@@ -1,4 +1,12 @@
-<title>ms-app v5</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F6F6F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
+<title>ms-app</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -243,6 +251,8 @@ html.ax .scr,html.ax .bot{zoom:1.18}
 .toast.mt{animation:toastin .5s cubic-bezier(.2,.9,.3,1.2) both}
 @media (prefers-reduced-motion:reduce){.tap,.chip.tap,.choice.tap{animation:tapflash .4s ease both!important}.toast.mt{animation:none}}
 </style>
+</head>
+<body>
 <div id="app"></div>
 <script src="https://unpkg.com/htm@3.1.1/preact/standalone.umd.js"></script>
 <script>
@@ -968,8 +978,8 @@ function cmdBase(v){
     if(ST.cycle!=='health'){ST.cycle='manual';}if(!ST.periodMarks.includes(todayK()))ST.periodMarks.push(todayK());if(ST.cycle==='health'){ST.cycle='manual';}save();
     return toast({title:L('Записала: месячные начались','Saved: period started'),sub:L('Сегодня день цикла 1. Дни до месячных теперь считаются от этой даты. Цикл виден только вам','Today is cycle day 1. Days before a period now count from this date. Only you can see the cycle'),acts:[{l:L('как это связано с циклом?','how is it linked to my cycle?'),fn:()=>say({kind:'cycle',keys:[]})}]});}
   if(/^(пауза|pause|сегодня пауза|pause today)$/.test(n)){const ids=addEntries([{kind:'pause',at:now().getTime()}]);save();return toast({title:L('Пауза','Paused'),sub:L('Записи сохранены, подсказок не будет, пока не вернетесь','Entries are kept, no suggestions until you are back'),acts:[undoAct(ids)]});}
-  if(/(english|англий|на англ)/.test(n)){ST.lang='en';LANG='en';save();return wrap('Switched to English');}
-  if(/(по-русски|по русски|русский|russian)/.test(n)){ST.lang='ru';LANG='ru';save();return wrap('Переключила на русский');}
+  if(/(english|англий|на англ)/.test(n)){ST.lang='en';ST.langSet=true;LANG='en';save();return wrap('Switched to English');}
+  if(/(по-русски|по русски|русский|russian)/.test(n)){ST.lang='ru';ST.langSet=true;LANG='ru';save();return wrap('Переключила на русский');}
   if(/(темн\S* тем|dark (theme|mode))/.test(n)){ST.theme='dark';save();applyTheme();return wrap(L('Темная тема','Dark theme'));}
   if(/(светл\S* тем|light (theme|mode))/.test(n)){ST.theme='light';save();applyTheme();return wrap(L('Светлая тема','Light theme'));}
   if(/(как в системе|system theme)/.test(n)){ST.theme='system';save();applyTheme();return wrap(L('Тема как в системе','Theme follows the system'));}
@@ -1304,7 +1314,7 @@ function InputLine(){
 }
 function Onboarding(){
   const [h,setH]=useState(true);const [w,setW]=useState(true);
-  const lang=lg=>{ST.lang=lg;LANG=lg;save();};
+  const lang=lg=>{ST.lang=lg;ST.langSet=true;LANG=lg;save();};
   const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();if(h){ST.health=true;ST.cycle='health';ST.seed=dk(addD(now(),-11));}if(w)ST.geo=true;if(demo)seedDemo();save();};
   return html`<div class="ob"><div class="obb">
       <div class="row" style="justify-content:flex-end"><div class="seg" role="group" aria-label=${L('Язык','Language')} style="flex:none"><button class=${'chip'+(LANG==='ru'?' on':'')} aria-pressed=${LANG==='ru'} onClick=${()=>lang('ru')}>RU</button><button class=${'chip'+(LANG==='en'?' on':'')} aria-pressed=${LANG==='en'} onClick=${()=>lang('en')}>EN</button></div></div>
@@ -1339,7 +1349,7 @@ function App(){
     <${SheetHost}/>
   </div>`;
 }
-ST=loadS();if(ST.photoUsed===undefined)ST.photoUsed=false;{const lg=(location.search.match(/[?&]lang=(en|ru)\b/)||[])[1];if(lg&&lg!==ST.lang){ST.lang=lg;saveS(ST);}}LANG=ST.lang||'ru';
+ST=loadS();if(ST.photoUsed===undefined)ST.photoUsed=false;{const lg=(location.search.match(/[?&]lang=(en|ru)\b/)||[])[1];if(lg){if(lg!==ST.lang){ST.lang=lg;ST.langSet=true;saveS(ST);}}else if(!ST.langSet&&!ST.onboarded){ST.lang=/^ru/i.test(navigator.language||'')?'ru':'en';saveS(ST);}}LANG=ST.lang||'ru';
 
 // ===== v5 states: everything from the figma sections, reachable by phrase or from «все состояния» =====
 ST.protocol=ST.protocol||null;ST.protocols=ST.protocols||[];ST.allergies=ST.allergies||[];ST.appt=ST.appt||null;ST.copiedAt=ST.copiedAt||0;ST.photoConsent=ST.photoConsent===undefined?null:ST.photoConsent;ST.recognize=ST.recognize!==false;ST.chipHints=ST.chipHints!==false;ST.readAloud=!!ST.readAloud;ST.bigText=!!ST.bigText;ST.hk=ST.hk||{steps:true,sleep:true,walk:true};
@@ -1466,4 +1476,4 @@ applyBig();
 function haptic(kind){if(ST.comfort&&ST.comfort.haptic===false)return;const pat=kind==='save'?[40,40,90]:kind==='warn'?[90,60,90]:kind==='undo'?[25,40,25]:[35];try{if(navigator.vibrate)navigator.vibrate(pat);}catch(e){}}
 document.addEventListener('pointerdown',e=>{const el=e.target.closest('.chip,.choice,.btn,.li,.fi,.tb,.tx,.mic,.cam,.link,.ib,.sw,.cx');if(!el)return;if(ST.comfort&&ST.comfort.haptic===false)return;el.classList.remove('tap');void el.offsetWidth;el.classList.add('tap');el.addEventListener('animationend',()=>el.classList.remove('tap'),{once:true});haptic(el.classList.contains('btn')?'save':'tap');},{passive:true});
 render(html`<${App}/>`,document.getElementById('app'));
-</script>
+</script></body></html>
