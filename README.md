@@ -4,6 +4,7 @@ A companion app for people with multiple sclerosis. One input line: voice, text,
 
 Open: https://julie566.github.io/ms-app/
 
+- `v5.html?v=6&lang=en` v6: last three entries in the day card, no feed (test version after the first tester feedback)
 - `v5.html?v=5b&lang=en` minimum: no context line, one or two chips
 - `v5.html?v=5&lang=en` with the context line and the hint
 - `&lang=ru` for Russian
