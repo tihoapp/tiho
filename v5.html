@@ -1137,7 +1137,7 @@ function CycleBlock({keys}){
 }
 function dayHint(){
   const foodDays=new Set(E().filter(e=>e.kind==='food').map(e=>e.d)).size;const n=ST.entries.length;const photos=E().filter(e=>e.photo).length;
-  if(n<5)return {ic:'cam',t:L('фото еды без подписи','food photos, no caption'),s:L('Совпадения через пару недель','Coincidences in a couple of weeks'),fn:()=>{const el=document.querySelector('.cam input[type=file]');if(el)el.click();}};
+  if(n<5)return null;
   if(foodDays<7)return {ic:'cam',t:EN()?`Food on ${foodDays} of 7 days`:`Еда записана: ${foodDays} из 7 дней`,s:L('Совпадения от 7 дней','Coincidences from 7 days'),fn:()=>{const el=document.querySelector('.cam input[type=file]');if(el)el.click();}};
   const d=now().getDate()%3;
   if(d===0)return {ic:'spark',t:L('что связано с самочувствием?','what is linked to how I feel?'),s:L('Еда, тепло, нагрузка, цикл','Food, heat, effort, cycle'),fn:()=>handleAll(L('что связано с самочувствием?','what is linked to how I feel?'))};
@@ -1240,7 +1240,7 @@ function DataBlock(){
 }
 // v6: today list inside the day card, last three, no scroll
 function TodayRow({x,dup}){
-  const d=new Date(x.at);const w=dup?null:x.words;const txt=w?qt(w):(dup?symName(x.key)+(x.s?', '+sName(x.s):''):entryTitle(x));
+  const d=new Date(x.at);const w=dup?null:x.words;const txt=w?qt(w):(dup?lc(symName(x.key))+(x.s?', '+sName(x.s):''):x.kind==='sym'?lc(entryTitle(x)):entryTitle(x));
   const sub=dup?'':w?(x.kind==='sym'?lc(symName(x.key))+(x.s?', '+sName(x.s):''):x.kind==='food'?mealName(x.meal):''):entrySub(x);
   const fresh=justNow(x);
   return html`<button class=${'tr6'+(fresh?' new':'')} onClick=${()=>openSheet('rec',{id:x.id})} aria-label=${fT(d)+', '+txt+(sub?', '+sub:'')+(fresh?L(', только что',', just now'):'')+L('. Исправить','. Edit')}>
@@ -1389,18 +1389,16 @@ function Onboarding(){
   const pickTheme=t=>{setTh(t);ST.theme=t;save();applyTheme();};
   const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();if(h){ST.health=true;ST.cycle='health';ST.seed=dk(addD(now(),-11));}if(w)ST.geo=true;if(demo)seedDemo();save();
     if(md!==MODE){try{localStorage.setItem('msapp.mode',md);}catch(e){}location.replace(location.pathname+'?v='+md+'&lang='+(ST.lang||'ru'));}};
-  const P=[L('фото еды без подписи','food photos, no caption'),L('сводка для врача','summary for the doctor'),L('цикл рядом с записями','cycle next to entries')];
   const d=ms=>({style:`animation-delay:${ms}ms`});
   const Seg=({items,val,fn,label})=>html`<div class="seg" role="group" aria-label=${label}>${items.map(([v,l])=>html`<button class=${'chip'+(val===v?' on':'')} aria-pressed=${val===v} onClick=${()=>fn(v)}><span>${l}</span></button>`)}</div>`;
   return html`<div class="ob"><div class="obb" ref=${br}>
       <div class="col center"><div class="flip" ref=${fr}><div class="pop"><${Mascot} mood="happy" size=${96}/></div></div><h1 class="lt rv" ...${d(1300)}>${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2 rv" ...${d(1450)}>${L('Голосом, текстом или фото еды','By voice, text or a food photo')}</p></div>
-      <div class="card surf rv" style="gap:0;padding:4px 20px;animation-delay:1650ms">${P.map(t=>html`<div class="li" key=${t} style="min-height:40px;padding-block:6px"><span class="tt"><span class="bs">${t}</span></span></div>`)}</div>
-      <div class="card surf rv obs" style="gap:0;padding:4px 20px;animation-delay:1850ms"><${SwRow} on=${h} fn=${()=>setH(!h)} t="Apple Health"/><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')}/>
+      <div class="card surf rv obs" style="gap:0;padding:4px 20px;animation-delay:1650ms"><${SwRow} on=${h} fn=${()=>setH(!h)} t="Apple Health"/><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')}/>
         <div class="rw"><span class="bs">${L('Тема','Theme')}</span><${Seg} label=${L('Тема','Theme')} val=${th} fn=${pickTheme} items=${[['light',L('светлая','light')],['dark',L('темная','dark')]]}/></div>
         <div class="rw"><span class="bs">${L('Версия','Version')}</span><${Seg} label=${L('Версия прототипа','Prototype version')} val=${md} fn=${setMd} items=${[['5','v5'],['5b','v5b'],['6','v6']]}/></div>
       </div>
-      <p class="f ink2 rv" ...${d(2000)}>${L('Не медицинское приложение','Not a medical app')}</p>
-    </div><div class="obf rv" style="animation-delay:2050ms"><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером','try with sample data')}</button></div></div>`;
+      <p class="f ink2 rv" ...${d(1800)}>${L('Не медицинское приложение','Not a medical app')}</p>
+    </div><div class="obf rv" style="animation-delay:1850ms"><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером','try with sample data')}</button></div></div>`;
 }
 const SH={rec:RecSheet,quick:QuickSheet,voice:VoiceSheet,safety:SafetySheet,copy:CopySheet};
 function SheetHost(){const s=UI.sheet;useEffect(()=>{if(!s)return;const el=document.querySelector('.sheet');if(el)el.focus();},[s&&s.k]);if(!s)return null;const C=SH[s.name];if(!C)return null;return html`<div class="scrim" onClick=${closeSheet} aria-hidden="true"></div><${C} key=${s.k} ...${s}/>`;}
