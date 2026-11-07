@@ -210,6 +210,27 @@ textarea.field{border-radius:22px;min-height:96px;line-height:1.4}
 @keyframes bar{0%,100%{height:12px}50%{height:44px}}
 @keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.025,.985)}}
 @media (prefers-reduced-motion:reduce){.sheet,.scrim,.toast{animation:none}.masc .mb,.bars i{animation:none}.sw,.sw::after{transition:none}}
+
+/* v5 web = figma v5/v5b */
+.spacer{flex:1 0 0;min-height:0}
+.grid{display:flex;flex-direction:column;gap:8px;flex:none}
+.grow2{display:flex;gap:8px;align-items:stretch}
+.grow2 .chip{flex:1 1 0;min-width:0;min-height:56px;justify-content:center;padding:0 12px}
+.grow2 .sp{flex:1 1 0}
+.grid .lbl{margin-top:2px}
+.acard{background:var(--surface);border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:8px;flex:none}
+.foot{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.rec{display:flex;align-items:center;gap:10px;min-height:28px}
+.rec .dot{width:10px;height:10px;border-radius:5px;background:var(--accent);flex:none;animation:blink 1.2s ease-in-out infinite}
+.rec .bars{height:28px;gap:3px;flex:none}
+.rec .bars i{width:3px;background:var(--ink2);height:12px}
+.rec .bars i:nth-child(6){animation-delay:.75s}.rec .bars i:nth-child(7){animation-delay:.9s}.rec .bars i:nth-child(8){animation-delay:.2s}.rec .bars i:nth-child(9){animation-delay:.5s}.rec .bars i:nth-child(10){animation-delay:.05s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.mt{margin-bottom:0}
+.li.hint{border-top:1px solid var(--line);border-bottom:0;padding-top:12px;padding-bottom:0;min-height:48px}
+.li.hint .chev{color:var(--ink2)}
+.eyebrow{font-size:13px;color:var(--ink2);margin:0}
+@media (prefers-reduced-motion:reduce){.rec .dot{animation:none}}
 </style>
 <div id="app"></div>
 <script src="https://unpkg.com/htm@3.1.1/preact/standalone.umd.js"></script>
@@ -629,7 +650,7 @@ function handleText(v){
   if(a.kind==='medical')return answer(v,a.keys,true);
   if(a.kind==='query')return answer(v,a.keys,false);
   if(a.kind==='doctorq')return addQuestion(a.q);
-  if(a.kind==='sym'){const ids=logSym(a.items,a.when,v);if(a.items.some(i=>i.key==='fever')){const x=E().find(e=>e.id===ids[0]);toast({title:L('Записала: температура или болезнь','Saved: fever or illness'),sub:L('При болезни ухудшение бывает из-за нее. Суток не ждите.','Illness itself can make things worse. Do not wait a day.'),icon:'info',acts:[{l:L('к врачу','ask doctor'),fn:()=>addQuestion(L('Температура или болезнь, ','Fever or illness, ')+fDM(now())+L(', стало хуже',', got worse'))},undoAct(ids)]});}return ids;}
+  if(a.kind==='sym'){const ids=logSym(a.items,a.when,v);if(a.items.some(i=>i.key==='fever')){const x=E().find(e=>e.id===ids[0]);toast({title:L('Записала: температура или болезнь','Saved: fever or illness'),sub:L('При болезни ухудшение бывает из-за нее. Суток не ждите','Illness itself can make things worse. Do not wait a day'),icon:'info',acts:[{l:L('к врачу','ask doctor'),fn:()=>addQuestion(L('Температура или болезнь, ','Fever or illness, ')+fDM(now())+L(', стало хуже',', got worse'))},undoAct(ids)]});}return ids;}
   if(a.kind==='food')return logFood({items:a.items,meal:a.meal,when:a.when,words:v});
   if(a.kind==='med')return logNote(v,L('Терапия идет из Здоровья','Therapy comes from Health'));
   const name=symNameFrom(v);let key=Object.keys(ST.custom).find(k=>norm(ST.custom[k])===norm(name));
@@ -767,14 +788,14 @@ const MEAL_OPTS=()=>['breakfast','lunch','dinner','snack'].map(m=>({id:m,l:cap(m
 function RecSheet({id}){
   const x=ST.entries.find(y=>y.id===id);
   const [m,setM]=useState('view');const [txt,setTxt]=useState('');
-  if(!x)return html`<${Frame} title=${L('запись','entry')}><p class="b ink2">${L('Этой записи уже нет.','This entry no longer exists.')}</p><button class="btn pri" onClick=${closeSheet}>${L('закрыть','close')}</button></${Frame}>`;
+  if(!x)return html`<${Frame} title=${L('запись','entry')}><p class="b ink2">${L('Этой записи уже нет','This entry no longer exists')}</p><button class="btn pri" onClick=${closeSheet}>${L('закрыть','close')}</button></${Frame}>`;
   const apply=(ch,label,title)=>{const old={};for(const k in ch)old[k]=x[k];const was=x.edited;Object.assign(x,ch,{edited:Date.now()});if(ch.at)x.d=dk(new Date(ch.at));sortE();save();setM('view');
     toast({title:title||L('Исправила','Changed'),sub:label,acts:[{l:L('отменить','undo'),fn:()=>{Object.assign(x,old);if(old.at)x.d=dk(new Date(old.at));x.edited=was;sortE();save();toast({title:L('Вернула как было','Restored'),icon:'undo'});}}]});};
   const del=()=>{const snap=Object.assign({},x);removeIds([x.id]);save();closeSheet();toast({title:L('Запись удалена','Entry deleted'),icon:'trash',acts:[{l:L('вернуть','restore'),fn:()=>{ST.entries.push(snap);sortE();save();toast({title:L('Вернула запись','Entry restored'),icon:'undo'});}}]});};
   const back=()=>setM('view');
   const title=cap(entryTitle(x));
   if(m==='del')return html`<${Frame} title=${L('удалить запись?','delete this entry?')}>
-    <p class="b">${L('Ее не будет в истории и в сводке для врача.','It will be gone from history and from the doctor summary.')}</p>
+    <p class="b">${L('Ее не будет в истории и в сводке для врача','It will be gone from history and from the doctor summary')}</p>
     <div class="col"><button class="btn sec" onClick=${del}>${L('удалить','delete')}</button><button class="btn pri" onClick=${back}>${L('оставить','keep')}</button></div></${Frame}>`;
   if(m.indexOf('mm:')===0){const ns=+m.slice(3),ws=strengthOf(x.words||'');const keep=x.s||ws;
     return html`<${Frame} title=${L('поменять силу?','change the strength?')} onBack=${back}>
@@ -830,7 +851,7 @@ function VoiceSheet(){
     :['Сильно немеют кончики пальцев после душа','К вечеру совсем нет сил','На обед паста и салат','Когда немело в последний раз?'];
   return html`<${Frame} title=${L('слушаю','listening')}>
     <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-    <p class="c ink2">${L('В прототипе голос имитируется. Выберите фразу или диктуйте с клавиатуры.','Voice is simulated here. Pick a phrase or dictate with the keyboard.')}</p>
+    <p class="c ink2">${L('В прототипе голос имитируется. Выберите фразу или диктуйте с клавиатуры','Voice is simulated here. Pick a phrase or dictate with the keyboard')}</p>
     <div class="col8">${ph.map(p=>html`<button class="choice" style="justify-content:flex-start;text-align:left" onClick=${()=>{closeSheet();handleText(p);}}>${p}</button>`)}</div>
     <button class="btn sec" onClick=${()=>{closeSheet();setTimeout(()=>{const el=document.getElementById('line');if(el)el.focus();},60);}}>${L('продиктовать с клавиатуры','dictate with keyboard')}</button>
   </${Frame}>`;
@@ -847,7 +868,7 @@ function symStats(k,days){
 }
 function SymBlock({k}){
   const s=symStats(k,30);
-  if(!s.n)return html`<section class="card surf"><p class="lbl">${symName(k)}</p><p class="b">${L('За 30 дней записей об этом нет.','No entries about this in 30 days.')}</p></section>`;
+  if(!s.n)return html`<section class="card surf"><p class="lbl">${symName(k)}</p><p class="b">${L('За 30 дней записей об этом нет','No entries about this in 30 days')}</p></section>`;
   return html`<section class="card surf" aria-label=${symName(k)}>
     <p class="lbl">${symName(k)}</p>
     <div class="row" style="align-items:baseline;gap:10px"><span class="big">${s.n}</span><span class="b">${EN()?(s.n===1?'entry':'entries')+' in 30 days':plRu(s.n,'запись','записи','записей')+' за 30 дней'}</span></div>
@@ -866,11 +887,11 @@ function SymBlock({k}){
 function FoodBlock({yday}){
   const T=now();const days=yday?[dk(addD(T,-1))]:[todayK(),dk(addD(T,-1)),dk(addD(T,-2))];
   const g=days.map(d=>({d,l:onDay(d).filter(x=>x.kind==='food')})).filter(x=>x.l.length);
-  if(!g.length)return html`<section class="card surf"><p class="b">${yday?L('Вчера записей о еде нет.','No food entries yesterday.'):L('За три дня записей о еде нет.','No food entries in three days.')}</p></section>`;
+  if(!g.length)return html`<section class="card surf"><p class="b">${yday?L('Вчера записей о еде нет','No food entries yesterday'):L('За три дня записей о еде нет','No food entries in three days')}</p></section>`;
   return html`${g.map(x=>html`<section class="card surf"><p class="lbl">${dayHead(x.d)}</p><div class="rows">${x.l.map(y=>html`<${FeedRow} key=${y.id} x=${y}/>`)}</div></section>`)}`;
 }
 function HeatBlock(){
-  if(!weatherOn())return html`<section class="card surf"><p class="b">${L('Погода выключена.','Weather is off.')}</p><button class="btn sec" onClick=${()=>cmd('settings')}>${L('включить погоду','turn on weather')}</button></section>`;
+  if(!weatherOn())return html`<section class="card surf"><p class="b">${L('Погода выключена','Weather is off')}</p><button class="btn sec" onClick=${()=>cmd('settings')}>${L('включить погоду','turn on weather')}</button></section>`;
   const T=fromDk(todayK());const days=[];for(let i=13;i>=0;i--)days.push(dk(addD(T,-i)));
   const hot=days.filter(d=>isHot(fromDk(d)));const cnt=ds=>symEnts().filter(x=>ds.includes(x.d)).length;const cold=days.filter(d=>!hot.includes(d));
   return html`<section class="card surf"><p class="lbl">${L('жара, 14 дней','heat, 14 days')}</p>
@@ -880,29 +901,58 @@ function HeatBlock(){
 function emergencyNo(){let r='';try{r=(Intl.DateTimeFormat().resolvedOptions().locale||navigator.language||'').split('-').pop().toUpperCase();}catch(e){}if(r==='RU')return L('112 или 103','112 or 103');if(r==='US'||r==='CA')return '911';return '112';}
 function SafetySheet({v}){
   return html`<${Frame} title=${L('если это началось внезапно','if this started suddenly')}>
-    <p class="b">${L('Звоните в скорую, не ждите.','Call emergency services, do not wait.')}</p>
+    <p class="b">${L('Звоните в скорую, не ждите','Call emergency services, do not wait')}</p>
     <div class="card surf"><p class="lbl">${L('скорая','emergency')}</p><p class="big num" style="user-select:all">${emergencyNo()}</p></div>
     <div class="col"><button class="btn pri" onClick=${closeSheet}>${L('понятно','got it')}</button><button class="btn sec" onClick=${()=>{closeSheet();logNote(v);}}>${L('записать как есть','save as written')}</button></div>
   </${Frame}>`;
 }
 
 function CopySheet({txt}){
-  return html`<${Frame} title=${L('скопировать сводку','copy summary')}><p class="c ink2">${L('Выделите и скопируйте.','Select and copy.')}</p>
+  return html`<${Frame} title=${L('скопировать сводку','copy summary')}><p class="c ink2">${L('Выделите и скопируйте','Select and copy')}</p>
     <textarea class="field" id="cptxt" readonly style="min-height:240px" value=${txt} onFocus=${e=>e.target.select()}></textarea></${Frame}>`;
 }
 
 // ---- app ----
-// ===== v5: one screen =====
-UI.resp=null;UI.hview=null;UI.inline=null;
+// ===== v5: one screen (web = figma v5 / v5b) =====
+UI.resp=null;UI.hview=null;UI.inline=null;UI.mtoast=null;
+const MODE=(()=>{const m=(location.search.match(/[?&]v=(5b?)\b/)||[])[1];if(m){try{localStorage.setItem('msapp.mode',m);}catch(e){}}let s=null;try{s=localStorage.getItem('msapp.mode');}catch(e){}return m||s||'5b';})();
+const B=MODE==='5b';
+const LIM=()=>EN()?20:17;
 let THEMED=false;
 function applyTheme(){const r=document.documentElement;if(ST.theme==='light'||ST.theme==='dark'){r.setAttribute('data-theme',ST.theme);THEMED=true;}else if(THEMED){r.removeAttribute('data-theme');THEMED=false;}}
-function say(o){UI.resp=Object.assign({kind:'info'},o);rr();}
+function say(o){if(o&&o.kind==='log')return toast(o.t);UI.resp=Object.assign({kind:'info'},o);rr();}
+// main toast: dark card above the day card, hides after 4 s, buttons live inside
+function toast(o){const t=Object.assign({id:++TID,where:UI.sheet?'sheet':'main',icon:'check',acts:[]},o);if(t.where==='sheet'){UI.toast=t;}else{UI.resp=null;UI.mtoast=t;}rr();}
+function MainToast(){const t=UI.mtoast;useEffect(()=>{if(!t)return;const id=t.id;const h=setTimeout(()=>{if(UI.mtoast&&UI.mtoast.id===id){UI.mtoast=null;rr();}},t.acts&&t.acts.length?6000:4000);return ()=>clearTimeout(h);},[t&&t.id]);if(!t)return null;
+  return html`<div class="toast mt" role="status"><div class="tr"><span class="tic"><${I} n=${t.icon}/></span><div class="tt"><p class="bs">${t.title}</p>${t.sub?html`<p class="c">${t.sub}</p>`:null}</div><button class="tx" aria-label=${L('Скрыть','Dismiss')} onClick=${()=>{UI.mtoast=null;rr();}}><${I} n="close" s=${20}/></button></div>${t.acts&&t.acts.length?html`<div class="ta">${t.acts.map(a=>html`<button class="tb" onClick=${()=>{UI.mtoast=null;a.fn();rr();}}>${a.l}</button>`)}</div>`:null}</div>`;}
+// chip grid: two columns, no horizontal scroll, long label takes the row
+function ChipGrid({items,label}){
+  const rows=[];let cur=null;
+  for(const it of items){const long=((it.l||'').length+(it.star||it.cam||it.ic?3:0))>LIM();if(long){cur=null;rows.push([it]);continue;}if(!cur||cur.length===2){cur=[];rows.push(cur);}cur.push(it);}
+  const Chip=({x})=>html`<button class=${'chip'+(x.on?' on':'')} aria-pressed=${x.on===undefined?undefined:!!x.on} aria-label=${x.aria||undefined} onClick=${x.fn}>${x.star?html`<span class="star"><${I} n="star" s=${18}/></span>`:x.cam?html`<${I} n="cam" s=${18}/>`:x.ic?html`<${I} n=${x.ic} s=${18}/>`:null}<span>${x.l}</span></button>`;
+  return html`<div class="grid" role="group" aria-label=${label||L('Подсказки','Suggestions')}>${rows.map((r,i)=>html`<div class="grow2" key=${i}>${r.map(x=>html`<${Chip} x=${x} key=${x.l}/>`)}${r.length===1&&((r[0].l||'').length+(r[0].star||r[0].cam||r[0].ic?3:0))<=LIM()?html`<span class="sp" aria-hidden="true"></span>`:null}</div>`)}</div>`;
+}
 
 // ---- commands by phrase: no settings screen ----
 function cmd(v){
   const n=norm(v);
   const wrap=(title,sub)=>say({kind:'log',t:{title,sub,icon:'check',acts:[]}});
-  if(n==='settings')return say({kind:'help'});
+  if(n==='settings'||/^(настройки|settings)$/.test(n))return say({kind:'settings'});
+  if(/^(данные|данные и доступ|data|data and access)$/.test(n))return say({kind:'data'});
+  if(/^v5b?$/.test(n)){try{localStorage.setItem('msapp.mode',n);}catch(e){}location.search='?v='+n;return true;}
+  if(/(истори|покажи записи|все записи|history|show (my )?entries|all entries)/.test(n))return say({kind:'history',per:30,f:'all'});
+  if(/(хуже обычного|хуже чем обычно|плохой день|worse than usual|bad day)/.test(n)&&!/(^|\s)(вернул\S*|назад|уже|нормально|back|normal)/.test(n)){
+    if(ST.worse)return toast({title:L('Хуже обычного, день ','Worse than usual, day ')+worseDayN(),sub:L('Скажите «вернулось к обычному», когда пройдет','Say “back to usual” when it passes'),icon:'info',acts:[]});
+    ST.worse={start:todayK()};save();return toast({title:L('Записала: хуже обычного','Saved: worse than usual'),sub:L('Буду отмечать дни, пока не скажете, что вернулось к обычному. Это попадет в сводку','I will mark the days until you say it is back to usual. This goes into the summary'),acts:[undoAct([])&&{l:L('отменить','undo'),fn:()=>{ST.worse=null;save();toast({title:L('Отменила','Undone'),icon:'undo'});}}]});}
+  if(/(вернулось к обычному|уже нормально|стало как обычно|back to usual|back to normal)/.test(n)){
+    if(!ST.worse)return toast({title:L('Хуже обычного не отмечали','Nothing marked as worse than usual'),icon:'info',acts:[]});
+    const w={start:ST.worse.start,end:todayK()};ST.worseHist.push(w);ST.worse=null;save();
+    return toast({title:L('Записала: вернулось к обычному','Saved: back to usual'),sub:(EN()?`${nDay(ddiff(fromDk(w.end),fromDk(w.start))+1)} worse than usual, `:`${nDay(ddiff(fromDk(w.end),fromDk(w.start))+1)} хуже обычного, `)+fRange(fromDk(w.start),fromDk(w.end))+L('. В сводке к врачу','. In the doctor summary'),acts:[{l:L('сводка к врачу','doctor summary'),fn:()=>say({kind:'summary',days:30})}]});}
+  if(/(что делалось|what was going on)/.test(n)&&(ST.worse||ST.worseHist.length)){const w=ST.worse||ST.worseHist[ST.worseHist.length-1];return say({kind:'answer',q:v,keys:[],range:{a:w.start,b:w.end||todayK(),l:L('эти дни','these days')},list:true});}
+  if(/(месячные начались|начались месячные|period started|my period started|got my period)/.test(n)){
+    if(ST.cycle!=='health'){ST.cycle='manual';}if(!ST.periodMarks.includes(todayK()))ST.periodMarks.push(todayK());if(ST.cycle==='health'){ST.cycle='manual';}save();
+    return toast({title:L('Записала: месячные начались','Saved: period started'),sub:L('Сегодня день цикла 1. Дни до месячных теперь считаются от этой даты. Цикл виден только вам','Today is cycle day 1. Days before a period now count from this date. Only you can see the cycle'),acts:[{l:L('как это связано с циклом?','how is it linked to my cycle?'),fn:()=>say({kind:'cycle',keys:[]})}]});}
+  if(/^(пауза|pause|сегодня пауза|pause today)$/.test(n)){const ids=addEntries([{kind:'pause',at:now().getTime()}]);save();return toast({title:L('Пауза','Paused'),sub:L('Записи сохранены, подсказок не будет, пока не вернетесь','Entries are kept, no suggestions until you are back'),acts:[undoAct(ids)]});}
   if(/(english|англий|на англ)/.test(n)){ST.lang='en';LANG='en';save();return wrap('Switched to English');}
   if(/(по-русски|по русски|русский|russian)/.test(n)){ST.lang='ru';LANG='ru';save();return wrap('Переключила на русский');}
   if(/(темн\S* тем|dark (theme|mode))/.test(n)){ST.theme='dark';save();applyTheme();return wrap(L('Темная тема','Dark theme'));}
@@ -913,8 +963,8 @@ function cmd(v){
   if(/(подключ\S*|включ\S*|connect|turn on|enable).{0,12}(погод|weather)/.test(n)){ST.geo=true;save();return wrap(L('Включила погоду','Weather on'));}
   if(/(отключ\S*|выключ\S*|disconnect|turn off|disable).{0,12}(погод|weather)/.test(n)){ST.geo=false;save();return wrap(L('Выключила погоду','Weather off'));}
   if(/(главн\S* для меня|main (one|symptom))/.test(n)){const ks=symsIn(v);if(ks.length){ST.main=ks[0];save();return wrap(L('Главный для меня: ','My main one: ')+symName(ks[0]));}return wrap(L('Назовите симптом: «главный для меня: усталость»','Name it: “main one: fatigue”'));}
-  if(/(стереть|удалить все|сбросить|erase|reset everything|wipe)/.test(n)){return say({kind:'confirm',title:L('стереть все данные?','erase all data?'),sub:L('Вернуть будет нельзя.','This cannot be undone.'),ok:L('стереть','erase'),fn:()=>{const lg=ST.lang;ST=defaults();ST.lang=lg;ST.photoUsed=false;ST.demo=false;ST.onboarded=true;ST.firstDay=todayK();save();wrap(L('Стерла. Это снова первый день','Erased. First day again'));}});}
-  if(/(пример|sample|demo)/.test(n)){return say({kind:'confirm',title:L('заменить данные примером?','replace data with a sample?'),sub:L('Ваши записи заменятся примером.','Your entries get replaced with a sample.'),ok:L('заменить','replace'),fn:()=>{seedDemo();save();wrap(L('Загрузила пример','Sample loaded'));}});}
+  if(/(стереть|удалить все|сбросить|erase|reset everything|wipe)/.test(n)){return say({kind:'confirm',title:L('стереть все данные?','erase all data?'),sub:L('Вернуть будет нельзя','This cannot be undone'),ok:L('стереть','erase'),fn:()=>{const lg=ST.lang;ST=defaults();ST.lang=lg;ST.photoUsed=false;ST.demo=false;ST.onboarded=true;ST.firstDay=todayK();save();wrap(L('Стерла. Это снова первый день','Erased. First day again'));}});}
+  if(/(пример|sample|demo)/.test(n)){return say({kind:'confirm',title:L('заменить данные примером?','replace data with a sample?'),sub:L('Ваши записи заменятся примером','Your entries get replaced with a sample'),ok:L('заменить','replace'),fn:()=>{seedDemo();save();wrap(L('Загрузила пример','Sample loaded'));}});}
   if(/(что ты (умеешь|можешь)|помощь|help|what can you do)/.test(n))return say({kind:'help'});
   if(/^(мои |my )?(вопросы|questions)( к| для)?( врач\S*| (the |my )?doctor)?\??$/.test(n))return say({kind:'questions',q:v});
   if(/(сводк|summary|^к врачу$|^(for the |to the )?doctor$)/.test(n)&&!/вопрос|question/.test(n)){const d=/(месяц|30|month)/.test(n)?30:/(полгод|180|six)/.test(n)?182:92;return say({kind:'summary',q:v,days:d});}
@@ -946,12 +996,12 @@ function daySentence(k){
   for(const x of l.slice().reverse()){if(x.kind==='sym'&&!seen.has(x.key)){seen.add(x.key);syms.push(lc(symName(x.key))+(x.s?', '+sName(x.s):'')+((x.ctx||[]).some(c=>c.indexOf('food:')===0)?L(' после еды',' after food'):''));}
     if(x.kind==='food')foods.push(x.items&&x.items.length?x.items.join(', '):mealName(x.meal));}
   const p=[];if(l.some(x=>x.kind==='pause'))p.push(L('Пауза','Pause'));if(syms.length)p.push(cap(syms.join('; ')));if(foods.length)p.push(cap(L('ели: ','ate: ')+foods.join('; ')));
-  return p.join('. ')+'.';
+  return p.join('. ');
 }
 function RangeList({range,f}){
   const list=ST.entries.filter(x=>x.d>=range.a&&x.d<=range.b&&(f==='all'||(f==='sym'?x.kind!=='food':x.kind==='food')));
   const groups=[];let cur=null;for(const x of list){if(!cur||cur.d!==x.d){cur={d:x.d,items:[]};groups.push(cur);}cur.items.push(x);}
-  if(!groups.length)return html`<p class="b ink2">${L('За этот период записей нет.','No entries for this period.')}</p>`;
+  if(!groups.length)return html`<p class="b ink2">${L('За этот период записей нет','No entries for this period')}</p>`;
   const days=new Set(list.map(x=>x.d)).size;
   return html`<p class="c ink2">${range.l}: ${nEnt(list.length)}, ${nDay(days)}</p>
     ${groups.map(g=>html`<div class="col4" key=${g.d}><p class="lbl">${dayHead(g.d)}</p><div class="rows">${g.items.map(x=>html`<${FeedRow} key=${x.id} x=${x}/>`)}</div></div>`)}`;
@@ -963,12 +1013,12 @@ function Summary({days}){
     try{navigator.clipboard.writeText(txt).then(done,()=>openSheet('copy',{txt}));}catch(e){openSheet('copy',{txt});}};
   return html`<div class="seg" role="group" aria-label=${L('Период','Period')}>${P.map(([d,l])=>html`<button class=${'chip'+(days===d?' on':'')} aria-pressed=${days===d} onClick=${()=>say({kind:'summary',days:d})}>${l}</button>`)}</div>
     <p class="c ink2">${L('Сводка за ','Summary for ')+s.range}${ST.demo?html` <span class="acc">${L('пример данных','sample data')}</span>`:null}</p>
-    ${s.few?html`<p class="c">${L('Записей пока мало.','Few entries so far.')}</p>`:null}
+    ${s.few?html`<p class="c">${L('Записей пока мало','Few entries so far')}</p>`:null}
     ${s.sections.map(x=>html`<div class="col4"><p class="lbl">${x.lab}</p>
       ${x.kv?html`<div class="kvr">${x.kv.map(r=>html`<span class="b">${r[0]}</span><span class="b num">${r[1]}</span>`)}</div>`:null}
       ${x.text?html`<p class="b">${x.text}</p>`:null}${x.list?html`<ul class="b" style="margin:0;padding-left:20px">${x.list.map(q=>html`<li>${q}</li>`)}</ul>`:null}</div>`)}
     <${DayChart} days=${Math.min(days,92)}/>
-    <p class="f ink2">${L('Только факты. Не медицинское заключение.','Facts only. Not a medical report.')}</p>
+    <p class="f ink2">${L('Только факты. Не медицинское заключение','Facts only. Not a medical report')}</p>
     <button class="btn pri" onClick=${copy}><${I} n="copy"/>${L('скопировать сводку','copy summary')}</button>`;
 }
 function DayChart({days}){
@@ -988,7 +1038,7 @@ function Questions(){
 }
 function Insights({keys}){
   const ks=(keys&&keys.length?keys:topSyms(dk(addD(now(),-29)),todayK(),2).map(x=>x[0]));
-  if(!ks.length)return html`<p class="b ink2">${L('Пока нет записей о самочувствии за 30 дней.','No entries about how you feel in 30 days yet.')}</p>`;
+  if(!ks.length)return html`<p class="b ink2">${L('Пока нет записей о самочувствии за 30 дней','No entries about how you feel in 30 days yet')}</p>`;
   const co=coincidences();
   return html`${ks.map(k=>{const st=symStats(k,30);if(!st.n)return null;return html`<div class="col4" key=${k}><p class="lbl">${symName(k)}: ${nEnt(st.n)}</p>
       <p class="c">${L('В течение 3 часов после еды: ','Within 3 hours after food: ')}<span class="num">${st.af} ${L('из','of')} ${st.n}</span>${st.dishes.length?html`<span class="ink2">${' ('+st.dishes.map(d=>d[0]+(d[1]>1?' ×'+d[1]:'')).join(', ')+')'}</span>`:null}</p>
@@ -998,13 +1048,13 @@ function Insights({keys}){
     <p class="lbl">${L('по группам еды','by food group')}</p>
     ${co.few?html`<p class="c ink2">${EN()?`Food on ${co.n} of 30 days, groups from 7`:`Еда записана ${co.n} из 30 дней, группы от 7`}</p>`
       :co.res.length?html`<div class="kvr">${co.res.slice(0,4).map(x=>html`<span class="c">${L('дни с ','days with ')+groupName({g:x.g},true)}</span><span class="c num">${EN()?`${x.a} of ${x.n} with symptoms that day or the next; other days ${x.oa} of ${x.o}`:`${x.a} из ${x.n} с симптомами в тот же или на следующий день; в остальные дни ${x.oa} из ${x.o}`}</span>`)}</div>`
-      :html`<p class="c ink2">${L('Ни одна группа не встречалась 3 дня и больше.','No group appeared on 3 or more days.')}</p>`}
+      :html`<p class="c ink2">${L('Ни одна группа не встречалась 3 дня и больше','No group appeared on 3 or more days')}</p>`}
     ${!ST.photoUsed?html``:null}`;
 }
 function CycleBlock({keys}){
-  if(ST.cycle==='off'||!periodStarts().length)return html`<p class="b">${L('Цикл выключен. Скажите «подключи Здоровье».','Cycle is off. Say “connect Health”.')}</p>`;
+  if(ST.cycle==='off'||!periodStarts().length)return html`<p class="b">${L('Цикл выключен. Скажите «подключи Здоровье»','Cycle is off. Say “connect Health”')}</p>`;
   const ks=(keys&&keys.length?keys:topSyms(dk(addD(now(),-89)),todayK(),2).map(x=>x[0]));
-  if(!ks.length)return html`<p class="b ink2">${L('Записей о самочувствии пока нет.','No entries about how you feel yet.')}</p>`;
+  if(!ks.length)return html`<p class="b ink2">${L('Записей о самочувствии пока нет','No entries about how you feel yet')}</p>`;
   const c=cycleTile();
   return html`${c?html`<p class="c ink2">${L('Сейчас: ','Now: ')+c.l+' '+c.v}</p>`:null}
     ${ks.map(k=>{const l=symEnts(k).filter(x=>x.d>=dk(addD(now(),-89)));const pre=l.filter(x=>prePeriod(x.d)).length;const on=l.filter(x=>onPeriod(fromDk(x.d))).length;const rest=l.length-pre-on;
@@ -1051,33 +1101,97 @@ function PhotoBlock({r}){
     <p class="f ink2">${L('Подсказки из прошлых записей, не распознавание','Suggestions from past entries, not recognition')}</p>
   </section>`;
 }
-function Follow({items}){return html`<div class="wrap" role="group" aria-label=${L('Дальше','Next')}>${items.map(x=>html`<button class="chip" key=${x.l} onClick=${()=>handleAll(x.q||x.l)}><${I} n="spark" s=${18}/><span>${x.l}</span></button>`)}</div>`;}
+function Follow({items}){return html`<${ChipGrid} label=${L('Дальше','Next')} items=${items.map(x=>({l:x.l,ic:'spark',fn:()=>handleAll(x.q||x.l)}))}/>`;}
+// ---- voice: recording indicator in the card, line says "идет запись" ----
+function VoiceBlock({r}){
+  const [sec,setSec]=useState(0);const [txt,setTxt]=useState('');
+  useEffect(()=>{const h=setInterval(()=>setSec(s=>s+1),1000);let rec=null;
+    try{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){rec=new SR();rec.lang=EN()?'en-US':'ru-RU';rec.interimResults=true;rec.continuous=true;rec.onresult=e=>{let t='';for(const res of e.results)t+=res[0].transcript;setTxt(t);r.txt=t;};rec.start();r.rec=rec;}}catch(e){rec=null;}
+    return ()=>{clearInterval(h);try{if(rec)rec.stop();}catch(e){}};},[]);
+  const ph=EN()?['Fingertips really numb after a shower','No strength left by the evening','Pasta and salad for lunch','When were my fingers numb last?']:['Сильно немеют кончики пальцев после душа','К вечеру совсем нет сил','На обед паста и салат','Когда немело в последний раз?'];
+  const mm=String(Math.floor(sec/60))+':'+String(sec%60).padStart(2,'0');
+  return html`<section class="card surf" aria-live="polite">
+    <h2 class="q">${L('слушаю','listening')}</h2>
+    <div class="rec" role="status" aria-label=${L('Идет запись, ','Recording, ')+mm}><span class="dot"></span><span class="cs ink2 num">${L('запись, ','recording, ')+mm}</span><div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+    ${txt?html`<p class="b">${txt}</p>`:r.rec?html`<p class="c ink2">${L('Говорите. Текст появится здесь','Speak. The text appears here')}</p>`:html`<p class="c ink2">${L('В этом браузере нет распознавания речи. Выберите фразу или напишите в строке','No speech recognition in this browser. Pick a phrase or type in the line')}</p><div class="col8">${ph.map(p=>html`<button class="choice" style="justify-content:flex-start;text-align:left" onClick=${()=>{UI.resp=null;handleText(p);}}>${p}</button>`)}</div>`}
+    <p class="c ink2">${L('Нажмите «готово», когда закончите','Tap “done” when you are finished')}</p>
+    ${B?html`<div class="foot"><${ChipGrid} items=${voiceChips(r)}/></div>`:null}
+  </section>`;
+}
+function voiceChips(r){return [{l:L('готово','done'),fn:()=>{const t=(r.txt||'').trim();UI.resp=null;if(t)handleAll(t);else rr();}},{l:L('отмена','cancel'),fn:()=>{UI.resp=null;rr();}}];}
+// ---- history by phrase: period and filters ----
+function HistoryBlock({r}){
+  const T=fromDk(todayK());const per=r.per||30;const f=r.f||'all';
+  const range={a:per>365?'0000':dk(addD(T,-(per-1))),b:todayK(),l:per===7?L('неделя','week'):per===30?L('месяц','month'):L('все','all')};
+  const set=o=>say(Object.assign({},r,o));
+  const P=[[7,L('неделя','week')],[30,L('месяц','month')],[999,L('все','all')]];
+  const F=[['all',L('все','all')],['sym',L('самочувствие','how I felt')],['food',L('еда','food')],['worse',L('хуже обычного','worse than usual')],['hot',L('в жару','in the heat')]];
+  let list=ST.entries.filter(x=>x.d>=range.a&&x.d<=range.b);
+  if(f==='sym')list=list.filter(x=>x.kind==='sym');else if(f==='food')list=list.filter(x=>x.kind==='food');else if(f==='worse')list=list.filter(x=>inWorse(x.d));else if(f==='hot')list=list.filter(x=>isHot(new Date(x.at)));
+  const groups=[];let cur=null;for(const x of list){if(!cur||cur.d!==x.d){cur={d:x.d,items:[]};groups.push(cur);}cur.items.push(x);}
+  return html`<section class="card surf" aria-live="polite"><div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${L('история','history')}</h2><p class="c ink2">${F.find(x=>x[0]===f)[1]+', '+range.l}</p></div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${()=>{UI.resp=null;rr();}}><${I} n="close"/></button></div>
+    <div class="seg" role="group" aria-label=${L('Период','Period')}>${P.map(([d,l])=>html`<button class=${'chip'+(per===d?' on':'')} aria-pressed=${per===d} onClick=${()=>set({per:d})}>${l}</button>`)}</div>
+    <div class="seg" role="group" aria-label=${L('Фильтр','Filter')}>${F.map(([id,l])=>html`<button class=${'chip'+(f===id?' on':'')} aria-pressed=${f===id} onClick=${()=>set({f:id})}>${l}</button>`)}</div>
+    ${!groups.length?html`<p class="b ink2">${L('Записей за этот период нет','No entries for this period')}</p>`:groups.slice(0,12).map(g=>html`<div class="col4" key=${g.d}><p class="lbl">${dayHead(g.d)}</p><div class="rows">${g.items.map(x=>html`<${FeedRow} key=${x.id} x=${x}/>`)}</div></div>`)}
+    <${Follow} items=${[{l:L('что с этим связано?','what is linked to it?'),q:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка к врачу','doctor summary')}]}/>
+  </section>`;
+}
+// ---- settings by phrase, no tabs ----
+function SettingsBlock(){
+  const close=()=>{UI.resp=null;rr();};
+  const T=(k,v)=>{ST[k]=v;save();};
+  return html`<section class="card surf"><div class="row" style="align-items:flex-start"><h2 class="q grow">${L('настройки','settings')}</h2><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${close}><${I} n="close"/></button></div>
+    <div class="list">
+      <${SwRow} on=${ST.health} fn=${()=>{if(ST.health)cmd(L('отключи Здоровье','disconnect Health'));else cmd(L('подключи Здоровье','connect Health'));}} t="Apple Health" s=${L('Шаги, сон, цикл. Только чтение','Steps, sleep, cycle. Read only')}/>
+      <${SwRow} on=${ST.geo} fn=${()=>T('geo',!ST.geo)} t=${L('Погода','Weather')} s=${L('Нужна только температура','Only the temperature is needed')}/>
+      <${SwRow} on=${ST.theme==='dark'} fn=${()=>{ST.theme=ST.theme==='dark'?'system':'dark';save();applyTheme();}} t=${L('Темная тема','Dark theme')} s=${L('Иначе как в системе','Otherwise same as system')}/>
+      <${SwRow} on=${ST.cycle!=='off'} fn=${()=>{ST.cycle=ST.cycle==='off'?(ST.health?'health':'manual'):'off';save();}} t=${L('Учитывать цикл','Track the cycle')} s=${L('Виден только вам','Only you can see it')}/>
+      <${SwRow} on=${LANG==='en'} fn=${()=>cmd(LANG==='en'?'по-русски':'english')} t="English" s=${L('Записи остаются на языке, на котором сказаны','Entries stay in the language they were said in')}/>
+    </div>
+    <button class="li hint" onClick=${()=>say({kind:'data'})}><span class="tt"><span class="bs">${L('данные и доступ','data and access')}</span><span class="c ink2">${L('Записи хранятся на телефоне','Entries are stored on your phone')}</span></span><${I} n="chevR"/></button>
+    <p class="f ink2">${L('Главный симптом: скажите «главный для меня: усталость»','Main symptom: say “main one: fatigue”')}</p>
+  </section>`;
+}
+function DataBlock(){
+  const close=()=>{UI.resp=null;rr();};
+  const exp=()=>{const txt=JSON.stringify({entries:ST.entries,questions:ST.questions},null,1);try{navigator.clipboard.writeText(txt).then(()=>toast({title:L('Скопировала записи','Entries copied'),sub:L('Вставьте в заметки или письмо','Paste into notes or an email'),acts:[]}),()=>openSheet('copy',{txt}));}catch(e){openSheet('copy',{txt});}};
+  return html`<section class="card surf"><div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${L('данные и доступ','data and access')}</h2><p class="c ink2">${L('Записи хранятся только в этом браузере','Entries are stored only in this browser')}</p></div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${close}><${I} n="close"/></button></div>
+    <p class="b">${EN()?`${ST.entries.length} ${ST.entries.length===1?'entry':'entries'}, ${E().filter(e=>e.photo).length} photos`:`${nEnt(ST.entries.length)}, ${E().filter(e=>e.photo).length} фото`}</p>
+    <button class="link" onClick=${exp}>${L('экспорт записей','export entries')}</button>
+    <button class="link" onClick=${()=>cmd(L('стереть все','erase everything'))}>${L('удалить все записи','delete all entries')}</button>
+    <p class="f ink2">${L('Удаление необратимо','Deleting cannot be undone')}</p>
+  </section>`;
+}
 function Block(){
   const r=UI.resp;const tk=todayK();
   const back=()=>{UI.resp=null;rr();};
   const Head=({title,sub})=>html`<div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${title}</h2>${sub?html`<p class="c ink2">${sub}</p>`:null}</div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${back}><${I} n="close"/></button></div>`;
+  const foot=B&&UI.footChips?html`<div class="foot"><${ChipGrid} items=${UI.footChips}/></div>`:null;
+  const openDay=()=>say({kind:'answer',q:L('записи за сегодня','today’s entries'),keys:[],range:{a:tk,b:tk,l:L('сегодня','today')},list:true});
+  const HintRow=({t,s,ic,fn})=>html`<button class="li hint" onClick=${fn}>${ic?html`<span class="ico"><${I} n=${ic}/></span>`:null}<span class="tt"><span class="bs">${t}</span>${s?html`<span class="c ink2">${s}</span>`:null}</span><${I} n="chevR"/></button>`;
   if(!r){
     const l=onDay(tk);
-    if(!ST.entries.length)return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="calm" size=${72}/><div class="grow col4"><h2 class="t2">${L('это ваш первый день','this is your first day')}</h2><p class="c ink2">${L('Скажите, как вы, или сфотографируйте еду.','Say how you are, or take a photo of food.')}</p></div></div></section>`;
-    if(!l.length)return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow col4"><h2 class="q">${L('сегодня пока тихо','quiet so far today')}</h2><p class="c ink2">${L('Записей нет.','No entries.')}</p></div></div></section>`;
-    const hint=dayHint();
-    return html`<section class="card surf" aria-live="polite"><p class="lbl">${L('сегодня','today')}</p><p class="b">${daySentence(tk)}</p>
-      <button class="link" onClick=${()=>say({kind:'answer',q:L('записи за сегодня','today’s entries'),keys:[],range:{a:tk,b:tk,l:L('сегодня','today')},list:true})}>${L('раскрыть записи','show entries')}</button>
-      ${hint?html`<button class="li" style="border-top:1px solid var(--line);border-bottom:0" onClick=${hint.fn}><span class="ico"><${I} n=${hint.ic}/></span><span class="tt"><span class="bs">${hint.t}</span><span class="c ink2">${hint.s}</span></span><${I} n="chevR"/></button>`:null}</section>`;
+    if(!ST.entries.length)return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="calm" size=${72}/><div class="grow col4"><h2 class="t2">${L('это ваш первый день','this is your first day')}</h2><p class="c ink2">${L('Скажите, как вы, или сфотографируйте еду','Say how you are, or take a photo of food')}</p></div></div>${foot}</section>`;
+    if(!l.length){const yk=dk(addD(now(),-1));const ys=onDay(yk).filter(x=>x.kind==='sym');const yt=ys.length?cap(L('вчера: ','yesterday: ')+[...new Set(ys.map(x=>lc(symName(x.key))))].join(', ')+'. '):'';
+      return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow col4"><p class="b">${yt+L('Сегодня пока тихо','Quiet so far today')}</p></div></div>${foot}</section>`;}
+    const hint=dayHint();const n=l.length;
+    return html`<section class="card surf" aria-live="polite">${B?null:html`<p class="lbl">${L('сегодня','today')}</p>`}<p class="b">${daySentence(tk)}</p>
+      ${B?null:html`<button class="link" onClick=${openDay}>${L('раскрыть записи','show entries')}</button>`}
+      ${hint?html`<${HintRow} t=${hint.t} s=${hint.s} fn=${hint.fn}/>`:null}
+      ${B?html`<${HintRow} t=${EN()?`${n} ${n===1?'entry':'entries'} today`:`${n} ${plRu(n,'запись','записи','записей')} сегодня`} s=${L('Открыть день','Open the day')} fn=${openDay}/>`:null}
+      ${foot}</section>`;
   }
-  if(r.kind==='log'){const t=r.t;const ds=daySentence(tk);
-    return html`<section class="card surf" aria-live="polite">
-      <div class="row" style="align-items:flex-start"><span class="tic" style="color:var(--accent);margin-top:2px"><${I} n=${t.icon}/></span><div class="grow col4"><p class="bs">${t.title}</p>${t.sub?html`<p class="c ink2">${t.sub}</p>`:null}</div><button class="ib" aria-label=${L('Скрыть','Dismiss')} onClick=${back}><${I} n="close" s=${20}/></button></div>
-      ${t.acts&&t.acts.length?html`<div class="ch2">${t.acts.map(a=>html`<button class="choice" onClick=${()=>{UI.resp=null;a.fn();rr();}}>${a.l}</button>`)}</div>`:null}
-      ${UI.inline&&UI.inline.step?html`<p class="c ink2">${L('Дальше по желанию','The rest is optional')}</p>`:ds?html`<p class="c ink2">${L('Сегодня: ','Today: ')+ds}</p>`:null}
-    </section>`;}
+  if(r.kind==='voice')return html`<${VoiceBlock} r=${r}/>`;
+  if(r.kind==='history')return html`<${HistoryBlock} r=${r}/>`;
+  if(r.kind==='settings')return html`<${SettingsBlock}/>`;
+  if(r.kind==='data')return html`<${DataBlock}/>`;
   if(r.kind==='photo')return html`<${PhotoBlock} r=${r}/>`;
   if(r.kind==='confirm')return html`<section class="card surf"><h2 class="q">${r.title}</h2><p class="b">${r.sub}</p><div class="ch2"><button class="choice" onClick=${()=>{UI.resp=null;r.fn();}}>${r.ok}</button><button class="choice sel" onClick=${back}>${L('отмена','cancel')}</button></div></section>`;
   if(r.kind==='help'){const ex=EN()?['when were my fingers numb?','what did I eat yesterday?','what is linked to how I feel?','how is it linked to my cycle?','what happened this week?','summary for a month','ask the doctor: …','connect Health','dark theme','по-русски']:['когда немело?','что я ела вчера?','что связано с самочувствием?','как это связано с циклом?','что было за неделю?','сводка за месяц','вопрос врачу: …','подключи Здоровье','темная тема','english'];
     return html`<section class="card surf"><${Head} title=${L('что можно сказать','what you can say')}/><div class="wrap">${ex.map(a=>html`<button class="chip" onClick=${()=>handleAll(a)}><span>${a}</span></button>`)}</div></section>`;}
   if(r.kind==='summary')return html`<section class="card doctor"><${Head} title=${L('к врачу','for the doctor')}/><${Summary} days=${r.days||92}/><${Follow} items=${[{l:L('вопросы врачу','questions for the doctor')},{l:L('что связано с самочувствием?','what is linked to how I feel?')}]}/></section>`;
-  if(r.kind==='insights')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('совпадения','coincidences')} sub=${L('Совпадения, не причины','Coincidences, not causes')}/><${Insights} keys=${r.keys}/><${Follow} items=${[{l:L('как это связано с циклом?','how is it linked to my cycle?')},{l:L('сводка за месяц','summary for a month')},{l:L('что я ела вчера?','what did I eat yesterday?')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей за 30 дней. ИИ может ошибаться. Не медицинская рекомендация.','From your entries, 30 days. AI can make mistakes. Not medical advice.')}</span></p></section>`;
-  if(r.kind==='cycle')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('цикл и самочувствие','cycle and how you feel')}/><${CycleBlock} keys=${r.keys}/><${Follow} items=${[{l:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка за 3 месяца','summary for 3 months')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Совпадения, не причины. ИИ может ошибаться. Не медицинская рекомендация.','Coincidences, not causes. AI can make mistakes. Not medical advice.')}</span></p></section>`;
+  if(r.kind==='insights')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('совпадения','coincidences')} sub=${L('Совпадения, не причины','Coincidences, not causes')}/><${Insights} keys=${r.keys}/><${Follow} items=${[{l:L('как это связано с циклом?','how is it linked to my cycle?')},{l:L('сводка за месяц','summary for a month')},{l:L('что я ела вчера?','what did I eat yesterday?')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей за 30 дней. ИИ может ошибаться. Не медицинская рекомендация','From your entries, 30 days. AI can make mistakes. Not medical advice')}</span></p></section>`;
+  if(r.kind==='cycle')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('цикл и самочувствие','cycle and how you feel')}/><${CycleBlock} keys=${r.keys}/><${Follow} items=${[{l:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка за 3 месяца','summary for 3 months')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Совпадения, не причины. ИИ может ошибаться. Не медицинская рекомендация','Coincidences, not causes. AI can make mistakes. Not medical advice')}</span></p></section>`;
   if(r.kind==='questions')return html`<section class="card doctor"><${Head} title=${L('вопросы к приему','questions for the visit')}/><${Questions}/></section>`;
   if(r.kind==='answer'){
     const has=r.keys.length||r.isFood||r.isHeat||r.range;
@@ -1087,9 +1201,9 @@ function Block(){
       ${!r.list?r.keys.map(k=>html`<${SymBlock} k=${k}/>`):null}
       ${r.isFood&&!r.medical&&!r.list?html`<${FoodBlock} yday=${!!(r.range&&r.range.l===L('вчера','yesterday'))}/>`:null}
       ${r.isHeat&&!r.medical?html`<${HeatBlock}/>`:null}
-      ${!has&&!r.medical?html`<p class="b">${L('В записях не нашла.','Not in your entries.')}</p><div class="wrap">${(EN()?['when were my fingers numb?','what did I eat yesterday?','what happened this week?']:['когда немело?','что я ела вчера?','что было за неделю?']).map(a=>html`<button class="chip" onClick=${()=>handleText(a)}><${I} n="spark" s=${18}/><span>${a}</span></button>`)}</div>`:null}
+      ${!has&&!r.medical?html`<p class="b">${L('В записях не нашла','Not in your entries')}</p><div class="wrap">${(EN()?['when were my fingers numb?','what did I eat yesterday?','what happened this week?']:['когда немело?','что я ела вчера?','что было за неделю?']).map(a=>html`<button class="chip" onClick=${()=>handleText(a)}><${I} n="spark" s=${18}/><span>${a}</span></button>`)}</div>`:null}
       ${has&&!r.medical?html`<${Follow} items=${r.keys.length?[{l:L('что с этим связано?','what is linked to it?'),q:L('что связано с ','what is linked to ')+lc(symName(r.keys[0]))+'?'},{l:L('как это связано с циклом?','how is it linked to my cycle?'),q:L('как ','how is ')+lc(symName(r.keys[0]))+L(' связано с циклом?',' linked to my cycle?')},{l:L('что было за неделю?','what happened this week?')}]:[{l:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка к врачу','summary for the doctor')}]}/>`:null}
-      <p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей. Совпадения, не причины. ИИ может ошибаться. Не медицинская рекомендация.','From your entries. Coincidences, not causes. AI can make mistakes. Not medical advice.')}</span></p>
+      <p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей. Совпадения, не причины. ИИ может ошибаться. Не медицинская рекомендация','From your entries. Coincidences, not causes. AI can make mistakes. Not medical advice')}</span></p>
     </section>`;}
   return html`<section class="card surf"><p class="bs">${r.title||''}</p>${r.sub?html`<p class="c ink2">${r.sub}</p>`:null}</section>`;
 }
@@ -1114,7 +1228,7 @@ function chips(){
   if(disc.length){const i=n0.getDate()%disc.length;out.push(disc[i]);if(disc.length>1)out.push(disc[(i+1)%disc.length]);}
   out.push({l:L('что я ела вчера?','what did I eat yesterday?'),fn:()=>handleText(L('что я ела вчера?','what did I eat yesterday?'))});
   if(ST.main)out.push({l:L('когда последний раз?','when was the last time?'),fn:()=>handleText(L('когда ','when ')+lc(symName(ST.main))+'?')});
-  const seen=new Set();return out.filter(c=>!seen.has(c.l)&&seen.add(c.l)).slice(0,4);
+  const seen=new Set();return out.filter(c=>!seen.has(c.l)&&seen.add(c.l)).slice(0,B?2:3);
 }
 function ctxOptions(){
   const n0=now(),o=[];const tk=todayK();
@@ -1127,36 +1241,32 @@ function ctxOptions(){
   o.push({l:L('стресс','stress'),c:'stress'});
   return o.slice(0,4);
 }
-function Step({label,opts,onPick,onClose}){
-  return html`<div class="hs" role="group" aria-label=${label}>
-    <span class="chip" style="box-shadow:none;background:none;padding-left:4px" aria-hidden="true"><span>${label}</span></span>
-    ${opts.map(o=>html`<button class="chip" key=${o.l} aria-label=${label+' '+o.l} onClick=${()=>onPick(o)}><span>${o.l}</span></button>`)}
-    <button class="chip" aria-label=${L('Закрыть','Close')} onClick=${onClose}><${I} n="close" s=${18}/></button></div>`;
-}
-function Chips(){
+function stepItems(){
   const close=()=>{UI.inline=null;rr();};
-  if(UI.inline&&UI.inline.step==='ctx'){const st=UI.inline;const x=ST.entries.find(e=>e.id===st.id);
-    if(!x)close();else return html`<${Step} label=${L('после чего? по желанию','after what? optional')} opts=${ctxOptions().concat([{l:L('ничего такого','nothing special'),c:null}])} onClose=${close}
-      onPick=${o=>{if(o.c&&!x.ctx.includes(o.c)){x.ctx=x.ctx.concat([o.c]);x.edited=Date.now();save();}UI.inline={step:'when',id:x.id};rr();}}/>`;}
-  if(UI.inline&&UI.inline.step==='when'){const st=UI.inline;const x=ST.entries.find(e=>e.id===st.id);const o=whenOpts().slice(0,4);
-    if(!x)close();else return html`<${Step} label=${L('когда?','when?')} opts=${o} onClose=${close}
-      onPick=${w=>{if(w.id!=='now'){x.at=w.d.getTime();x.d=dk(w.d);x.edited=Date.now();sortE();}save();UI.inline=null;say({kind:'log',t:{title:L('Записала: ','Saved: ')+lc(symName(x.key))+(x.s?', '+sName(x.s):''),sub:cap(relDT(new Date(x.at)))+((x.ctx||[]).length?', '+x.ctx.map(c=>ctxText(c)).join(', '):''),icon:'check',acts:[fixAct(x.id),undoAct([x.id])]}});}}/>`;}
+  if(UI.inline&&UI.inline.step==='ctx'){if(B){UI.inline=null;return null;}const st=UI.inline;const x=ST.entries.find(e=>e.id===st.id);if(!x){close();return null;}
+    return {label:L('после чего? по желанию','after what? optional'),items:ctxOptions().concat([{l:L('ничего такого','nothing special'),c:null}]).map(o=>({l:o.l,fn:()=>{if(o.c&&!x.ctx.includes(o.c)){x.ctx=x.ctx.concat([o.c]);x.edited=Date.now();save();}UI.inline={step:'when',id:x.id};rr();}})).concat([{l:'×',aria:L('Закрыть','Close'),fn:close}])};}
+  if(UI.inline&&UI.inline.step==='when'){if(B){UI.inline=null;return null;}const st=UI.inline;const x=ST.entries.find(e=>e.id===st.id);if(!x){close();return null;}
+    return {label:L('когда?','when?'),items:whenOpts().slice(0,3).map(w=>({l:w.l,fn:()=>{if(w.id!=='now'){x.at=w.d.getTime();x.d=dk(w.d);x.edited=Date.now();sortE();}save();UI.inline=null;toast({title:L('Записала: ','Saved: ')+lc(symName(x.key))+(x.s?', '+sName(x.s):''),sub:cap(relDT(new Date(x.at)))+((x.ctx||[]).length?', '+x.ctx.map(c=>ctxText(c)).join(', '):''),acts:[fixAct(x.id),undoAct([x.id])]});}})).concat([{l:'×',aria:L('Закрыть','Close'),fn:close}])};}
   if(UI.inline){const k=typeof UI.inline==='string'?UI.inline:UI.inline.sym;const prior=symEnts(k).length>0;
     const opts=prior?[{l:cmpName('less'),n:1,cmp:'less'},{l:cmpName('same'),n:2,cmp:'same'},{l:cmpName('more'),n:3,cmp:'more'}]:[1,2,3].map(n=>({l:sName(n),n}));
-    return html`<${Step} label=${symName(k)+':'} opts=${opts} onClose=${close}
-      onPick=${o=>{const ids=logSym([{key:k,s:o.n,ctx:[]}],null,null);const x=E().find(e=>e.id===ids[0]);if(x&&o.cmp){x.cmp=o.cmp;save();if(UI.resp&&UI.resp.kind==='log')UI.resp.t.title=L('Записала: ','Saved: ')+lc(symName(k))+', '+cmpName(o.cmp);}UI.inline={step:'ctx',id:ids[0]};rr();}}/>`;}
-  const c=chips();
-  return html`<div class="hs" role="group" aria-label=${L('Подсказки','Suggestions')}>${c.map(x=>html`<button class="chip" key=${x.l} onClick=${x.fn}>${x.star?html`<span class="star"><${I} n="star" s=${18}/></span>`:x.cam?html`<${I} n="cam" s=${18}/>`:null}<span>${x.l}</span></button>`)}
-    <button class="chip" aria-label=${L('Что можно сказать','What you can say')} onClick=${()=>say({kind:'help'})}><span>?</span></button></div>`;
+    return {label:symName(k)+':',items:opts.map(o=>({l:o.l,fn:()=>{const ids=logSym([{key:k,s:o.n,ctx:[]}],null,null);const x=E().find(e=>e.id===ids[0]);if(x&&o.cmp){x.cmp=o.cmp;save();if(UI.mtoast)UI.mtoast.title=L('Записала: ','Saved: ')+lc(symName(k))+', '+cmpName(o.cmp);}UI.inline=B?null:{step:'ctx',id:ids[0]};rr();}})).concat([{l:'×',aria:L('Закрыть','Close'),fn:close}])};}
+  return null;
 }
+function allChips(){
+  const st=stepItems();if(st)return st;
+  if(UI.resp){if(UI.resp.kind==='voice'&&!B)return {items:voiceChips(UI.resp)};return null;}
+  const c=chips();if(!B)c.push({l:'?',aria:L('Что можно сказать','What you can say'),fn:()=>say({kind:'help'})});
+  return {items:c};
+}
+function ChipsBottom({ch}){if(!ch)return null;return html`<div class="acard">${ch.label?html`<p class="lbl">${ch.label}</p>`:null}<${ChipGrid} items=${ch.items}/></div>`;}
 function handleAll(v){if(cmd(v)===false)handleText(v);}
 function InputLine(){
   const [t,setT]=useState(UI.draft||'');
   const send=()=>{const v=t.trim();if(!v)return;setT('');UI.draft='';handleAll(v);};
   return html`<form class="line" onSubmit=${e=>{e.preventDefault();send();}}>
     <label class=${'cam'+(ST.photoUsed?'':' wide')}><input type="file" accept="image/*" class="sr" aria-label=${L('Фото еды','Food photo')} onChange=${onPhoto}/><${I} n="cam"/>${ST.photoUsed?null:html`<span aria-hidden="true">${L('фото','photo')}</span>`}</label>
-    <input id="line" class="lin" value=${t} onInput=${e=>{setT(e.target.value);UI.draft=e.target.value;}} placeholder=${L('Как вы? Или спросите','How are you? Or ask')} aria-label=${L('Что записать или спросить','What to save or ask')} enterkeyhint="send" autocomplete="off"/>
-    ${t.trim()?html`<button type="submit" class="mic" aria-label=${L('Отправить','Send')}><${I} n="send"/></button>`:html`<button type="button" class="mic" aria-label=${L('Сказать голосом','Speak')} onClick=${()=>openSheet('voice')}><${I} n="mic"/></button>`}
+    <input id="line" class="lin" value=${t} onInput=${e=>{setT(e.target.value);UI.draft=e.target.value;}} placeholder=${UI.resp&&UI.resp.kind==='voice'?L('идет запись','recording'):UI.mtoast?L('что-нибудь еще?','anything else?'):B?L('как вы?','how are you?'):L('Как вы?','How are you?')} aria-label=${L('Что записать или спросить','What to save or ask')} enterkeyhint="send" autocomplete="off"/>
+    ${t.trim()?html`<button type="submit" class="mic" aria-label=${L('Отправить','Send')}><${I} n="send"/></button>`:html`<button type="button" class="mic" aria-label=${L('Сказать голосом','Speak')} onClick=${()=>say({kind:'voice',txt:''})}><${I} n="mic"/></button>`}
   </form>`;
 }
 function Onboarding(){
@@ -1165,14 +1275,14 @@ function Onboarding(){
   const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();if(h){ST.health=true;ST.cycle='health';ST.seed=dk(addD(now(),-11));}if(w)ST.geo=true;if(demo)seedDemo();save();};
   return html`<div class="ob"><div class="obb">
       <div class="row" style="justify-content:flex-end"><div class="seg" role="group" aria-label=${L('Язык','Language')} style="flex:none"><button class=${'chip'+(LANG==='ru'?' on':'')} aria-pressed=${LANG==='ru'} onClick=${()=>lang('ru')}>RU</button><button class=${'chip'+(LANG==='en'?' on':'')} aria-pressed=${LANG==='en'} onClick=${()=>lang('en')}>EN</button></div></div>
-      <div class="col center"><${Mascot} mood="happy" size=${120}/><h1 class="lt">${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2">${L('Голосом, словами или фото еды.','By voice, in words, or a photo of food.')}</p></div>
+      <div class="col center"><${Mascot} mood="happy" size=${120}/><h1 class="lt">${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2">${L('Голосом, словами или фото еды','By voice, in words, or a photo of food')}</p></div>
       <div class="rows">
         <div class="li"><span class="ico"><${I} n="cam"/></span><span class="tt"><span class="bs">${L('фото еды без подписи','food photos, no caption')}</span><span class="c ink2">${L('Совпадения с самочувствием через пару недель','Coincidences with how you feel in a couple of weeks')}</span></span></div>
         <div class="li"><span class="ico"><${I} n="doc"/></span><span class="tt"><span class="bs">${L('сводка для врача','summary for the doctor')}</span><span class="c ink2">${L('За месяц, три или полгода','A month, three or six')}</span></span></div>
         <div class="li"><span class="ico"><${I} n="drop"/></span><span class="tt"><span class="bs">${L('цикл рядом с записями','cycle next to entries')}</span><span class="c ink2">${L('Из Здоровья','From Health')}</span></span></div>
       </div>
       <div class="list"><${SwRow} on=${h} fn=${()=>setH(!h)} t="Apple Health" s=${L('Шаги, сон, цикл, терапия','Steps, sleep, cycle, therapy')}/><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')} s=${L('Жаркие дни рядом с записями','Hot days next to entries')}/></div>
-      <p class="f ink2">${L('Не медицинское приложение. Здоровье и погода в прототипе имитируются.','Not a medical app. Health and weather are simulated here.')}</p>
+      <p class="f ink2">${L('Не медицинское приложение. Здоровье и погода в прототипе имитируются','Not a medical app. Health and weather are simulated here')}</p>
     </div><div class="obf"><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером данных','try it with sample data')}</button></div></div>`;
 }
 const SH={rec:RecSheet,quick:QuickSheet,voice:VoiceSheet,safety:SafetySheet,copy:CopySheet};
@@ -1182,13 +1292,17 @@ function App(){
   useEffect(()=>{applyTheme();const k=e=>{if(e.key==='Escape'){if(UI.sheet)closeSheet();else if(UI.resp){UI.resp=null;rr();}}};document.addEventListener('keydown',k);return ()=>document.removeEventListener('keydown',k);},[]);
   LANG=ST.lang||'ru';document.documentElement.lang=LANG;
   if(!ST.onboarded)return html`<div class="phone"><${Onboarding}/></div>`;
+  const ch=allChips();
+  UI.footChips=(B&&ch&&!UI.resp)?ch.items:null;const bottom=B?(UI.resp?null:(ch&&ch.label?ch:null)):ch;
   return html`<div class="phone">
     <main class="scr" aria-label=${L('Сегодня','Today')}>
       <header class="hd"><div class="grow"><h1 class="lt">${L('сегодня','today')}</h1><p class="c ink2">${cap(fHdr(now()))}${ST.demo?html` <span class="acc">${L('пример данных','sample data')}</span>`:null}</p></div></header>
-      <${Ctx}/>
+      ${B?null:html`<${Ctx}/>`}
+      <div class="spacer" aria-hidden="true"></div>
+      <${MainToast}/>
       <${Block}/>
     </main>
-    <div class="bot"><${Chips}/><${InputLine}/><div style="height:8px"></div></div>
+    <div class="bot"><${ChipsBottom} ch=${bottom}/><${InputLine}/><div style="height:8px"></div></div>
     <${SheetHost}/>
   </div>`;
 }
