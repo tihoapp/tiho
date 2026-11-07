@@ -242,14 +242,40 @@ textarea.field{border-radius:22px;min-height:96px;line-height:1.4}
 html.ax .scr,html.ax .bot{zoom:1.18}
 .bigs .b,.bigs .c,.bigs .kvr span{font-size:1.25em;line-height:1.35}
 
-/* explicit feedback: numb fingers must know the tap landed */
-@keyframes tapshake{0%{transform:translateX(0) scale(1)}20%{transform:translateX(-4px) scale(.97)}40%{transform:translateX(4px) scale(.97)}60%{transform:translateX(-3px) scale(.985)}80%{transform:translateX(2px) scale(1)}100%{transform:translateX(0) scale(1)}}
-@keyframes tapflash{0%{box-shadow:inset 0 0 0 1px var(--control)}30%{box-shadow:inset 0 0 0 3px var(--ink)}100%{box-shadow:inset 0 0 0 1px var(--control)}}
-@keyframes toastin{0%{transform:translateY(12px) scale(.98);opacity:0}50%{transform:translateY(-3px) scale(1.01);opacity:1}70%{transform:translateX(-3px)}85%{transform:translateX(3px)}100%{transform:none;opacity:1}}
-.tap{animation:tapshake .32s cubic-bezier(.36,.07,.19,.97) both!important}
-.chip.tap,.choice.tap{animation:tapshake .32s cubic-bezier(.36,.07,.19,.97) both,tapflash .5s ease both!important}
-.toast.mt{animation:toastin .5s cubic-bezier(.2,.9,.3,1.2) both}
-@media (prefers-reduced-motion:reduce){.tap,.chip.tap,.choice.tap{animation:tapflash .4s ease both!important}.toast.mt{animation:none}}
+/* explicit feedback: numb fingers must know the tap landed.
+   the finger covers the button, so the signal also goes outside it: ring + whole-phone buzz on saves */
+.press{transform:scale(.92)!important;filter:brightness(.88);transition:transform 50ms ease-out,filter 50ms ease-out!important}
+.sw.press,.cx.press,.link.press{transform:scale(.9)!important}
+@keyframes buzz{0%{transform:scale(.92)}8%{transform:translateX(-5px) scale(1.05)}16%{transform:translateX(5px) scale(1.04)}24%{transform:translateX(-5px) scale(1.03)}32%{transform:translateX(5px) scale(1.02)}40%{transform:translateX(-4px) scale(1.01)}48%{transform:translateX(4px) scale(1)}58%{transform:translateX(-3px)}68%{transform:translateX(3px)}78%{transform:translateX(-2px)}88%{transform:translateX(1px)}100%{transform:none}}
+@keyframes tapflash{0%{box-shadow:inset 0 0 0 1px var(--control)}20%{box-shadow:inset 0 0 0 3px var(--ink)}100%{box-shadow:inset 0 0 0 1px var(--control)}}
+@keyframes ringout{0%{outline-offset:0;opacity:1}100%{outline-offset:18px;opacity:0}}
+@keyframes ringfade{0%{opacity:1}100%{opacity:0}}
+@keyframes pbuzz{0%,100%{transform:none}10%{transform:translate(-3px,1px)}20%{transform:translate(3px,-1px)}30%{transform:translate(-3px,0)}40%{transform:translate(3px,1px)}50%{transform:translate(-2px,-1px)}60%{transform:translate(2px,0)}70%{transform:translate(-2px,1px)}80%{transform:translate(1px,0)}90%{transform:translate(-1px,0)}}
+@keyframes toastin{0%{transform:translateY(16px) scale(.96);opacity:0}45%{transform:translateY(-4px) scale(1.02);opacity:1}60%{transform:translateX(-5px)}72%{transform:translateX(5px)}84%{transform:translateX(-3px)}100%{transform:none;opacity:1}}
+.tap{animation:buzz .34s linear both!important}
+.chip.tap,.choice.tap{animation:buzz .34s linear both,tapflash .55s ease both!important}
+.ring{position:fixed;pointer-events:none;z-index:9999;outline:3px solid var(--ink);outline-offset:0;animation:ringout .45s cubic-bezier(.2,.7,.3,1) forwards}
+.phone.pbuzz{animation:pbuzz .3s linear both}
+@media (prefers-reduced-motion:reduce){.press{transform:none!important}.tap,.chip.tap,.choice.tap{animation:tapflash .45s ease both!important}.ring{animation:ringfade .45s ease forwards;outline-offset:4px}.phone.pbuzz{animation:none}.toast.mt{animation:none}}
+/* v6: today list inside the day card */
+.today6{display:flex;flex-direction:column}
+.tr6{display:flex;align-items:flex-start;gap:12px;min-height:56px;padding:12px 0;border-top:1px solid var(--line);width:100%;text-align:left;border-radius:0}
+.tr6.new{border-radius:12px;border-top-color:transparent}
+.tr6.new+.acts6{background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state);border-radius:0 0 12px 12px;padding-top:4px}
+.acts6{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 0 12px 60px}
+.acts6 .chip{min-height:48px}
+.acts6 .sub6{grid-column:1/-1}
+.d6 .ctx{margin-top:0;gap:0 16px}
+.d6 .ctx .stl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.today6>:first-child{border-top:0}
+.tm6{flex:none;min-width:48px;font-size:15px;line-height:1.4;color:var(--ink2);font-variant-numeric:tabular-nums;padding-top:1px}
+.tx6{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
+.nw6{flex:none;font-size:13px;line-height:1.4;font-weight:600;color:var(--accent);padding-top:2px}
+.more6{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;width:100%;font-size:15px;color:var(--ink2);text-align:left}
+@keyframes newrow{0%{background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state);transform:translateY(10px);opacity:0}8%{transform:none;opacity:1}85%{background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state)}100%{background:transparent;box-shadow:-8px 0 0 transparent,8px 0 0 transparent}}
+.tr6.new{animation:newrow 6s ease-out both}
+@media (prefers-reduced-motion:reduce){.tr6.new{animation:none;background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state)}}
+.toast.mt{animation:toastin .55s cubic-bezier(.2,.9,.3,1.2) both}
 </style>
 </head>
 <body>
@@ -772,7 +798,7 @@ function Ctx(){
   const items=[];
   if(weatherOn())items.push(html`<span class="cx"><${I} n="sun" s=${20}/><span class="v num">${(tempFor(now())>0?'+':'')+tempFor(now())+'°'}</span><span class="sr">${L('погода','weather')}</span></span>`);
   else items.push(html`<button class="cx off" onClick=${()=>cmd('settings')}><${I} n="sun" s=${20}/>${L('погода: включить','weather: turn on')}</button>`);
-  if(ST.health)items.push(html`<span class="cx"><${I} n="steps" s=${20}/><span class="v num">${fmtNum(stepsFor(now()))}</span><span class="ink2">${L('шагов','steps')}</span></span>`);
+  if(ST.health)items.push(html`<span class="cx"><${I} n="steps" s=${20}/><span class="v num">${fmtNum(stepsFor(now()))}</span><span class="ink2 stl">${L('шагов','steps')}</span></span>`);
   else items.push(html`<button class="cx off" onClick=${()=>cmd('settings')}><${I} n="steps" s=${20}/>${L('шаги: подключить Здоровье','steps: connect Health')}</button>`);
   const c=cycleTile();
   if(c&&!c.none)items.push(html`<span class="cx"><${I} n="drop" s=${20}/><span class="ink2">${c.l}</span><span class="v num">${c.v}</span></span>`);
@@ -940,15 +966,16 @@ function CopySheet({txt}){
 // ---- app ----
 // ===== v5: one screen (web = figma v5 / v5b) =====
 UI.resp=null;UI.hview=null;UI.inline=null;UI.mtoast=null;
-const MODE=(()=>{const m=(location.search.match(/[?&]v=(5b?)\b/)||[])[1];if(m){try{localStorage.setItem('msapp.mode',m);}catch(e){}}let s=null;try{s=localStorage.getItem('msapp.mode');}catch(e){}return m||s||'5b';})();
-const B=MODE==='5b';
+const MODE=(()=>{const m=(location.search.match(/[?&]v=(5b?|6)\b/)||[])[1];if(m){try{localStorage.setItem('msapp.mode',m);}catch(e){}}let s=null;try{s=localStorage.getItem('msapp.mode');}catch(e){}return m||s||'5b';})();
+const V6=MODE==='6';
+const B=MODE==='5b'||V6; // v6 builds on v5b
 const LIM=()=>EN()?20:17;
 let THEMED=false;
 function applyTheme(){const r=document.documentElement;if(ST.theme==='light'||ST.theme==='dark'){r.setAttribute('data-theme',ST.theme);THEMED=true;}else if(THEMED){r.removeAttribute('data-theme');THEMED=false;}}
 function say(o){if(o&&o.kind==='log')return toast(o.t);UI.resp=Object.assign({kind:'info'},o);rr();}
 // main toast: dark card above the day card, hides after 4 s, buttons live inside
-function toast(o){const t=Object.assign({id:++TID,where:UI.sheet?'sheet':'main',icon:'check',acts:[]},o);if(t.where==='sheet'){UI.toast=t;}else{UI.resp=null;UI.mtoast=t;}if(typeof speak==='function')speak(t.title+(t.sub?'. '+t.sub:''));if(typeof haptic==='function')haptic(t.icon==='info'?'warn':t.icon==='undo'?'undo':'save');rr();}
-function MainToast(){const t=UI.mtoast;useEffect(()=>{if(!t)return;const id=t.id;const h=setTimeout(()=>{if(UI.mtoast&&UI.mtoast.id===id){UI.mtoast=null;rr();}},t.acts&&t.acts.length?6000:4000);return ()=>clearTimeout(h);},[t&&t.id]);if(!t)return null;
+function toast(o){const t=Object.assign({id:++TID,where:UI.sheet?'sheet':'main',icon:'check',acts:[]},o);if(t.where==='sheet'){UI.toast=t;}else{UI.resp=null;UI.mtoast=t;if(V6&&t.acts&&t.acts.length){const top=onDay(todayK()).filter(x=>!(x.src==='health')).slice(0,3);const f=top.find(e=>e.made&&Date.now()-e.made<800);if(f)t.inline6=f.id;}}if(typeof speak==='function')speak(t.title+(t.sub?'. '+t.sub:''));if(typeof haptic==='function')haptic(t.icon==='info'?'warn':t.icon==='undo'?'undo':'save');rr();}
+function MainToast(){const t=UI.mtoast;useEffect(()=>{if(!t)return;const id=t.id;const h=setTimeout(()=>{if(UI.mtoast&&UI.mtoast.id===id){UI.mtoast=null;rr();}},t.acts&&t.acts.length?6000:4000);return ()=>clearTimeout(h);},[t&&t.id]);if(!t)return null;if(V6&&t.inline6&&!UI.resp)return null;
   return html`<div class="toast mt" role="status"><div class="tr"><span class="tic"><${I} n=${t.icon}/></span><div class="tt"><p class="bs">${t.title}</p>${t.sub?html`<p class="c">${t.sub}</p>`:null}</div><button class="tx" aria-label=${L('Скрыть','Dismiss')} onClick=${()=>{UI.mtoast=null;rr();}}><${I} n="close" s=${20}/></button></div>${t.acts&&t.acts.length?html`<div class="ta">${t.acts.map(a=>html`<button class="tb" onClick=${()=>{UI.mtoast=null;a.fn();rr();}}>${a.l}</button>`)}</div>`:null}</div>`;}
 // chip grid: two columns, no horizontal scroll, long label takes the row
 function ChipGrid({items,label}){
@@ -964,7 +991,7 @@ function cmdBase(v){
   const wrap=(title,sub)=>say({kind:'log',t:{title,sub,icon:'check',acts:[]}});
   if(n==='settings'||/^(настройки|settings)$/.test(n))return say({kind:'settings'});
   if(/^(данные|данные и доступ|data|data and access)$/.test(n))return say({kind:'data'});
-  if(/^v5b?$/.test(n)){try{localStorage.setItem('msapp.mode',n);}catch(e){}location.search='?v='+n;return true;}
+  if(/^v(5b?|6)$/.test(n)){try{localStorage.setItem('msapp.mode',n);}catch(e){}location.search='?v='+n;return true;}
   if(/(истори|покажи записи|все записи|history|show (my )?entries|all entries)/.test(n))return say({kind:'history',per:30,f:'all'});
   if(/(хуже обычного|хуже чем обычно|плохой день|worse than usual|bad day)/.test(n)&&!/(^|\s)(вернул\S*|назад|уже|нормально|back|normal)/.test(n)){
     if(ST.worse)return toast({title:L('Хуже обычного, день ','Worse than usual, day ')+worseDayN(),sub:L('Скажите «вернулось к обычному», когда пройдет','Say “back to usual” when it passes'),icon:'info',acts:[]});
@@ -1192,6 +1219,25 @@ function DataBlock(){
     <p class="f ink2">${L('Удаление необратимо','Deleting cannot be undone')}</p>
   </section>`;
 }
+// v6: today list inside the day card, last three, no scroll
+function TodayRow({x}){
+  const d=new Date(x.at);const txt=x.words?qt(x.words):entryTitle(x);
+  const sub=x.words?(x.kind==='sym'?lc(symName(x.key))+(x.s?', '+sName(x.s):''):x.kind==='food'?mealName(x.meal):''):entrySub(x);
+  const fresh=justNow(x);
+  return html`<button class=${'tr6'+(fresh?' new':'')} onClick=${()=>openSheet('rec',{id:x.id})} aria-label=${fT(d)+', '+txt+(sub?', '+sub:'')+(fresh?L(', только что',', just now'):'')+L('. Исправить','. Edit')}>
+    <span class="tm6 num">${fT(d)}</span><span class="tx6"><span class="b">${txt}</span>${sub&&norm(sub)!==norm(txt)?html`<span class="c ink2">${sub}</span>`:null}</span>${fresh?html`<span class="nw6">${L('только что','just now')}</span>`:null}</button>`;
+}
+function DayCard6({l,hint,foot,openDay,HintRow}){
+  const user=l.filter(x=>!(x.kind==='med'&&x.src==='health')&&!(x.kind==='move'&&x.src==='health'));
+  const last=user.slice(0,3).reverse();const more=user.length-last.length;const t=UI.mtoast&&UI.mtoast.inline6?UI.mtoast:null;
+  return html`<section class="card surf d6" aria-live="polite"><${Ctx}/>
+    <div class="today6" aria-label=${L('Сегодня записано','Saved today')}>
+      ${more>0?html`<button class="more6" onClick=${openDay}><span>${EN()?`${more} earlier ${more===1?'entry':'entries'}`:`еще ${more} ${plRu(more,'запись','записи','записей')} раньше`}</span><${I} n="chevR" s=${20}/></button>`:null}
+      ${last.map(x=>html`<${TodayRow} key=${x.id} x=${x}/>${t&&t.inline6===x.id?html`<div class="acts6"><p class="sr" role="status">${t.title}</p>${t.sub&&!/^(сегодня|today)(,|\s|$)/i.test(t.sub)?html`<p class="c ink2 sub6">${t.sub}</p>`:null}${t.acts.filter(Boolean).map(a=>html`<button class="chip" onClick=${()=>{UI.mtoast=null;a.fn();rr();}}><span>${a.l}</span></button>`)}</div>`:null}`)}
+    </div>
+    ${hint&&last.length<=2?html`<${HintRow} t=${hint.t} s=${hint.s} fn=${hint.fn}/>`:null}
+    ${foot}</section>`;
+}
 function Block(){
   const r=UI.resp;const tk=todayK();
   const back=()=>{UI.resp=null;rr();};
@@ -1207,8 +1253,9 @@ function Block(){
       if(gap>=7)return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow"><p class="b">${L('Неделю записей не было. Ничего не потеряно, можно начать с сегодня','No entries for a week. Nothing is lost, you can start from today')}</p></div></div>${foot}</section>`;
       if(ST.firstDay&&ddiff(now(),fromDk(ST.firstDay))===7){const wk=ST.entries.filter(e=>e.d>=ST.firstDay);const top=topSyms(ST.firstDay,tk,1)[0];return html`<section class="card surf" aria-live="polite"><p class="b">${(EN()?`First week: ${nEnt(wk.length)}, ${wk.filter(e=>e.photo).length} photos. `:`Первая неделя: ${nEnt(wk.length)}, ${wk.filter(e=>e.photo).length} фото. `)+(top?L('Чаще всего: ','Most often: ')+lc(symName(top[0]))+'. ':'')+L('Совпадения появятся через 2–3 недели','Coincidences appear after 2–3 weeks')}</p>${foot}</section>`;}
       const yk=dk(addD(now(),-1));const ys=onDay(yk).filter(x=>x.kind==='sym');const yt=ys.length?cap(L('вчера: ','yesterday: ')+[...new Set(ys.map(x=>lc(symName(x.key))))].join(', ')+'. '):'';
-      return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow col4"><p class="b">${yt+L('Сегодня пока тихо','Quiet so far today')}</p></div></div>${foot}</section>`;}
+      return html`<section class=${'card surf'+(V6?' d6':'')} aria-live="polite">${V6?html`<${Ctx}/>`:null}<div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow col4"><p class="b">${yt+L('Сегодня пока тихо','Quiet so far today')}</p></div></div>${foot}</section>`;}
     const hint=dayHint();const n=l.length;
+    if(V6)return html`<${DayCard6} l=${l} hint=${hint} foot=${foot} openDay=${openDay} HintRow=${HintRow}/>`;
     return html`<section class="card surf" aria-live="polite">${B?null:html`<p class="lbl">${L('сегодня','today')}</p>`}<p class="b">${daySentence(tk)}</p>
       ${B?null:html`<button class="link" onClick=${openDay}>${L('раскрыть записи','show entries')}</button>`}
       ${hint?html`<${HintRow} t=${hint.t} s=${hint.s} fn=${hint.fn}/>`:null}
@@ -1299,7 +1346,7 @@ function stepItems(){
 function allChips(){
   const st=stepItems();if(st)return st;
   if(UI.resp){if(UI.resp.kind==='voice'&&!B)return {items:voiceChips(UI.resp)};if(!B&&UI.resp.chips&&UI.resp.chips.length)return {items:UI.resp.chips};return null;}
-  const c=chips();if(!ST.chipHints)c.length=Math.min(c.length,1);if(!B)c.push({l:'?',aria:L('Что можно сказать','What you can say'),fn:()=>say({kind:'help'})});
+  const c=chips();if(!ST.chipHints)c.length=Math.min(c.length,1);if(!B||V6)c.push({l:V6?L('что спросить?','what to ask?'):'?',aria:L('Что можно сказать','What you can say'),fn:()=>say({kind:'help'})});
   return {items:c};
 }
 function ChipsBottom({ch}){if(!ch)return null;return html`<div class="acard">${ch.label?html`<p class="lbl">${ch.label}</p>`:null}<${ChipGrid} items=${ch.items}/></div>`;}
@@ -1308,8 +1355,8 @@ function InputLine(){
   const [t,setT]=useState(UI.draft||'');
   const send=()=>{const v=t.trim();if(!v)return;setT('');UI.draft='';const ph=UI.ph;UI.ph=null;if(ph&&/город|city/.test(ph)){ST.city=v;ST.geo=true;save();return toast({title:L('Город: ','City: ')+v,acts:[]});}if(ph&&/врач|doctor/.test(ph))return cmd(L('врач сказал: ','doctor said: ')+v);handleAll(v);};
   return html`<form class="line" onSubmit=${e=>{e.preventDefault();send();}}>
-    <label class=${'cam'+(ST.photoUsed?'':' wide')}><input type="file" accept="image/*" multiple class="sr" aria-label=${L('Фото еды','Food photo')} onChange=${onPhoto}/><${I} n="cam"/>${ST.photoUsed?null:html`<span aria-hidden="true">${L('фото','photo')}</span>`}</label>
-    <input id="line" class="lin" value=${t} onInput=${e=>{setT(e.target.value);UI.draft=e.target.value;}} placeholder=${UI.ph?UI.ph:UI.resp&&UI.resp.kind==='voice'?L('идет запись','recording'):UI.mtoast?L('что-нибудь еще?','anything else?'):B?L('как вы?','how are you?'):L('Как вы?','How are you?')} aria-label=${L('Что записать или спросить','What to save or ask')} enterkeyhint="send" autocomplete="off"/>
+    <label class=${'cam'+(ST.photoUsed||V6?'':' wide')}><input type="file" accept="image/*" multiple class="sr" aria-label=${L('Фото еды','Food photo')} onChange=${onPhoto}/><${I} n="cam"/>${ST.photoUsed||V6?null:html`<span aria-hidden="true">${L('фото','photo')}</span>`}</label>
+    <input id="line" class="lin" value=${t} onInput=${e=>{setT(e.target.value);UI.draft=e.target.value;}} placeholder=${UI.ph?UI.ph:UI.resp&&UI.resp.kind==='voice'?L('идет запись','recording'):UI.mtoast?L('что-нибудь еще?','anything else?'):V6?L('скажите или спросите','tell me or ask'):B?L('как вы?','how are you?'):L('Как вы?','How are you?')} aria-label=${L('Что записать или спросить','What to save or ask')} enterkeyhint="send" autocomplete="off"/>
     ${t.trim()?html`<button type="submit" class="mic" aria-label=${L('Отправить','Send')}><${I} n="send"/></button>`:html`<button type="button" class="mic" aria-label=${L('Сказать голосом','Speak')} onClick=${()=>say({kind:'voice',txt:''})}><${I} n="mic"/></button>`}
   </form>`;
 }
@@ -1332,6 +1379,7 @@ function App(){
   LANG=ST.lang||'ru';document.documentElement.lang=LANG;
   if(!ST.onboarded)return html`<div class="phone"><${Onboarding}/></div>`;
   const ch=allChips();
+  useEffect(()=>{if(!V6||UI.resp)return;const sc=document.querySelector('.scr');if(sc)sc.scrollTop=sc.scrollHeight;},[ST.entries.length,UI.mtoast&&UI.mtoast.id,!!UI.resp]);
   UI.footChips=(B&&ch&&!UI.resp)?ch.items:null;const bottom=B?(UI.resp?null:(ch&&ch.label?ch:null)):ch;
   return html`<div class="phone">
     <main class="scr" aria-label=${L('Сегодня','Today')}>
@@ -1468,9 +1516,18 @@ function SettingsBlock({r}){const page=r&&r.page;const close=()=>{UI.resp=null;r
   return null;}
 applyBig();
 
-// ---- explicit feedback: haptic + shake on every tap ----
-function haptic(kind){if(ST.comfort&&ST.comfort.haptic===false)return;const pat=kind==='save'?[40,40,90]:kind==='warn'?[90,60,90]:kind==='undo'?[25,40,25]:[35];try{if(navigator.vibrate)navigator.vibrate(pat);}catch(e){}}
-document.addEventListener('pointerdown',e=>{const el=e.target.closest('.chip,.choice,.btn,.li,.fi,.tb,.tx,.mic,.cam,.link,.ib,.sw,.cx');if(!el)return;if(ST.comfort&&ST.comfort.haptic===false)return;el.classList.remove('tap');void el.offsetWidth;el.classList.add('tap');el.addEventListener('animationend',()=>el.classList.remove('tap'),{once:true});haptic(el.classList.contains('btn')?'save':'tap');},{passive:true});
+// ---- explicit feedback: no vibration on iPhone web, so the screen does the buzzing ----
+// press: instant squeeze under the finger; release: rattle like a motor + ring outside the finger; saves and warnings buzz the whole phone
+const hOn=()=>!(ST.comfort&&ST.comfort.haptic===false);
+function phoneBuzz(){const p=document.querySelector('.phone');if(!p)return;p.classList.remove('pbuzz');void p.offsetWidth;p.classList.add('pbuzz');p.addEventListener('animationend',()=>p.classList.remove('pbuzz'),{once:true});}
+function haptic(kind){if(!hOn())return;const pat=kind==='save'?[40,40,90]:kind==='warn'?[90,60,90]:kind==='undo'?[25,40,25]:[35];try{if(navigator.vibrate)navigator.vibrate(pat);}catch(e){}if(kind==='save'||kind==='warn'||kind==='undo')phoneBuzz();}
+const TAPSEL='.chip,.choice,.btn,.li,.fi,.tb,.tx,.mic,.cam,.link,.ib,.sw,.cx,.tr6,.more6';
+function ring(el){const r=el.getBoundingClientRect();if(!r.width)return;const d=document.createElement('div');d.className='ring';d.setAttribute('aria-hidden','true');const rad=getComputedStyle(el).borderRadius||'16px';Object.assign(d.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',borderRadius:rad});document.body.appendChild(d);d.addEventListener('animationend',()=>d.remove(),{once:true});setTimeout(()=>d.remove(),900);}
+let PRESSED=null;
+document.addEventListener('pointerdown',e=>{const el=e.target.closest(TAPSEL);if(!el||!hOn())return;PRESSED=el;el.classList.remove('tap');el.classList.add('press');},{passive:true});
+function release(e,fire){const el=PRESSED;PRESSED=null;if(!el)return;el.classList.remove('press');if(!fire)return;void el.offsetWidth;el.classList.add('tap');el.addEventListener('animationend',()=>el.classList.remove('tap'),{once:true});ring(el);haptic(el.classList.contains('btn')?'save':'tap');}
+document.addEventListener('pointerup',e=>release(e,true),{passive:true});
+document.addEventListener('pointercancel',e=>release(e,false),{passive:true});
 
 // ---- figma v5: edit and safety are cards on the one screen, not sheets ----
 function openSheet(name,p){if(name==='rec')return say({kind:'edit',id:p.id});if(name==='safety')return say({kind:'safety',v:p.v});return openSheetBase(name,p);}
