@@ -9,6 +9,12 @@
 <title>ms-app</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ms-app">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -48,7 +54,7 @@ input,textarea{font:inherit;color:var(--ink)}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-.phone{position:relative;height:100%;max-width:430px;margin:0 auto;background:var(--canvas);display:flex;flex-direction:column;overflow:hidden}
+.phone{position:relative;height:100%;max-width:430px;margin:0 auto;background:var(--canvas);display:flex;flex-direction:column;overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (min-width:600px) and (min-height:720px){.phone{height:min(880px,calc(100% - 32px));margin-top:16px;border-radius:44px;box-shadow:0 24px 70px var(--shadow)}}
 .scr{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-block:16px 16px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:16px}
 .bot{flex:none;padding-block:8px 0;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:8px;background:var(--canvas)}
@@ -91,16 +97,15 @@ input,textarea{font:inherit;color:var(--ink)}
 .card{border-radius:28px;padding:20px;display:flex;flex-direction:column;gap:12px;flex:none}
 .surf{background:var(--surface)}.state{background:var(--t-state)}.memory{background:var(--t-memory)}.doctor{background:var(--t-doctor)}
 .lbl{font-weight:600;font-size:15px;line-height:1.35;color:var(--ink2);margin:0}
-.rows{display:flex;flex-direction:column}
-.fi{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
-.fi:last-child{border-bottom:0}
+.rows{display:flex;flex-direction:column;gap:4px}
+.fi{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 0;width:100%;text-align:left}
 .fi:active{opacity:.7}
 .fi .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .fi .tt .bs,.fi .tt .c{overflow-wrap:anywhere}
 .fi .tm{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
 .ico{width:44px;height:44px;border-radius:22px;background:var(--canvas);display:flex;align-items:center;justify-content:center;flex:none;color:var(--ink2)}
 .th{width:52px;height:52px;border-radius:14px;object-fit:cover;flex:none;background:var(--pressed);display:block}
-.li{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.li{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 0;width:100%;text-align:left}
 .li:last-child{border-bottom:0}
 .li .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .li svg{flex:none;color:var(--ink2)}
@@ -140,7 +145,7 @@ input,textarea{font:inherit;color:var(--ink)}
 .mic:active{background:var(--action-pressed)}
 
 /* tabs */
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);flex:none;border-top:1px solid var(--line);margin-left:calc(-1 * var(--gl));margin-right:calc(-1 * var(--gr));padding-left:var(--gl);padding-right:var(--gr)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);flex:none;margin-left:calc(-1 * var(--gl));margin-right:calc(-1 * var(--gr));padding-left:var(--gl);padding-right:var(--gr)}
 .tab{min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink3);font-weight:500;font-size:12px;line-height:1.2;text-align:center}
 .tab.on{color:var(--ink);font-weight:600}
 
@@ -210,7 +215,8 @@ textarea.field{border-radius:22px;min-height:96px;line-height:1.4}
 
 /* onboarding */
 .ob{height:100%;display:flex;flex-direction:column}
-.obb{flex:1;min-height:0;overflow-y:auto;padding-block:12px 12px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:12px;justify-content:center}
+.obb{flex:1;min-height:0;overflow-y:auto;padding-block:12px 12px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:12px}
+.obb>:first-child{margin-top:auto}.obb>:last-child{margin-bottom:auto}
 .obf{flex:none;padding-block:8px 16px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:4px}
 
 @keyframes up{from{transform:translateY(24px);opacity:.3}to{transform:none;opacity:1}}
@@ -227,7 +233,7 @@ textarea.field{border-radius:22px;min-height:96px;line-height:1.4}
 .grow2 .sp{flex:1 1 0}
 .grid .lbl{margin-top:2px}
 .acard{background:var(--surface);border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:8px;flex:none}
-.foot{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.foot{padding-top:8px;display:flex;flex-direction:column;gap:8px}
 .rec{display:flex;align-items:center;gap:10px;min-height:28px}
 .rec .dot{width:10px;height:10px;border-radius:5px;background:var(--accent);flex:none;animation:blink 1.2s ease-in-out infinite}
 .rec .bars{height:28px;gap:3px;flex:none}
@@ -235,7 +241,7 @@ textarea.field{border-radius:22px;min-height:96px;line-height:1.4}
 .rec .bars i:nth-child(6){animation-delay:.75s}.rec .bars i:nth-child(7){animation-delay:.9s}.rec .bars i:nth-child(8){animation-delay:.2s}.rec .bars i:nth-child(9){animation-delay:.5s}.rec .bars i:nth-child(10){animation-delay:.05s}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 .mt{margin-bottom:0}
-.li.hint{border-top:1px solid var(--line);border-bottom:0;padding-top:12px;padding-bottom:0;min-height:48px}
+.li.hint{padding-top:8px;padding-bottom:0;min-height:48px}
 .li.hint .chev{color:var(--ink2)}
 .eyebrow{font-size:13px;color:var(--ink2);margin:0}
 @media (prefers-reduced-motion:reduce){.rec .dot{animation:none}}
@@ -258,16 +264,14 @@ html.ax .scr,html.ax .bot{zoom:1.18}
 .phone.pbuzz{animation:pbuzz .3s linear both}
 @media (prefers-reduced-motion:reduce){.press{transform:none!important}.tap,.chip.tap,.choice.tap{animation:tapflash .45s ease both!important}.ring{animation:ringfade .45s ease forwards;outline-offset:4px}.phone.pbuzz{animation:none}.toast.mt{animation:none}}
 /* v6: today list inside the day card */
-.today6{display:flex;flex-direction:column}
-.tr6{display:flex;align-items:flex-start;gap:12px;min-height:56px;padding:12px 0;border-top:1px solid var(--line);width:100%;text-align:left;border-radius:0}
-.tr6.new{border-radius:12px;border-top-color:transparent}
-.tr6.new+.acts6{background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state);border-radius:0 0 12px 12px;padding-top:4px}
+.today6{display:flex;flex-direction:column;gap:8px}
+.tr6{display:flex;align-items:flex-start;gap:12px;min-height:56px;padding:10px 0;width:100%;text-align:left;border-radius:12px}
+.tr6.new+.acts6{margin-top:-8px;background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state);border-radius:0 0 12px 12px;padding-top:4px}
 .acts6{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 0 12px 60px}
 .acts6 .chip{min-height:48px}
 .acts6 .sub6{grid-column:1/-1}
 .d6 .ctx{margin-top:0;gap:0 16px}
 .d6 .ctx .stl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.today6>:first-child{border-top:0}
 .tm6{flex:none;min-width:48px;font-size:15px;line-height:1.4;color:var(--ink2);font-variant-numeric:tabular-nums;padding-top:1px}
 .tx6{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
 .nw6{flex:none;font-size:13px;line-height:1.4;font-weight:600;color:var(--accent);padding-top:2px}
@@ -276,6 +280,21 @@ html.ax .scr,html.ax .bot{zoom:1.18}
 .tr6.new{animation:newrow 6s ease-out both}
 @media (prefers-reduced-motion:reduce){.tr6.new{animation:none;background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state)}}
 .toast.mt{animation:toastin .55s cubic-bezier(.2,.9,.3,1.2) both}
+/* welcome: mascot first, then what the app does */
+@keyframes mpop{0%{transform:scale(.4) translateY(24px);opacity:0}60%{transform:scale(1.08) translateY(-4px);opacity:1}80%{transform:scale(.97)}100%{transform:none;opacity:1}}
+@keyframes rise{0%{transform:translateY(14px);opacity:0}100%{transform:none;opacity:1}}
+.ob .pop{animation:mpop .7s cubic-bezier(.2,.9,.3,1.2) both}
+.ob .flip{transition:transform .65s cubic-bezier(.3,.8,.3,1)}
+.ob .rv{animation:rise .5s ease-out both}
+.obs{display:flex;flex-direction:column;gap:8px;padding:12px 0}
+.obs .rw{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.obs .li{min-height:48px;padding-block:4px}
+.obs{padding-block:6px!important}
+.ob .lt{margin:0}
+.obs .seg{display:flex;gap:8px}
+.obs .seg .chip{min-height:44px;padding:0 14px}
+.obf{padding-bottom:max(16px,env(safe-area-inset-bottom,0px))!important}
+@media (prefers-reduced-motion:reduce){.ob .pop,.ob .rv{animation:none}.ob .flip{transition:none;transform:none!important}}
 </style>
 </head>
 <body>
@@ -1220,9 +1239,9 @@ function DataBlock(){
   </section>`;
 }
 // v6: today list inside the day card, last three, no scroll
-function TodayRow({x}){
-  const d=new Date(x.at);const txt=x.words?qt(x.words):entryTitle(x);
-  const sub=x.words?(x.kind==='sym'?lc(symName(x.key))+(x.s?', '+sName(x.s):''):x.kind==='food'?mealName(x.meal):''):entrySub(x);
+function TodayRow({x,dup}){
+  const d=new Date(x.at);const w=dup?null:x.words;const txt=w?qt(w):(dup?symName(x.key)+(x.s?', '+sName(x.s):''):entryTitle(x));
+  const sub=dup?'':w?(x.kind==='sym'?lc(symName(x.key))+(x.s?', '+sName(x.s):''):x.kind==='food'?mealName(x.meal):''):entrySub(x);
   const fresh=justNow(x);
   return html`<button class=${'tr6'+(fresh?' new':'')} onClick=${()=>openSheet('rec',{id:x.id})} aria-label=${fT(d)+', '+txt+(sub?', '+sub:'')+(fresh?L(', только что',', just now'):'')+L('. Исправить','. Edit')}>
     <span class="tm6 num">${fT(d)}</span><span class="tx6"><span class="b">${txt}</span>${sub&&norm(sub)!==norm(txt)?html`<span class="c ink2">${sub}</span>`:null}</span>${fresh?html`<span class="nw6">${L('только что','just now')}</span>`:null}</button>`;
@@ -1233,7 +1252,7 @@ function DayCard6({l,hint,foot,openDay,HintRow}){
   return html`<section class="card surf d6" aria-live="polite"><${Ctx}/>
     <div class="today6" aria-label=${L('Сегодня записано','Saved today')}>
       ${more>0?html`<button class="more6" onClick=${openDay}><span>${EN()?`${more} earlier ${more===1?'entry':'entries'}`:`еще ${more} ${plRu(more,'запись','записи','записей')} раньше`}</span><${I} n="chevR" s=${20}/></button>`:null}
-      ${last.map(x=>html`<${TodayRow} key=${x.id} x=${x}/>${t&&t.inline6===x.id?html`<div class="acts6"><p class="sr" role="status">${t.title}</p>${t.sub&&!/^(сегодня|today)(,|\s|$)/i.test(t.sub)?html`<p class="c ink2 sub6">${t.sub}</p>`:null}${t.acts.filter(Boolean).map(a=>html`<button class="chip" onClick=${()=>{UI.mtoast=null;a.fn();rr();}}><span>${a.l}</span></button>`)}</div>`:null}`)}
+      ${last.map((x,i)=>html`<${TodayRow} key=${x.id} x=${x} dup=${!!(i&&x.words&&last[i-1].words===x.words&&Math.abs(last[i-1].at-x.at)<6e4)}/>${t&&t.inline6===x.id?html`<div class="acts6"><p class="sr" role="status">${t.title}</p>${t.sub&&!/^(сегодня|today)(,|\s|$)/i.test(t.sub)?html`<p class="c ink2 sub6">${t.sub}</p>`:null}${t.acts.filter(Boolean).map(a=>html`<button class="chip" onClick=${()=>{UI.mtoast=null;a.fn();rr();}}><span>${a.l}</span></button>`)}</div>`:null}`)}
     </div>
     ${hint&&last.length<=2?html`<${HintRow} t=${hint.t} s=${hint.s} fn=${hint.fn}/>`:null}
     ${foot}</section>`;
@@ -1362,14 +1381,26 @@ function InputLine(){
 }
 function Onboarding(){
   const [h,setH]=useState(true);const [w,setW]=useState(true);
-  const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();if(h){ST.health=true;ST.cycle='health';ST.seed=dk(addD(now(),-11));}if(w)ST.geo=true;if(demo)seedDemo();save();};
+  let sysDark=false;try{sysDark=matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}
+  const [th,setTh]=useState(ST.theme==='light'||ST.theme==='dark'?ST.theme:(sysDark?'dark':'light'));
+  const [md,setMd]=useState(MODE);
+  const fr=useRef(null),br=useRef(null);
+  useEffect(()=>{const f=fr.current,b=br.current;if(!f||!b)return;let rm=false;try{rm=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}if(rm)return;const a=b.getBoundingClientRect(),m=f.getBoundingClientRect();const dy=(a.top+a.height/2)-(m.top+m.height/2);f.style.transform=`translateY(${dy}px) scale(1.6)`;const t=setTimeout(()=>{f.style.transform='';},1000);return ()=>clearTimeout(t);},[]);
+  const pickTheme=t=>{setTh(t);ST.theme=t;save();applyTheme();};
+  const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();if(h){ST.health=true;ST.cycle='health';ST.seed=dk(addD(now(),-11));}if(w)ST.geo=true;if(demo)seedDemo();save();
+    if(md!==MODE){try{localStorage.setItem('msapp.mode',md);}catch(e){}location.replace(location.pathname+'?v='+md+'&lang='+(ST.lang||'ru'));}};
   const P=[L('фото еды без подписи','food photos, no caption'),L('сводка для врача','summary for the doctor'),L('цикл рядом с записями','cycle next to entries')];
-  return html`<div class="ob"><div class="obb">
-      <div class="col center"><${Mascot} mood="happy" size=${96}/><h1 class="lt">${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2">${L('Голосом, текстом или фото еды','By voice, text or a food photo')}</p></div>
-      <div class="card surf" style="gap:0;padding:4px 20px">${P.map(t=>html`<div class="li" key=${t} style="min-height:52px"><span class="tt"><span class="bs">${t}</span></span></div>`)}</div>
-      <div class="card surf" style="gap:0;padding:4px 20px"><${SwRow} on=${h} fn=${()=>setH(!h)} t="Apple Health"/><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')}/></div>
-      <p class="f ink2">${L('Не медицинское приложение','Not a medical app')}</p>
-    </div><div class="obf"><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером','try with sample data')}</button></div></div>`;
+  const d=ms=>({style:`animation-delay:${ms}ms`});
+  const Seg=({items,val,fn,label})=>html`<div class="seg" role="group" aria-label=${label}>${items.map(([v,l])=>html`<button class=${'chip'+(val===v?' on':'')} aria-pressed=${val===v} onClick=${()=>fn(v)}><span>${l}</span></button>`)}</div>`;
+  return html`<div class="ob"><div class="obb" ref=${br}>
+      <div class="col center"><div class="flip" ref=${fr}><div class="pop"><${Mascot} mood="happy" size=${96}/></div></div><h1 class="lt rv" ...${d(1300)}>${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2 rv" ...${d(1450)}>${L('Голосом, текстом или фото еды','By voice, text or a food photo')}</p></div>
+      <div class="card surf rv" style="gap:0;padding:4px 20px;animation-delay:1650ms">${P.map(t=>html`<div class="li" key=${t} style="min-height:40px;padding-block:6px"><span class="tt"><span class="bs">${t}</span></span></div>`)}</div>
+      <div class="card surf rv obs" style="gap:0;padding:4px 20px;animation-delay:1850ms"><${SwRow} on=${h} fn=${()=>setH(!h)} t="Apple Health"/><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')}/>
+        <div class="rw"><span class="bs">${L('Тема','Theme')}</span><${Seg} label=${L('Тема','Theme')} val=${th} fn=${pickTheme} items=${[['light',L('светлая','light')],['dark',L('темная','dark')]]}/></div>
+        <div class="rw"><span class="bs">${L('Версия','Version')}</span><${Seg} label=${L('Версия прототипа','Prototype version')} val=${md} fn=${setMd} items=${[['5','v5'],['5b','v5b'],['6','v6']]}/></div>
+      </div>
+      <p class="f ink2 rv" ...${d(2000)}>${L('Не медицинское приложение','Not a medical app')}</p>
+    </div><div class="obf rv" style="animation-delay:2050ms"><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером','try with sample data')}</button></div></div>`;
 }
 const SH={rec:RecSheet,quick:QuickSheet,voice:VoiceSheet,safety:SafetySheet,copy:CopySheet};
 function SheetHost(){const s=UI.sheet;useEffect(()=>{if(!s)return;const el=document.querySelector('.sheet');if(el)el.focus();},[s&&s.k]);if(!s)return null;const C=SH[s.name];if(!C)return null;return html`<div class="scrim" onClick=${closeSheet} aria-hidden="true"></div><${C} key=${s.k} ...${s}/>`;}
