@@ -210,7 +210,7 @@ textarea.field{border-radius:22px;min-height:96px;line-height:1.4}
 
 /* onboarding */
 .ob{height:100%;display:flex;flex-direction:column}
-.obb{flex:1;min-height:0;overflow-y:auto;padding-block:12px 12px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:20px}
+.obb{flex:1;min-height:0;overflow-y:auto;padding-block:12px 12px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:12px;justify-content:center}
 .obf{flex:none;padding-block:8px 16px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:4px}
 
 @keyframes up{from{transform:translateY(24px);opacity:.3}to{transform:none;opacity:1}}
@@ -600,8 +600,8 @@ let RR=null;
 UI={tab:'today',sheet:null,toast:null,filter:'all',draft:''};
 const rr=()=>{if(RR)RR();};
 function save(){const ok=saveS(ST);rr();return ok;}
-function openSheet(name,p){UI.sheet=Object.assign({name,k:uid()},p||{});if(UI.toast&&UI.toast.where==='main')UI.toast=null;rr();}
-function closeSheet(){UI.sheet=null;if(UI.toast&&UI.toast.where==='sheet')UI.toast=null;rr();}
+function openSheetBase(name,p){UI.sheet=Object.assign({name,k:uid()},p||{});if(UI.toast&&UI.toast.where==='main')UI.toast=null;rr();}
+function closeSheetBase(){UI.sheet=null;if(UI.toast&&UI.toast.where==='sheet')UI.toast=null;rr();}
 let TID=0;
 function toast(o){const t=Object.assign({id:++TID,where:UI.sheet?'sheet':'main',icon:'check',acts:[]},o);if(t.where==='sheet'){UI.toast=t;}else{UI.toast=null;UI.resp={kind:'log',t};}rr();}
 function hideToast(){UI.toast=null;rr();}
@@ -797,7 +797,7 @@ function SwRow({on,fn,t,s}){return html`<button class="li" role="switch" aria-ch
 function SegRow({opts,val,pick,lab}){return html`<div class="seg" role="group" aria-label=${lab}>${opts.map(([id,l])=>html`<button class=${'chip'+(val===id?' on':'')} aria-pressed=${val===id} onClick=${()=>pick(id)}>${l}</button>`)}</div>`;}
 
 // ---- sheets ----
-function Frame({title,onBack,children,noClose}){
+function FrameSheet({title,onBack,children,noClose}){
   return html`<div class="sheet" role="dialog" aria-modal="true" aria-label=${title} tabindex="-1">
     <div class="handle" aria-hidden="true"></div>
     ${UI.toast&&UI.toast.where==='sheet'?html`<${SheetToast}/>`:null}
@@ -1217,6 +1217,8 @@ function Block(){
       ${foot}</section>`;
   }
   if(r.kind==='voice')return html`<${VoiceBlock} r=${r}/>`;
+  if(r.kind==='edit')return html`<${RecSheet} key=${r.id} id=${r.id}/>`;
+  if(r.kind==='safety')return html`<${SafetySheet} v=${r.v}/>`;
   if(r.kind==='history')return html`<${HistoryBlock} r=${r}/>`;
   if(r.kind==='settings')return html`<${SettingsBlock} r=${r}/>`;
   if(r.kind==='card')return html`<${GenericCard} r=${r}/>`;
@@ -1314,19 +1316,14 @@ function InputLine(){
 }
 function Onboarding(){
   const [h,setH]=useState(true);const [w,setW]=useState(true);
-  const lang=lg=>{ST.lang=lg;ST.langSet=true;LANG=lg;save();};
   const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();if(h){ST.health=true;ST.cycle='health';ST.seed=dk(addD(now(),-11));}if(w)ST.geo=true;if(demo)seedDemo();save();};
+  const P=[L('фото еды без подписи','food photos, no caption'),L('сводка для врача','summary for the doctor'),L('цикл рядом с записями','cycle next to entries')];
   return html`<div class="ob"><div class="obb">
-      <div class="row" style="justify-content:flex-end"><div class="seg" role="group" aria-label=${L('Язык','Language')} style="flex:none"><button class=${'chip'+(LANG==='ru'?' on':'')} aria-pressed=${LANG==='ru'} onClick=${()=>lang('ru')}>RU</button><button class=${'chip'+(LANG==='en'?' on':'')} aria-pressed=${LANG==='en'} onClick=${()=>lang('en')}>EN</button></div></div>
-      <div class="col center"><${Mascot} mood="happy" size=${120}/><h1 class="lt">${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2">${L('Голосом, словами или фото еды','By voice, in words, or a photo of food')}</p></div>
-      <div class="rows">
-        <div class="li"><span class="ico"><${I} n="cam"/></span><span class="tt"><span class="bs">${L('фото еды без подписи','food photos, no caption')}</span><span class="c ink2">${L('Совпадения с самочувствием через пару недель','Coincidences with how you feel in a couple of weeks')}</span></span></div>
-        <div class="li"><span class="ico"><${I} n="doc"/></span><span class="tt"><span class="bs">${L('сводка для врача','summary for the doctor')}</span><span class="c ink2">${L('За месяц, три или полгода','A month, three or six')}</span></span></div>
-        <div class="li"><span class="ico"><${I} n="drop"/></span><span class="tt"><span class="bs">${L('цикл рядом с записями','cycle next to entries')}</span><span class="c ink2">${L('Из Здоровья','From Health')}</span></span></div>
-      </div>
-      <div class="list"><${SwRow} on=${h} fn=${()=>setH(!h)} t="Apple Health" s=${L('Шаги, сон, цикл, терапия','Steps, sleep, cycle, therapy')}/><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')} s=${L('Жаркие дни рядом с записями','Hot days next to entries')}/></div>
-      <p class="f ink2">${L('Не медицинское приложение. Здоровье и погода в прототипе имитируются','Not a medical app. Health and weather are simulated here')}</p>
-    </div><div class="obf"><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером данных','try it with sample data')}</button></div></div>`;
+      <div class="col center"><${Mascot} mood="happy" size=${96}/><h1 class="lt">${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2">${L('Голосом, текстом или фото еды','By voice, text or a food photo')}</p></div>
+      <div class="card surf" style="gap:0;padding:4px 20px">${P.map(t=>html`<div class="li" key=${t} style="min-height:52px"><span class="tt"><span class="bs">${t}</span></span></div>`)}</div>
+      <div class="card surf" style="gap:0;padding:4px 20px"><${SwRow} on=${h} fn=${()=>setH(!h)} t="Apple Health"/><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')}/></div>
+      <p class="f ink2">${L('Не медицинское приложение','Not a medical app')}</p>
+    </div><div class="obf"><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером','try with sample data')}</button></div></div>`;
 }
 const SH={rec:RecSheet,quick:QuickSheet,voice:VoiceSheet,safety:SafetySheet,copy:CopySheet};
 function SheetHost(){const s=UI.sheet;useEffect(()=>{if(!s)return;const el=document.querySelector('.sheet');if(el)el.focus();},[s&&s.k]);if(!s)return null;const C=SH[s.name];if(!C)return null;return html`<div class="scrim" onClick=${closeSheet} aria-hidden="true"></div><${C} key=${s.k} ...${s}/>`;}
@@ -1475,5 +1472,12 @@ applyBig();
 // ---- explicit feedback: haptic + shake on every tap ----
 function haptic(kind){if(ST.comfort&&ST.comfort.haptic===false)return;const pat=kind==='save'?[40,40,90]:kind==='warn'?[90,60,90]:kind==='undo'?[25,40,25]:[35];try{if(navigator.vibrate)navigator.vibrate(pat);}catch(e){}}
 document.addEventListener('pointerdown',e=>{const el=e.target.closest('.chip,.choice,.btn,.li,.fi,.tb,.tx,.mic,.cam,.link,.ib,.sw,.cx');if(!el)return;if(ST.comfort&&ST.comfort.haptic===false)return;el.classList.remove('tap');void el.offsetWidth;el.classList.add('tap');el.addEventListener('animationend',()=>el.classList.remove('tap'),{once:true});haptic(el.classList.contains('btn')?'save':'tap');},{passive:true});
+
+// ---- figma v5: edit and safety are cards on the one screen, not sheets ----
+function openSheet(name,p){if(name==='rec')return say({kind:'edit',id:p.id});if(name==='safety')return say({kind:'safety',v:p.v});return openSheetBase(name,p);}
+function closeSheet(){if(UI.resp&&(UI.resp.kind==='edit'||UI.resp.kind==='safety')){UI.resp=null;rr();return;}return closeSheetBase();}
+function Frame({title,onBack,children,noClose}){
+  if(UI.sheet)return html`<div class="sheet" role="dialog" aria-modal="true" aria-label=${title} tabindex="-1"><div class="handle" aria-hidden="true"></div>${UI.toast&&UI.toast.where==='sheet'?html`<${SheetToast}/>`:null}<div class="shd">${onBack?html`<button class="ib" aria-label=${L('Назад','Back')} onClick=${onBack}><${I} n="chevL"/></button>`:null}<h2 class="t2 grow">${title}</h2>${noClose?null:html`<button class="ib" aria-label=${L('Закрыть','Close')} onClick=${closeSheet}><${I} n="close"/></button>`}</div>${children}</div>`;
+  return html`<section class="card surf" aria-label=${title}><div class="row" style="align-items:flex-start">${onBack?html`<button class="ib" aria-label=${L('Назад','Back')} onClick=${onBack}><${I} n="chevL"/></button>`:null}<h2 class="q grow">${title}</h2>${noClose?null:html`<button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${closeSheet}><${I} n="close"/></button>`}</div>${children}</section>`;}
 render(html`<${App}/>`,document.getElementById('app'));
 </script></body></html>
