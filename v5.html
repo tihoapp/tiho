@@ -1339,7 +1339,7 @@ function App(){
     <${SheetHost}/>
   </div>`;
 }
-ST=loadS();if(ST.photoUsed===undefined)ST.photoUsed=false;LANG=ST.lang||'ru';
+ST=loadS();if(ST.photoUsed===undefined)ST.photoUsed=false;{const lg=(location.search.match(/[?&]lang=(en|ru)\b/)||[])[1];if(lg&&lg!==ST.lang){ST.lang=lg;saveS(ST);}}LANG=ST.lang||'ru';
 
 // ===== v5 states: everything from the figma sections, reachable by phrase or from «все состояния» =====
 ST.protocol=ST.protocol||null;ST.protocols=ST.protocols||[];ST.allergies=ST.allergies||[];ST.appt=ST.appt||null;ST.copiedAt=ST.copiedAt||0;ST.photoConsent=ST.photoConsent===undefined?null:ST.photoConsent;ST.recognize=ST.recognize!==false;ST.chipHints=ST.chipHints!==false;ST.readAloud=!!ST.readAloud;ST.bigText=!!ST.bigText;ST.hk=ST.hk||{steps:true,sleep:true,walk:true};
