@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ms-app: прототипы</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f6f4;--surface:#fff;--text:#1d1d22;--text2:#5c5c66;--line:#e4e4e0;--control:#86868e}
+@media (prefers-color-scheme:dark){:root{--bg:#121214;--surface:#1e1e22;--text:#f2f2f4;--text2:#c4c4cd;--line:#2a2a2f;--control:#8a8a94}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Onest,-apple-system,system-ui,sans-serif;padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-left)) 40px max(16px,env(safe-area-inset-right))}
+main{max-width:480px;margin:0 auto}
+h1{font-size:28px;font-weight:700;margin:16px 0 4px;letter-spacing:-.01em}
+p{color:var(--text2);margin:0 0 24px;line-height:1.4}
+a.card{display:block;background:var(--surface);border-radius:28px;padding:20px;margin-bottom:12px;text-decoration:none;color:inherit;border:1px solid var(--line)}
+a.card b{display:block;font-size:17px;margin-bottom:4px}
+a.card span{color:var(--text2);font-size:14px;line-height:1.4}
+small{display:block;color:var(--text2);font-size:12px;margin-top:24px;line-height:1.4}
+</style>
+</head>
+<body><main>
+<h1>ms-app</h1>
+<p>Помощник для людей с рассеянным склерозом: одна строка, записи голосом, текстом или фото еды, совпадения и сводка к врачу. Открывать на телефоне</p>
+<a class="card" href="v5.html"><b>v5: один экран</b><span>Строка, чипы и генерируемый блок. Текущая версия</span></a>
+<a class="card" href="v4.html"><b>v4: вкладки и история</b><span>Предыдущая версия с календарем, фильтрами и настройками</span></a>
+<a class="card" href="p1.html"><b>p1: первый прототип</b><span>Самая ранняя версия, для сравнения</span></a>
+<small>Не медицинское приложение. Прототип, данные хранятся только в браузере. ИИ может ошибаться</small>
+</main></body></html>
