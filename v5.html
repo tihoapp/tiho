@@ -517,7 +517,9 @@ function analyzeRest(t){
 // ---- simulated context (no Apple Health or weather in the prototype) ----
 function hsh(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0)/4294967295;}
 const weatherOn=()=>!!(ST.geo||ST.city);
-function tempFor(d){const base=[6,8,12,17,22,27,30,30,25,18,12,7][d.getMonth()];return Math.round(base+(hsh('t'+dk(d)+(ST.city||'geo'))-0.5)*9);}
+// real temperature from Open-Meteo; the simulated one only for sample data
+function tempFor(d){if(ST.demo)return tempSim(d);if(!ST.wx)return null;const k=dk(d);if(k===todayK()&&ST.wx.cur&&Date.now()-ST.wx.cur.at<3*36e5)return ST.wx.cur.t;const v=ST.wx.days&&ST.wx.days[k];return v==null?null:v;}
+function tempSim(d){const base=[6,8,12,17,22,27,30,30,25,18,12,7][d.getMonth()];return Math.round(base+(hsh('t'+dk(d)+(ST.city||'geo'))-0.5)*9);}
 const isHot=d=>weatherOn()&&tempFor(d)>=26;
 const hotFrom=d=>11+Math.floor(hsh('h'+dk(d))*4);
 function stepsFor(d){const full=2500+Math.round(hsh('s'+dk(d))*6500);if(dk(d)===todayK()){const h=now().getHours()+now().getMinutes()/60;return Math.round(full*Math.min(1,Math.max(0,(h-7)/14)));}return full;}
@@ -815,13 +817,16 @@ function Mascot({mood='calm',size=88}){
 // ---- today ----
 function Ctx(){
   const items=[];
-  if(weatherOn())items.push(html`<span class="cx"><${I} n="sun" s=${20}/><span class="v num">${(tempFor(now())>0?'+':'')+tempFor(now())+'°'}</span><span class="sr">${L('погода','weather')}</span></span>`);
+  const tw=weatherOn()?tempFor(now()):null;
+  if(weatherOn()&&tw==null&&ST.wxErr)items.push(html`<button class="cx off" onClick=${()=>focusLine(L('город, например Тбилиси','city, for example Tbilisi'))}><${I} n="sun" s=${20}/>${L('погода: укажите город','weather: set a city')}</button>`);
+  else if(weatherOn()&&tw==null)items.push(html`<span class="cx"><${I} n="sun" s=${20}/><span class="ink2" aria-label=${L('погода загружается','weather is loading')}>…</span></span>`);
+  else if(weatherOn())items.push(html`<span class="cx"><${I} n="sun" s=${20}/><span class="v num">${(tw>0?'+':'')+tw+'°'}</span><span class="sr">${L('погода','weather')}</span></span>`);
   else items.push(html`<button class="cx off" onClick=${()=>cmd('settings')}><${I} n="sun" s=${20}/>${L('погода: включить','weather: turn on')}</button>`);
   if(ST.health)items.push(html`<span class="cx"><${I} n="steps" s=${20}/><span class="v num">${fmtNum(stepsFor(now()))}</span><span class="ink2 stl">${L('шагов','steps')}</span></span>`);
-  else items.push(html`<button class="cx off" onClick=${()=>cmd('settings')}><${I} n="steps" s=${20}/>${L('шаги: подключить Здоровье','steps: connect Health')}</button>`);
   const c=cycleTile();
   if(c&&!c.none)items.push(html`<span class="cx"><${I} n="drop" s=${20}/><span class="ink2">${c.l}</span><span class="v num">${c.v}</span></span>`);
-  else items.push(html`<button class="cx off" onClick=${()=>cmd('settings')}><${I} n="drop" s=${20}/>${c&&c.none?L('цикл: нет данных','cycle: no data'):L('цикл: включить','cycle: turn on')}</button>`);
+  else if(c&&c.none)items.push(html`<span class="cx"><${I} n="drop" s=${20}/><span class="ink2">${L('цикл: скажите «месячные начались»','cycle: say “my period started”')}</span></span>`);
+  else items.push(html`<button class="cx off" onClick=${()=>cmd('settings')}><${I} n="drop" s=${20}/>${L('цикл: включить','cycle: turn on')}</button>`);
   return html`<div class="ctx" aria-label=${L('Контекст дня','Today’s context')}>${items}</div>`;
 }
 function FeedRow({x}){
@@ -1029,9 +1034,9 @@ function cmdBase(v){
   if(/(темн\S* тем|dark (theme|mode))/.test(n)){ST.theme='dark';save();applyTheme();return wrap(L('Темная тема','Dark theme'));}
   if(/(светл\S* тем|light (theme|mode))/.test(n)){ST.theme='light';save();applyTheme();return wrap(L('Светлая тема','Light theme'));}
   if(/(как в системе|system theme)/.test(n)){ST.theme='system';save();applyTheme();return wrap(L('Тема как в системе','Theme follows the system'));}
-  if(/(подключ\S*|включ\S*|connect|turn on|enable).{0,12}(здоровье|health)/.test(n)){ST.health=true;if(!ST.seed)ST.seed=dk(addD(now(),-11));if(ST.cycle==='off')ST.cycle='health';save();return wrap(L('Подключила Здоровье','Health connected'));}
+  if(/(подключ\S*|включ\S*|connect|turn on|enable).{0,12}(здоровье|health)/.test(n)){if(!ST.demo)return toast({title:L('Apple Health подключится в приложении для iPhone','Apple Health connects in the iPhone app'),sub:L('Здесь цикл можно отмечать словами: «месячные начались»','Here you can mark the cycle in words: “my period started”'),icon:'info',acts:[]});ST.health=true;if(!ST.seed)ST.seed=dk(addD(now(),-11));if(ST.cycle==='off')ST.cycle='health';save();return wrap(L('Подключила Здоровье','Health connected'));}
   if(/(отключ\S*|выключ\S*|disconnect|turn off|disable).{0,12}(здоровье|health)/.test(n)){ST.health=false;if(ST.cycle==='health')ST.cycle='off';save();return wrap(L('Отключила Здоровье','Health disconnected'));}
-  if(/(подключ\S*|включ\S*|connect|turn on|enable).{0,12}(погод|weather)/.test(n)){ST.geo=true;save();return wrap(L('Включила погоду','Weather on'));}
+  if(/(подключ\S*|включ\S*|connect|turn on|enable).{0,12}(погод|weather)/.test(n)){ST.geo=true;save();setTimeout(()=>fetchWx(true),0);return wrap(L('Включила погоду','Weather on'));}
   if(/(отключ\S*|выключ\S*|disconnect|turn off|disable).{0,12}(погод|weather)/.test(n)){ST.geo=false;save();return wrap(L('Выключила погоду','Weather off'));}
   if(/(главн\S* для меня|main (one|symptom))/.test(n)){const ks=symsIn(v);if(ks.length){ST.main=ks[0];save();return wrap(L('Главный для меня: ','My main one: ')+symName(ks[0]));}return wrap(L('Назовите симптом: «главный для меня: усталость»','Name it: “main one: fatigue”'));}
   if(/(стереть|удалить все|сбросить|erase|reset everything|wipe)/.test(n)){return say({kind:'confirm',title:L('стереть все данные?','erase all data?'),sub:L('Вернуть будет нельзя','This cannot be undone'),ok:L('стереть','erase'),fn:()=>{const lg=ST.lang;ST=defaults();ST.lang=lg;ST.photoUsed=false;ST.demo=false;ST.onboarded=true;ST.firstDay=todayK();save();wrap(L('Стерла. Это снова первый день','Erased. First day again'));}});}
@@ -1090,7 +1095,7 @@ function Summary({days}){
     ${ST.allergies.length?html`<div class="col4"><p class="lbl">${L('аллергии и непереносимость','allergies and intolerance')}</p><p class="b">${ST.allergies.join(', ')}</p></div>`:null}
     ${ST.protocols.length||ST.protocol?html`<div class="col4"><p class="lbl">${L('питание','nutrition')}</p><p class="b">${(ST.protocol?[ST.protocol]:[]).concat(ST.protocols).map(p=>p.name+': '+(p.end?fRange(fromDk(p.start),fromDk(p.end)):L('с ','since ')+fDM(fromDk(p.start))+L(', идет',', ongoing'))).join('; ')}</p></div>`:null}
     ${E().some(e=>e.doc)?html`<div class="col4"><p class="lbl">${L('заметки врача','doctor notes')}</p>${E().filter(e=>e.doc).slice(0,3).map(e=>html`<p class="b" key=${e.id}>${fDM(new Date(e.at))}: ${e.words}</p>`)}</div>`:null}
-    ${!ST.health?html`<div class="col4"><p class="c ink2">${L('Apple Health не подключен: шагов и сна в сводке нет','Apple Health is not connected: no steps or sleep in the summary')}</p><${ChipGrid} items=${[{l:L('подключить','connect'),fn:()=>cmd(L('подключи Здоровье','connect Health'))}]}/></div>`:null}
+    ${!ST.health?html`<p class="c ink2">${L('Шаги и сон из Apple Health появятся в приложении для iPhone','Steps and sleep from Apple Health come in the iPhone app')}</p>`:null}
     <p class="f ink2">${B?L('Это не медицинское заключение','This is not a medical report'):L('Только факты. Не медицинское заключение','Facts only. Not a medical report')}</p>
     ${seg}
     <button class="btn pri" onClick=${copy}><${I} n="copy"/>${L('скопировать сводку','copy summary')}</button>`;
@@ -1126,7 +1131,8 @@ function Insights({keys}){
     ${!ST.photoUsed?html``:null}`;
 }
 function CycleBlock({keys}){
-  if(ST.cycle==='off'||!periodStarts().length)return html`<p class="b">${L('Цикл выключен. Скажите «подключи Здоровье»','Cycle is off. Say “connect Health”')}</p>`;
+  if(ST.cycle==='off')return html`<p class="b">${L('Цикл выключен. Включить можно в настройках','The cycle is off. You can turn it on in settings')}</p>`;
+  if(!periodStarts().length)return html`<p class="b">${L('Цикл пока не отмечен. Когда начнутся месячные, скажите «месячные начались»','No cycle marked yet. When your period starts, say “my period started”')}</p>`;
   const ks=(keys&&keys.length?keys:topSyms(dk(addD(now(),-89)),todayK(),2).map(x=>x[0]));
   if(!ks.length)return html`<p class="b ink2">${L('Записей о самочувствии пока нет','No entries about how you feel yet')}</p>`;
   const c=cycleTile();
@@ -1266,7 +1272,7 @@ function Block(){
   const HintRow=({t,s,ic,fn})=>html`<button class="li hint" onClick=${fn}>${ic?html`<span class="ico"><${I} n=${ic}/></span>`:null}<span class="tt"><span class="bs">${t}</span>${s?html`<span class="c ink2">${s}</span>`:null}</span><${I} n="chevR"/></button>`;
   if(!r){
     const l=onDay(tk);
-    if(!ST.entries.length)return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="calm" size=${72}/><div class="grow col4"><h2 class="t2">${L('это ваш первый день','this is your first day')}</h2><p class="c ink2">${L('Скажите, как вы, или сфотографируйте еду','Say how you are, or take a photo of food')}</p></div></div>${foot}</section>`;
+    if(!ST.entries.length)return html`<section class=${'card surf'+(V6?' d6':'')} aria-live="polite">${V6?html`<${Ctx}/>`:null}<div class="row"><${Mascot} mood="calm" size=${72}/><div class="grow col4"><h2 class="t2">${L('это ваш первый день','this is your first day')}</h2><p class="c ink2">${L('Скажите, как вы, или сфотографируйте еду','Say how you are, or take a photo of food')}</p></div></div>${foot}</section>`;
     if(!l.length){const lastE=ST.entries[0];const gap=lastE?ddiff(now(),fromDk(lastE.d)):0;
       if(gap>=14)return html`<section class="card surf" aria-live="polite"><p class="b">${L('Две недели тихо. Если было хуже обычного, можно записать задним числом','Two quiet weeks. If it was worse than usual, you can log it for past days')}</p>${B?html`<div class="foot"><${ChipGrid} items=${[{l:L('было хуже','it was worse'),fn:()=>focusLine(L('когда и что было?','when and what was it?'))},{l:L('все было обычно','all as usual'),fn:()=>{const ids=addEntries([{kind:'pause',at:now().getTime()}]);save();toast({title:L('Хорошо. Продолжаем с сегодня','Good. Continuing from today'),acts:[undoAct(ids)]});}}]}/></div>`:null}</section>`;
       if(gap>=7)return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow"><p class="b">${L('Неделю записей не было. Ничего не потеряно, можно начать с сегодня','No entries for a week. Nothing is lost, you can start from today')}</p></div></div>${foot}</section>`;
@@ -1293,7 +1299,7 @@ function Block(){
   if(r.kind==='data')return html`<${DataBlock}/>`;
   if(r.kind==='photo')return html`<${PhotoBlock} r=${r}/>`;
   if(r.kind==='confirm')return html`<section class="card surf"><h2 class="q">${r.title}</h2><p class="b">${r.sub}</p><div class="ch2"><button class="choice" onClick=${()=>{UI.resp=null;r.fn();}}>${r.ok}</button><button class="choice sel" onClick=${back}>${L('отмена','cancel')}</button></div></section>`;
-  if(r.kind==='help'){const ex=EN()?['when were my fingers numb?','what did I eat yesterday?','what is linked to how I feel?','how is it linked to my cycle?','what happened this week?','summary for a month','ask the doctor: …','connect Health','dark theme','по-русски']:['когда немело?','что я ела вчера?','что связано с самочувствием?','как это связано с циклом?','что было за неделю?','сводка за месяц','вопрос врачу: …','подключи Здоровье','темная тема','english'];
+  if(r.kind==='help'){const ex=EN()?['when were my fingers numb?','what did I eat yesterday?','what is linked to how I feel?','how is it linked to my cycle?','what happened this week?','summary for a month','ask the doctor: …','my period started','dark theme','по-русски']:['когда немело?','что я ела вчера?','что связано с самочувствием?','как это связано с циклом?','что было за неделю?','сводка за месяц','вопрос врачу: …','месячные начались','темная тема','english'];
     return html`<section class="card surf"><${Head} title=${L('что можно сказать','what you can say')}/><div class="wrap">${ex.map(a=>html`<button class="chip" onClick=${()=>handleAll(a)}><span>${a}</span></button>`)}</div></section>`;}
   if(r.kind==='summary')return html`<section class=${'card doctor'+(r.big?' bigs':'')}><${Head} title=${L('к врачу','for the doctor')}/><${Summary} days=${r.days||30}/><${ChipGrid} items=${[{l:r.big?L('обычный размер','normal size'):L('крупно для врача','large for the doctor'),fn:()=>say(Object.assign({},r,{big:!r.big}))}]}/></section>`;
   if(r.kind==='insights')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('совпадения','coincidences')} sub=${L('Совпадения, не причины','Coincidences, not causes')}/><${Insights} keys=${r.keys}/><${Follow} items=${[{l:L('как это связано с циклом?','how is it linked to my cycle?')},{l:L('сводка за месяц','summary for a month')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей за 30 дней. ИИ может ошибаться. Не медицинская рекомендация','From your entries, 30 days. AI can make mistakes. Not medical advice')}</span></p></section>`;
@@ -1372,7 +1378,7 @@ function ChipsBottom({ch}){if(!ch)return null;return html`<div class="acard">${c
 function handleAll(v){if(cmd(v)===false)handleText(v);}
 function InputLine(){
   const [t,setT]=useState(UI.draft||'');
-  const send=()=>{const v=t.trim();if(!v)return;setT('');UI.draft='';const ph=UI.ph;UI.ph=null;if(ph&&/город|city/.test(ph)){ST.city=v;ST.geo=true;save();return toast({title:L('Город: ','City: ')+v,acts:[]});}if(ph&&/врач|doctor/.test(ph))return cmd(L('врач сказал: ','doctor said: ')+v);handleAll(v);};
+  const send=()=>{const v=t.trim();if(!v)return;setT('');UI.draft='';const ph=UI.ph;UI.ph=null;if(ph&&/город|city/.test(ph)){ST.city=v;ST.geo=true;save();setTimeout(()=>fetchWx(true),0);return toast({title:L('Город: ','City: ')+v,acts:[]});}if(ph&&/врач|doctor/.test(ph))return cmd(L('врач сказал: ','doctor said: ')+v);handleAll(v);};
   return html`<form class="line" onSubmit=${e=>{e.preventDefault();send();}}>
     <label class=${'cam'+(ST.photoUsed||V6?'':' wide')}><input type="file" accept="image/*" multiple class="sr" aria-label=${L('Фото еды','Food photo')} onChange=${onPhoto}/><${I} n="cam"/>${ST.photoUsed||V6?null:html`<span aria-hidden="true">${L('фото','photo')}</span>`}</label>
     <input id="line" class="lin" value=${t} onInput=${e=>{setT(e.target.value);UI.draft=e.target.value;}} placeholder=${UI.ph?UI.ph:UI.resp&&UI.resp.kind==='voice'?L('идет запись','recording'):UI.mtoast?L('что-нибудь еще?','anything else?'):V6?L('скажите или спросите','tell me or ask'):B?L('как вы?','how are you?'):L('Как вы?','How are you?')} aria-label=${L('Что записать или спросить','What to save or ask')} enterkeyhint="send" autocomplete="off"/>
@@ -1387,18 +1393,17 @@ function Onboarding(){
   const fr=useRef(null),br=useRef(null);
   useEffect(()=>{const f=fr.current,b=br.current;if(!f||!b)return;let rm=false;try{rm=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}if(rm)return;const a=b.getBoundingClientRect(),m=f.getBoundingClientRect();const dy=(a.top+a.height/2)-(m.top+m.height/2);f.style.transform=`translateY(${dy}px) scale(1.6)`;const t=setTimeout(()=>{f.style.transform='';},1000);return ()=>clearTimeout(t);},[]);
   const pickTheme=t=>{setTh(t);ST.theme=t;save();applyTheme();};
-  const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();if(h){ST.health=true;ST.cycle='health';ST.seed=dk(addD(now(),-11));}if(w)ST.geo=true;if(demo)seedDemo();save();
+  const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();ST.health=false;ST.cycle='manual';if(w)ST.geo=true;if(demo)seedDemo();save();if(w&&!demo)setTimeout(()=>fetchWx(true),50);
     if(md!==MODE){try{localStorage.setItem('msapp.mode',md);}catch(e){}location.replace(location.pathname+'?v='+md+'&lang='+(ST.lang||'ru'));}};
   const d=ms=>({style:`animation-delay:${ms}ms`});
   const Seg=({items,val,fn,label})=>html`<div class="seg" role="group" aria-label=${label}>${items.map(([v,l])=>html`<button class=${'chip'+(val===v?' on':'')} aria-pressed=${val===v} onClick=${()=>fn(v)}><span>${l}</span></button>`)}</div>`;
   return html`<div class="ob"><div class="obb" ref=${br}>
       <div class="col center"><div class="flip" ref=${fr}><div class="pop"><${Mascot} mood="happy" size=${96}/></div></div><h1 class="lt rv" ...${d(1300)}>${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2 rv" ...${d(1450)}>${L('Голосом, текстом или фото еды','By voice, text or a food photo')}</p></div>
-      <div class="card surf rv obs" style="gap:0;padding:4px 20px;animation-delay:1650ms"><${SwRow} on=${h} fn=${()=>setH(!h)} t="Apple Health"/><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')}/>
+      <div class="card surf rv obs" style="gap:0;padding:4px 20px;animation-delay:1650ms"><div class="col4" style="padding-block:10px"><span class="bs">Apple Health</span><span class="c ink2">${L('Подключится в приложении для iPhone. Цикл здесь отмечается словами','Connects in the iPhone app. Here the cycle is marked in words')}</span></div><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')}/>
         <div class="rw"><span class="bs">${L('Тема','Theme')}</span><${Seg} label=${L('Тема','Theme')} val=${th} fn=${pickTheme} items=${[['light',L('светлая','light')],['dark',L('темная','dark')]]}/></div>
         <div class="rw"><span class="bs">${L('Версия','Version')}</span><${Seg} label=${L('Версия прототипа','Prototype version')} val=${md} fn=${setMd} items=${[['5','v5'],['5b','v5b'],['6','v6']]}/></div>
       </div>
-      <p class="f ink2 rv" ...${d(1800)}>${L('Не медицинское приложение','Not a medical app')}</p>
-    </div><div class="obf rv" style="animation-delay:1850ms"><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером','try with sample data')}</button></div></div>`;
+    </div><div class="obf rv" style="animation-delay:1850ms"><p class="f ink2" style="text-align:center;margin:0 0 8px">${L('Не медицинское приложение','Not a medical app')}</p><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером','try with sample data')}</button></div></div>`;
 }
 const SH={rec:RecSheet,quick:QuickSheet,voice:VoiceSheet,safety:SafetySheet,copy:CopySheet};
 function SheetHost(){const s=UI.sheet;useEffect(()=>{if(!s)return;const el=document.querySelector('.sheet');if(el)el.focus();},[s&&s.k]);if(!s)return null;const C=SH[s.name];if(!C)return null;return html`<div class="scrim" onClick=${closeSheet} aria-hidden="true"></div><${C} key=${s.k} ...${s}/>`;}
@@ -1530,16 +1535,17 @@ function SettingsBlock({r}){const page=r&&r.page;const close=()=>{UI.resp=null;r
     <${Row} t=${L('мои симптомы','my symptoms')} s=${L('Главный: ','Main: ')+symName(mainSym())} fn=${()=>say({kind:'settings',page:'syms'})}/>
     <${Row} t=${L('цикл','cycle')} s=${ST.cycle==='off'?L('выключен','off'):L('виден только вам','only you can see it')} fn=${()=>say({kind:'settings',page:'cycle'})}/>
     <${Row} t=${L('город и погода','city and weather')} s=${ST.geo?(ST.city||L('по геопозиции','by location')):L('выключена','off')} fn=${()=>say({kind:'settings',page:'city'})}/>
-    <${Row} t="Apple Health" s=${ST.health?L('подключен, только чтение','connected, read only'):L('не подключен','not connected')} fn=${()=>say({kind:'settings',page:'health'})}/>
+    <${Row} t="Apple Health" s=${ST.health?L('подключен, только чтение','connected, read only'):L('в приложении для iPhone','in the iPhone app')} fn=${()=>say({kind:'settings',page:'health'})}/>
     <${Row} t=${L('язык','language')} s=${LANG==='en'?'English':'русский'} fn=${()=>say({kind:'settings',page:'lang'})}/>
     <${Row} t=${L('данные и доступ','data and access')} s=${L('Записи хранятся на телефоне','Entries are stored on your phone')} fn=${()=>say({kind:'data'})}/>
-  </div><p class="f ink2">${L('Все это можно сказать строкой: «темная тема», «подключи Здоровье», «english»','All of this can be said in the line: “dark theme”, “connect Health”, “по-русски”')}</p></section>`;
+  </div><p class="f ink2">${L('Все это можно сказать строкой: «темная тема», «месячные начались», «english»','All of this can be said in the line: “dark theme”, “my period started”, “по-русски”')}</p></section>`;
   const wrap=(t,s,body)=>html`<section class="card surf"><div class="row" style="align-items:flex-start"><button class="ib" aria-label=${L('Назад','Back')} onClick=${back}><${I} n="chevL"/></button><div class="grow col4"><h2 class="q">${t}</h2>${s?html`<p class="c ink2">${s}</p>`:null}</div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${close}><${I} n="close"/></button></div>${body}</section>`;
   if(page==='comfort')return wrap(L('удобство','comfort'),L('Шрифт и тема берутся из системы, здесь можно переопределить','Text size and theme come from the system, you can override them here'),html`<div class="list"><${Tg} on=${ST.bigText} fn=${()=>{ST.bigText=!ST.bigText;save();applyBig();}} t=${L('крупный шрифт','large text')}/><${Tg} on=${ST.theme==='dark'} fn=${()=>{ST.theme=ST.theme==='dark'?'system':'dark';save();applyTheme();}} t=${L('темная тема','dark theme')}/><${Tg} on=${ST.readAloud} fn=${()=>{ST.readAloud=!ST.readAloud;save();if(ST.readAloud)speak(L('Озвучивание включено','Read aloud is on'));}} t=${L('озвучивать ответы','read answers aloud')}/><${Tg} on=${ST.comfort.haptic!==false} fn=${()=>{ST.comfort.haptic=ST.comfort.haptic===false;save();haptic('save');}} t=${L('сильный отклик на нажатие','strong tap feedback')} s=${L('Вибрация и встряска кнопки, чтобы нажатие было заметно даже онемевшими пальцами','Vibration and a button shake, so a tap is felt even with numb fingers')}/></div>`);
   if(page==='ai')return wrap(L('ИИ и фото','AI and photos'),L('Фото хранятся только на телефоне. На распознавание уходит снимок без даты и места','Photos stay on your phone. Recognition gets the image without date or location'),html`<div class="list"><${Tg} on=${ST.recognize} fn=${()=>{ST.recognize=!ST.recognize;ST.photoConsent=ST.recognize;save();}} t=${L('распознавать еду на фото','recognize food in photos')}/><${Tg} on=${ST.chipHints} fn=${()=>{ST.chipHints=!ST.chipHints;save();}} t=${L('подсказки чипов','chip suggestions')}/></div>`);
   if(page==='syms'){const keys=[...new Set([mainSym(),...ST.symptoms,...Object.keys(ST.custom)])];return wrap(L('мои симптомы','my symptoms'),L('Главный показывается чипом','The main one shows as a chip'),html`<div class="col8">${keys.map(k=>html`<button class=${'choice'+(k===mainSym()?' sel':'')} key=${k} onClick=${()=>{ST.main=k;save();}}>${symName(k)}${k===mainSym()?L(', главный',', main'):''}</button>`)}</div><button class="link" onClick=${()=>{UI.resp=null;focusLine(L('главный для меня: …','main one: …'));}}>${L('добавить симптом','add a symptom')}</button>`);}
   if(page==='cycle'){const last=periodStarts()[0];return wrap(L('цикл','cycle'),L('Виден только вам. В сводку попадает как «дни до месячных»','Only you can see it. In the summary it appears as “days before a period”'),html`<div class="list"><${Tg} on=${ST.cycle!=='off'} fn=${()=>{ST.cycle=ST.cycle==='off'?(ST.health?'health':'manual'):'off';save();}} t=${L('учитывать цикл','track the cycle')}/></div><div class="col8"><button class="choice" onClick=${()=>cmd(L('месячные начались','my period started'))}>${L('последние месячные: ','last period: ')+(last?fDM(fromDk(last)):L('нет данных','no data'))}</button><button class="choice" onClick=${()=>toast({title:L('Длина цикла считается по отметкам','Cycle length is computed from marks'),icon:'info',acts:[]})}>${L('длина цикла: 28 дней','cycle length: 28 days')}</button></div>`);}
-  if(page==='city')return wrap(L('город и погода','city and weather'),L('Нужна только температура. Геопозиция не хранится','Only the temperature is needed. Location is not stored'),html`<div class="list"><${Tg} on=${ST.geo} fn=${()=>{ST.geo=!ST.geo;save();}} t=${L('погода в записях','weather in entries')}/></div><div class="col8"><button class="choice" onClick=${()=>{UI.resp=null;focusLine(L('город, например Тбилиси','city, for example Tbilisi'));}}>${ST.city||L('Тбилиси, по геопозиции','Tbilisi, by location')}</button></div>`);
+  if(page==='city')return wrap(L('город и погода','city and weather'),L('Нужна только температура. Место хранится примерно, до города','Only the temperature is needed. The place is kept roughly, to the city'),html`<div class="list"><${Tg} on=${ST.geo} fn=${()=>{ST.geo=!ST.geo;save();if(ST.geo)fetchWx(true);}} t=${L('погода в записях','weather in entries')}/></div><div class="col8"><button class="choice" onClick=${()=>{UI.resp=null;focusLine(L('город, например Тбилиси','city, for example Tbilisi'));}}>${ST.city||(ST.wx&&ST.wx.lat!=null?L('по геопозиции','by location'):L('указать город','set a city'))}</button></div>`);
+  if(page==='health'&&!ST.demo)return wrap('Apple Health',L('Подключится в приложении для iPhone, только чтение','Connects in the iPhone app, read only'),html`<p class="b">${L('Здесь цикл можно отмечать словами: «месячные начались»','Here you can mark the cycle in words: “my period started”')}</p>`);
   if(page==='health')return wrap('Apple Health',L('Только чтение. Приложение ничего не записывает в Здоровье','Read only. The app writes nothing to Health'),html`<div class="list"><${Tg} on=${ST.health} fn=${()=>cmd(ST.health?L('отключи Здоровье','disconnect Health'):L('подключи Здоровье','connect Health'))} t=${L('подключено','connected')}/><${Tg} on=${ST.hk.steps} fn=${()=>{ST.hk.steps=!ST.hk.steps;save();}} t=${L('шаги','steps')}/><${Tg} on=${ST.hk.sleep} fn=${()=>{ST.hk.sleep=!ST.hk.sleep;save();}} t=${L('сон','sleep')}/><${Tg} on=${ST.hk.walk} fn=${()=>{ST.hk.walk=!ST.hk.walk;save();}} t=${L('скорость ходьбы','walking speed')}/></div>`);
   if(page==='lang')return wrap(L('язык','language'),L('Записи остаются на том языке, на котором сказаны','Entries stay in the language they were said in'),html`<div class="col8"><button class=${'choice'+(LANG==='ru'?' sel':'')} onClick=${()=>cmd('по-русски')}>русский</button><button class=${'choice'+(LANG==='en'?' sel':'')} onClick=${()=>cmd('english')}>English</button></div>`);
   return null;}
@@ -1564,5 +1570,29 @@ function closeSheet(){if(UI.resp&&(UI.resp.kind==='edit'||UI.resp.kind==='safety
 function Frame({title,onBack,children,noClose}){
   if(UI.sheet)return html`<div class="sheet" role="dialog" aria-modal="true" aria-label=${title} tabindex="-1"><div class="handle" aria-hidden="true"></div>${UI.toast&&UI.toast.where==='sheet'?html`<${SheetToast}/>`:null}<div class="shd">${onBack?html`<button class="ib" aria-label=${L('Назад','Back')} onClick=${onBack}><${I} n="chevL"/></button>`:null}<h2 class="t2 grow">${title}</h2>${noClose?null:html`<button class="ib" aria-label=${L('Закрыть','Close')} onClick=${closeSheet}><${I} n="close"/></button>`}</div>${children}</div>`;
   return html`<section class="card surf" aria-label=${title}><div class="row" style="align-items:flex-start">${onBack?html`<button class="ib" aria-label=${L('Назад','Back')} onClick=${onBack}><${I} n="chevL"/></button>`:null}<h2 class="q grow">${title}</h2>${noClose?null:html`<button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${closeSheet}><${I} n="close"/></button>`}</div>${children}</section>`;}
+
+// ---- real weather: location or city -> Open-Meteo, only the temperature, place rounded to ~10 km ----
+let WXBUSY=false;
+async function wxCoords(){
+  if(ST.city&&!(ST.wx&&ST.wx.city===ST.city&&ST.wx.lat!=null)){const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language='+(EN()?'en':'ru')+'&name='+encodeURIComponent(ST.city));const j=await r.json();const g=j.results&&j.results[0];if(!g)throw new Error('city');return {lat:Math.round(g.latitude*10)/10,lon:Math.round(g.longitude*10)/10,city:ST.city};}
+  if(ST.wx&&ST.wx.lat!=null&&(!ST.city||ST.wx.city===ST.city))return {lat:ST.wx.lat,lon:ST.wx.lon,city:ST.wx.city||null};
+  return await new Promise((res,rej)=>{if(!navigator.geolocation)return rej(new Error('geo'));navigator.geolocation.getCurrentPosition(p=>res({lat:Math.round(p.coords.latitude*10)/10,lon:Math.round(p.coords.longitude*10)/10,city:null}),()=>rej(new Error('geo')),{maximumAge:36e5,timeout:15000,enableHighAccuracy:false});});
+}
+async function fetchWx(force){
+  if(ST.demo||!weatherOn()||WXBUSY)return;
+  if(!force&&ST.wx&&ST.wx.cur&&Date.now()-ST.wx.cur.at<30*6e4&&(!ST.city||ST.wx.city===ST.city))return;
+  WXBUSY=true;const prev=ST.wxErr;
+  try{const c=await wxCoords();const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m&daily=temperature_2m_max&past_days=92&forecast_days=1&timezone=auto`);if(!r.ok)throw new Error('net');const j=await r.json();
+    const days={};(j.daily&&j.daily.time||[]).forEach((t,i)=>{const v=j.daily.temperature_2m_max[i];if(v!=null)days[t]=Math.round(v);});
+    ST.wx={lat:c.lat,lon:c.lon,city:c.city,cur:{t:Math.round(j.current.temperature_2m),at:Date.now()},days};ST.wxErr=null;save();rr();}
+  catch(e){ST.wxErr=e.message==='geo'?'geo':e.message==='city'?'city':'net';save();
+    if(ST.wxErr!==prev){if(ST.wxErr==='geo')toast({title:L('Без геопозиции','No location'),sub:L('Погоду можно брать по городу','Weather can come from a city'),icon:'info',acts:[{l:L('указать город','set a city'),fn:()=>focusLine(L('город, например Тбилиси','city, for example Tbilisi'))}]});else if(ST.wxErr==='city')toast({title:L('Город не нашла','City not found'),sub:ST.city||'',icon:'info',acts:[{l:L('другой город','another city'),fn:()=>{ST.city=null;save();focusLine(L('город, например Тбилиси','city, for example Tbilisi'));}}]});}
+    rr();}
+  finally{WXBUSY=false;}
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ST.onboarded)fetchWx();});
+setTimeout(()=>{if(ST.onboarded)fetchWx();},400);
+// migration: earlier builds faked Apple Health outside the sample
+if(ST&&!ST.demo&&ST.health){ST.health=false;if(ST.cycle==='health')ST.cycle='manual';saveS(ST);}
 render(html`<${App}/>`,document.getElementById('app'));
 </script></body></html>
