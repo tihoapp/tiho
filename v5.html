@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ms-app v4 test build. Layout: one phone column; scroll area, then toast, quick words, input line and tabs in the bottom bar; sheets slide up over it */
+/* ms-app v5 web. Layout: one phone column; scroll area, then toast, quick words, input line and tabs in the bottom bar; sheets slide up over it */
 :root{
   --canvas:#F6F6F4;--surface:#FFFFFF;--pressed:#EDEDEA;
   --ink:#1D1D22;--ink2:#5C5C66;--ink3:#62626C;
@@ -127,7 +127,7 @@ input,textarea{font:inherit;color:var(--ink)}
 .hs::-webkit-scrollbar{display:none}
 .hs .chip{flex:none;max-width:260px}
 
-/* input line v4 */
+/* input line */
 .line{height:64px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--control);display:flex;align-items:center;gap:6px;padding:0 6px;flex:none}
 .line:focus-within{box-shadow:inset 0 0 0 2px var(--ink)}
 .cam{height:48px;min-width:48px;border-radius:24px;background:var(--canvas);display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;cursor:pointer;color:var(--ink);font-weight:600;font-size:15px}
@@ -595,7 +595,7 @@ const verdictName=v=>v==='link'?L('вижу связь','I see a link'):v==='non
 function summaryText(lg,days){const s=buildSummary(lg,days);return withLang(lg,()=>{let t=L('Сводка для врача','Summary for the doctor')+'\n'+s.range+'. '+L('Только факты','Facts only')+'\n\n';for(const x of s.sections){t+=x.lab.toUpperCase()+'\n';if(x.kv)t+=x.kv.map(r=>r[0]+': '+r[1]).join('\n')+'\n';if(x.text)t+=x.text+'\n';if(x.list)t+=x.list.map(q=>'— '+q).join('\n')+'\n';t+='\n';}return t.replace(/ /g,' ');});}
 function csv(){const rows=[['date','time','kind','what','strength','context','words']];for(const e of E().slice().reverse()){const d=new Date(e.at);rows.push([e.d,pad(d.getHours())+':'+pad(d.getMinutes()),e.kind,withLang('en',()=>entryTitle(e)),e.s?withLang('en',()=>sName(e.s)):'',(e.ctx||[]).join(' '),e.words||'']);}return rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');}
 
-// ===== v4 ui: state, actions =====
+// ===== state, actions =====
 let RR=null;
 UI={tab:'today',sheet:null,toast:null,filter:'all',draft:''};
 const rr=()=>{if(RR)RR();};
@@ -897,10 +897,10 @@ function SymBlock({k}){
   return html`<section class="card surf" aria-label=${symName(k)}>
     <p class="lbl">${symName(k)}</p>
     <div class="row" style="align-items:baseline;gap:10px"><span class="big">${s.n}</span><span class="b">${EN()?(s.n===1?'entry':'entries')+' in 30 days':plRu(s.n,'запись','записи','записей')+' за 30 дней'}</span></div>
-    <div class="strip" role="img" aria-label=${L('Дни с записями за 30 дней','Days with entries over 30 days')}>${s.strip.map((d,i)=>html`<i class=${(d.on?'on':'')+(i===29?' td':'')}></i>`)}</div>
-    <div class="sx"><span>${L('30 дней назад','30 days ago')}</span><span>${L('сегодня','today')}</span></div>
+    ${B?null:html`<div class="strip" role="img" aria-label=${L('Дни с записями за 30 дней','Days with entries over 30 days')}>${s.strip.map((d,i)=>html`<i class=${(d.on?'on':'')+(i===29?' td':'')}></i>`)}</div>
+    <div class="sx"><span>${L('30 дней назад','30 days ago')}</span><span>${L('сегодня','today')}</span></div>`}
     <div class="col4">
-      <p class="c">${L('Дней с записями: ','Days with entries: ')}<span class="num">${s.days} ${L('из','of')} 30</span></p>
+      ${B?null:html`<p class="c">${L('Дней с записями: ','Days with entries: ')}<span class="num">${s.days} ${L('из','of')} 30</span></p>`}
       <p class="c">${L('Последний раз: ','Last time: ')+relDT(new Date(s.last.at))}</p>
       <p class="c">${L('После тепла или в жару: ','After heat or on hot days: ')}<span class="num">${s.heat} ${L('из','of')} ${s.n}</span></p>
       ${s.af?html`<p class="c">${L('В течение 3 часов после еды: ','Within 3 hours after food: ')}<span class="num">${s.af} ${L('из','of')} ${s.n}</span>${s.dishes.length?html`<span class="ink2">${' ('+s.dishes.map(d=>d[0]+(d[1]>1?' ×'+d[1]:'')).join(', ')+')'}</span>`:null}</p>`:null}
@@ -1036,18 +1036,17 @@ function Summary({days}){
   const P=[[30,L('30 дней','30 days')],[92,L('3 месяца','3 months')],[182,L('полгода','6 months')]];
   const copy=()=>{const txt=summaryText(LANG,days);ST.copiedAt=Date.now();save();const done=()=>say({kind:'log',t:{title:L('Скопировала сводку','Summary copied'),sub:L('Вставьте в сообщение врачу или в заметки','Paste it into a message to your doctor or into notes'),icon:'check',acts:[]}});
     try{navigator.clipboard.writeText(txt).then(done,()=>openSheet('copy',{txt}));}catch(e){openSheet('copy',{txt});}};
-  return html`<div class="seg" role="group" aria-label=${L('Период','Period')}>${P.map(([d,l])=>html`<button class=${'chip'+(days===d?' on':'')} aria-pressed=${days===d} onClick=${()=>say({kind:'summary',days:d})}>${l}</button>`)}</div>
-    <p class="c ink2">${L('Сводка за ','Summary for ')+s.range}${ST.demo?html` <span class="acc">${L('пример данных','sample data')}</span>`:null}</p>
-    ${s.few?html`<p class="c">${L('Записей пока мало','Few entries so far')}</p>`:null}
+  const seg=html`<div class="seg" role="group" aria-label=${L('Период','Period')}>${P.map(([d,l])=>html`<button class=${'chip'+(days===d?' on':'')} aria-pressed=${days===d} onClick=${()=>say({kind:'summary',days:d,big:UI.resp&&UI.resp.big})}>${l}</button>`)}</div>`;
+  return html`${s.few?html`<p class="b">${L('Записей пока мало. Для совпадений мало, покажу факты без выводов','Few entries so far. Too few for coincidences, so facts only, no conclusions')}</p>`:null}
     ${s.sections.map(x=>html`<div class="col4"><p class="lbl">${x.lab}</p>
-      ${x.kv?html`<div class="kvr">${x.kv.map(r=>html`<span class="b">${r[0]}</span><span class="b num">${r[1]}</span>`)}</div>`:null}
+      ${x.kv?html`<p class="b">${x.kv.map(r=>r[0]+' '+r[1]).join(', ')}</p>`:null}
       ${x.text?html`<p class="b">${x.text}</p>`:null}${x.list?html`<ul class="b" style="margin:0;padding-left:20px">${x.list.map(q=>html`<li>${q}</li>`)}</ul>`:null}</div>`)}
     ${ST.allergies.length?html`<div class="col4"><p class="lbl">${L('аллергии и непереносимость','allergies and intolerance')}</p><p class="b">${ST.allergies.join(', ')}</p></div>`:null}
     ${ST.protocols.length||ST.protocol?html`<div class="col4"><p class="lbl">${L('питание','nutrition')}</p><p class="b">${(ST.protocol?[ST.protocol]:[]).concat(ST.protocols).map(p=>p.name+': '+(p.end?fRange(fromDk(p.start),fromDk(p.end)):L('с ','since ')+fDM(fromDk(p.start))+L(', идет',', ongoing'))).join('; ')}</p></div>`:null}
     ${E().some(e=>e.doc)?html`<div class="col4"><p class="lbl">${L('заметки врача','doctor notes')}</p>${E().filter(e=>e.doc).slice(0,3).map(e=>html`<p class="b" key=${e.id}>${fDM(new Date(e.at))}: ${e.words}</p>`)}</div>`:null}
     ${!ST.health?html`<div class="col4"><p class="c ink2">${L('Apple Health не подключен: шагов и сна в сводке нет','Apple Health is not connected: no steps or sleep in the summary')}</p><${ChipGrid} items=${[{l:L('подключить','connect'),fn:()=>cmd(L('подключи Здоровье','connect Health'))}]}/></div>`:null}
-    <${DayChart} days=${Math.min(days,92)}/>
-    <p class="f ink2">${L('Только факты. Не медицинское заключение','Facts only. Not a medical report')}</p>
+    <p class="f ink2">${B?L('Это не медицинское заключение','This is not a medical report'):L('Только факты. Не медицинское заключение','Facts only. Not a medical report')}</p>
+    ${seg}
     <button class="btn pri" onClick=${copy}><${I} n="copy"/>${L('скопировать сводку','copy summary')}</button>`;
 }
 function DayChart({days}){
@@ -1230,20 +1229,20 @@ function Block(){
   if(r.kind==='confirm')return html`<section class="card surf"><h2 class="q">${r.title}</h2><p class="b">${r.sub}</p><div class="ch2"><button class="choice" onClick=${()=>{UI.resp=null;r.fn();}}>${r.ok}</button><button class="choice sel" onClick=${back}>${L('отмена','cancel')}</button></div></section>`;
   if(r.kind==='help'){const ex=EN()?['when were my fingers numb?','what did I eat yesterday?','what is linked to how I feel?','how is it linked to my cycle?','what happened this week?','summary for a month','ask the doctor: …','connect Health','dark theme','по-русски']:['когда немело?','что я ела вчера?','что связано с самочувствием?','как это связано с циклом?','что было за неделю?','сводка за месяц','вопрос врачу: …','подключи Здоровье','темная тема','english'];
     return html`<section class="card surf"><${Head} title=${L('что можно сказать','what you can say')}/><div class="wrap">${ex.map(a=>html`<button class="chip" onClick=${()=>handleAll(a)}><span>${a}</span></button>`)}</div></section>`;}
-  if(r.kind==='summary')return html`<section class=${'card doctor'+(r.big?' bigs':'')}><${Head} title=${L('к врачу','for the doctor')}/><${Summary} days=${r.days||92}/><${ChipGrid} items=${[{l:r.big?L('обычный размер','normal size'):L('крупно для врача','large for the doctor'),fn:()=>say(Object.assign({},r,{big:!r.big}))}]}/><${Follow} items=${[{l:L('вопросы врачу','questions for the doctor')},{l:L('что связано с самочувствием?','what is linked to how I feel?')}]}/></section>`;
-  if(r.kind==='insights')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('совпадения','coincidences')} sub=${L('Совпадения, не причины','Coincidences, not causes')}/><${Insights} keys=${r.keys}/><${Follow} items=${[{l:L('как это связано с циклом?','how is it linked to my cycle?')},{l:L('сводка за месяц','summary for a month')},{l:L('что я ела вчера?','what did I eat yesterday?')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей за 30 дней. ИИ может ошибаться. Не медицинская рекомендация','From your entries, 30 days. AI can make mistakes. Not medical advice')}</span></p></section>`;
+  if(r.kind==='summary')return html`<section class=${'card doctor'+(r.big?' bigs':'')}><${Head} title=${L('к врачу','for the doctor')}/><${Summary} days=${r.days||30}/><${ChipGrid} items=${[{l:r.big?L('обычный размер','normal size'):L('крупно для врача','large for the doctor'),fn:()=>say(Object.assign({},r,{big:!r.big}))}]}/></section>`;
+  if(r.kind==='insights')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('совпадения','coincidences')} sub=${L('Совпадения, не причины','Coincidences, not causes')}/><${Insights} keys=${r.keys}/><${Follow} items=${[{l:L('как это связано с циклом?','how is it linked to my cycle?')},{l:L('сводка за месяц','summary for a month')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей за 30 дней. ИИ может ошибаться. Не медицинская рекомендация','From your entries, 30 days. AI can make mistakes. Not medical advice')}</span></p></section>`;
   if(r.kind==='cycle')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('цикл и самочувствие','cycle and how you feel')}/><${CycleBlock} keys=${r.keys}/><${Follow} items=${[{l:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка за 3 месяца','summary for 3 months')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Совпадения, не причины. ИИ может ошибаться. Не медицинская рекомендация','Coincidences, not causes. AI can make mistakes. Not medical advice')}</span></p></section>`;
   if(r.kind==='questions')return html`<section class="card doctor"><${Head} title=${L('вопросы к приему','questions for the visit')}/><${Questions}/></section>`;
   if(r.kind==='answer'){
     const has=r.keys.length||r.isFood||r.isHeat||r.range;
-    return html`<section class="card surf" aria-live="polite"><${Head} title=${qt(r.q)}/>
+    return html`<section class="card surf" aria-live="polite"><${Head} title=${qt(r.q)}/>${B&&!r.list&&r.keys.length?html`<${Ctx}/>`:null}
       ${r.medical?html`<div class="card doctor" style="padding:16px"><h3 class="q">${L('на это лучше ответит врач','your doctor is the right person for this')}</h3><button class="btn pri" onClick=${()=>{addQuestion(r.q);}}>${L('добавить к вопросам','add to questions')}</button></div>`:null}
       ${r.list&&r.range?html`<${RangeList} range=${r.range} f=${r.isFood?'food':'all'}/>`:null}
       ${!r.list?r.keys.map(k=>html`<${SymBlock} k=${k}/>`):null}
       ${r.isFood&&!r.medical&&!r.list?html`<${FoodBlock} yday=${!!(r.range&&r.range.l===L('вчера','yesterday'))}/>`:null}
       ${r.isHeat&&!r.medical?html`<${HeatBlock}/>`:null}
       ${!has&&!r.medical?html`<p class="b">${L('В записях не нашла','Not in your entries')}</p><div class="wrap">${(EN()?['when were my fingers numb?','what did I eat yesterday?','what happened this week?']:['когда немело?','что я ела вчера?','что было за неделю?']).map(a=>html`<button class="chip" onClick=${()=>handleText(a)}><${I} n="spark" s=${18}/><span>${a}</span></button>`)}</div>`:null}
-      ${has&&!r.medical?html`<${Follow} items=${r.keys.length?[{l:L('что с этим связано?','what is linked to it?'),q:L('что связано с ','what is linked to ')+lc(symName(r.keys[0]))+'?'},{l:L('как это связано с циклом?','how is it linked to my cycle?'),q:L('как ','how is ')+lc(symName(r.keys[0]))+L(' связано с циклом?',' linked to my cycle?')},{l:L('что было за неделю?','what happened this week?')}]:[{l:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка к врачу','summary for the doctor')}]}/>`:null}
+      ${has&&!r.medical?html`<${Follow} items=${r.keys.length?[{l:L('что с этим связано?','what is linked to it?'),q:L('что связано с ','what is linked to ')+lc(symName(r.keys[0]))+'?'},{l:L('как это связано с циклом?','how is it linked to my cycle?'),q:L('как ','how is ')+lc(symName(r.keys[0]))+L(' связано с циклом?',' linked to my cycle?')}]:[{l:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка к врачу','summary for the doctor')}]}/>`:null}
       <p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей. Совпадения, не причины. ИИ может ошибаться. Не медицинская рекомендация','From your entries. Coincidences, not causes. AI can make mistakes. Not medical advice')}</span></p>
     </section>`;}
   return html`<section class="card surf"><p class="bs">${r.title||''}</p>${r.sub?html`<p class="c ink2">${r.sub}</p>`:null}</section>`;
@@ -1254,7 +1253,7 @@ function chips(){
   const out=[];const n0=now(),h=n0.getHours(),tk=todayK();const today=onDay(tk);
   const yk=dk(addD(n0,-1));const ys=onDay(yk).filter(x=>x.kind==='sym');const uniq=[];for(const x of ys)if(!uniq.find(u=>u.key===x.key))uniq.push(x);
   const lastFood=today.find(x=>x.kind==='food');
-  if(!ST.entries.length){const ph=EN()?['fingers slightly numb','oatmeal and coffee for breakfast']:['слегка немеют пальцы','на завтрак овсянка и кофе'];return [{l:L('сфотографировать еду','photograph food'),cam:true,fn:()=>{const el=document.querySelector('.cam input[type=file]');if(el)el.click();}}].concat(ph.map(p=>({l:p,fn:()=>handleText(p)})));}
+  if(!ST.entries.length){const ph=EN()?['fingers slightly numb','oatmeal and coffee for breakfast']:['слегка немеют пальцы','на завтрак овсянка и кофе'];const first=[{l:L('сфотографировать еду','photograph food'),cam:true,fn:()=>{const el=document.querySelector('.cam input[type=file]');if(el)el.click();}}];return B?first:first.concat(ph.slice(0,1).map(p=>({l:p,fn:()=>handleText(p)})));}
   if(!today.length&&uniq.length){out.push({l:L('как вчера','same as yesterday'),fn:()=>logSym(uniq.map(u=>({key:u.key,s:u.s,ctx:[]})),null,null)});out.push({l:L('прошло','gone'),fn:()=>{const at=n0.getTime();const ids=addEntries(uniq.map(u=>({kind:'gone',key:u.key,at})));save();toast({title:L('Хорошо, что прошло','Good that it passed'),sub:uniq.map(u=>lc(symName(u.key))).join(', '),acts:[undoAct(ids)]});}});}
   const inl=()=>{UI.inline=ST.main;rr();};
   if(ST.protocol&&protoDays()>=14&&!today.length)out.push({l:L('протокол: день ','protocol: day ')+protoDays(),fn:protoAsk});
