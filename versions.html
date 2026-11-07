@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tiho</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f6f4;--surface:#fff;--text:#1d1d22;--text2:#5c5c66;--line:#e4e4e0;--control:#86868e}
+@media (prefers-color-scheme:dark){:root{--bg:#121214;--surface:#1e1e22;--text:#f2f2f4;--text2:#c4c4cd;--line:#2a2a2f;--control:#8a8a94}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Onest,-apple-system,system-ui,sans-serif;padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-left)) 40px max(16px,env(safe-area-inset-right))}
+main{max-width:480px;margin:0 auto}
+h1{font-size:28px;font-weight:700;margin:16px 0 4px;letter-spacing:-.01em}
+h2{font-size:15px;font-weight:600;color:var(--text2);margin:28px 0 8px}
+p{color:var(--text2);margin:0 0 20px;line-height:1.4}
+a.card{display:block;background:var(--surface);border-radius:28px;padding:20px;margin-bottom:12px;text-decoration:none;color:inherit;border:1px solid var(--line)}
+a.card b{display:block;font-size:17px;margin-bottom:4px}
+a.card span{color:var(--text2);font-size:14px;line-height:1.4}
+small{display:block;color:var(--text2);font-size:12px;margin-top:24px;line-height:1.4}
+</style>
+</head>
+<body><main>
+<h1>Tiho</h1>
+<p>A companion for people with multiple sclerosis: one input line, entries by voice, text or a food photo, coincidences and a summary for the doctor. Open on a phone</p>
+<h2>На экран «Домой» / Home Screen</h2>
+<a class="card" href="v5.html"><b>открыть приложение</b><span>Откройте эту ссылку в Safari, нажмите «Поделиться» и выберите «На экран „Домой“». Появится иконка с маскотом, приложение откроется без браузера. Версию и тему можно выбрать на приветственном экране</span></a>
+<a class="card" href="v5.html"><b>open the app</b><span>Open this link in Safari, tap Share and choose “Add to Home Screen”. You get the mascot icon and the app opens without the browser. Pick the version and theme on the welcome screen</span></a>
+<h2>English</h2>
+<a class="card" href="v5.html?v=6&lang=en"><b>v6: today in the card</b><span>Built on v5b: the last three entries in your words right in the day card, a saved entry confirms inside its own row, context inside the card, the “what to ask?” chip</span></a>
+<a class="card" href="v5.html?v=5b&lang=en"><b>v5b: minimum</b><span>No context line, one or two chips, zero steps after saving</span></a>
+<a class="card" href="v5.html?v=5&lang=en"><b>v5: with the context line</b><span>Weather, steps and cycle above the day card, the “what is linked?” hint, the “?” chip</span></a>
+<h2>Русский</h2>
+<a class="card" href="v5.html?v=6&lang=ru"><b>v6: сегодня в карточке</b><span>На основе v5b: последние три записи вашими словами прямо в карточке дня, новая запись подтверждается в своей строке, контекст внутри карточки, чип «что спросить?»</span></a>
+<a class="card" href="v5.html?v=5b&lang=ru"><b>v5b: минимум</b><span>Без контекстной строки, один-два чипа, ноль шагов после записи</span></a>
+<a class="card" href="v5.html?v=5&lang=ru"><b>v5: с контекстной строкой</b><span>Погода, шаги и цикл над карточкой дня, подсказка «что связано?», чип «?»</span></a>
+<small>Not a medical app. Prototype: entries are stored only in this browser. AI can make mistakes. Language can also be switched inside: say “english” or “по-русски”, or settings → language</small>
+</main></body></html>

@@ -3,38 +3,1596 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ms-app</title>
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="manifest" href="manifest.webmanifest">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F6F6F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)">
+<title>Tiho</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tiho">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f6f4;--surface:#fff;--text:#1d1d22;--text2:#5c5c66;--line:#e4e4e0;--control:#86868e}
-@media (prefers-color-scheme:dark){:root{--bg:#121214;--surface:#1e1e22;--text:#f2f2f4;--text2:#c4c4cd;--line:#2a2a2f;--control:#8a8a94}}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Onest,-apple-system,system-ui,sans-serif;padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-left)) 40px max(16px,env(safe-area-inset-right))}
-main{max-width:480px;margin:0 auto}
-h1{font-size:28px;font-weight:700;margin:16px 0 4px;letter-spacing:-.01em}
-h2{font-size:15px;font-weight:600;color:var(--text2);margin:28px 0 8px}
-p{color:var(--text2);margin:0 0 20px;line-height:1.4}
-a.card{display:block;background:var(--surface);border-radius:28px;padding:20px;margin-bottom:12px;text-decoration:none;color:inherit;border:1px solid var(--line)}
-a.card b{display:block;font-size:17px;margin-bottom:4px}
-a.card span{color:var(--text2);font-size:14px;line-height:1.4}
-small{display:block;color:var(--text2);font-size:12px;margin-top:24px;line-height:1.4}
+/* ms-app v5 web. Layout: one phone column; scroll area, then toast, quick words, input line and tabs in the bottom bar; sheets slide up over it */
+:root{
+  --canvas:#F6F6F4;--surface:#FFFFFF;--pressed:#EDEDEA;
+  --ink:#1D1D22;--ink2:#5C5C66;--ink3:#62626C;
+  --action:#232327;--on-action:#FFFFFF;--action-pressed:#3A3A40;
+  --t-state:#ECE8FB;--t-memory:#E3F3EA;--t-doctor:#E4EEFB;
+  --accent-bg:#FCE6D6;--accent:#8F3D12;
+  --line:#E4E4E0;--control:#86868E;--focus:#8C7FD6;
+  --toast:#FFFFFF;--toast-btn:#F6F6F4;--toast-ink:#1D1D22;--toast-accent:#8F3D12;--toast-line:#232327;
+  --scrim:rgba(18,18,20,.38);--desk:#E9E9E5;--shadow:rgba(0,0,0,.16);
+  --m1:#FFF3EA;--m2:#F6C9A9;--m3:#E29870;--mcheek:#EC8565;--mink:#4A3226;--mshadow:#3A2A20;
+  --font:'Onest',-apple-system,'SF Pro Text',system-ui,'Segoe UI',sans-serif;
+  --gl:max(16px,env(safe-area-inset-left,0px));--gr:max(16px,env(safe-area-inset-right,0px));
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --canvas:#121214;--surface:#1E1E22;--pressed:#2A2A2F;--ink:#F2F2F4;--ink2:#A9A9B3;--ink3:#9C9CA6;
+  --action:#F2F2F4;--on-action:#121214;--action-pressed:#D8D8DE;--t-state:#2A2540;--t-memory:#1F3329;--t-doctor:#1F2A3B;
+  --accent-bg:#3A2418;--accent:#F2B28C;--line:#2E2E33;--control:#76767F;--focus:#A99CF0;
+  --toast:#1E1E22;--toast-btn:#2A2A2F;--toast-ink:#F2F2F4;--toast-accent:#F2B28C;--toast-line:#F2F2F4;--scrim:rgba(0,0,0,.55);--desk:#0B0B0C;--shadow:rgba(0,0,0,.5);
+  --mshadow:#000000;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --canvas:#121214;--surface:#1E1E22;--pressed:#2A2A2F;--ink:#F2F2F4;--ink2:#A9A9B3;--ink3:#9C9CA6;
+  --action:#F2F2F4;--on-action:#121214;--action-pressed:#D8D8DE;--t-state:#2A2540;--t-memory:#1F3329;--t-doctor:#1F2A3B;
+  --accent-bg:#3A2418;--accent:#F2B28C;--line:#2E2E33;--control:#76767F;--focus:#A99CF0;
+  --toast:#1E1E22;--toast-btn:#2A2A2F;--toast-ink:#F2F2F4;--toast-accent:#F2B28C;--toast-line:#F2F2F4;--scrim:rgba(0,0,0,.55);--desk:#0B0B0C;--shadow:rgba(0,0,0,.5);
+  --mshadow:#000000;color-scheme:dark}
+html{height:100%;box-sizing:border-box}
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{height:100%;margin:0;background:var(--desk);color:var(--ink);font:400 17px/1.4 var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+#app{height:100%}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+input,textarea{font:inherit;color:var(--ink)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.phone{position:relative;height:100%;max-width:430px;margin:0 auto;background:var(--canvas);display:flex;flex-direction:column;overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:600px) and (min-height:720px){.phone{height:min(880px,calc(100% - 32px));margin-top:16px;border-radius:44px;box-shadow:0 24px 70px var(--shadow)}}
+.scr{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-block:16px 16px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:16px}
+.bot{flex:none;padding-block:8px 0;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:8px;background:var(--canvas)}
+
+/* type: DS text styles */
+.lt{font-weight:700;font-size:34px;line-height:1.1;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.t2{font-weight:600;font-size:22px;line-height:1.25;margin:0;text-wrap:balance}
+.q{font-weight:600;font-size:21px;line-height:1.25;margin:0;text-wrap:balance}
+.b{font-size:17px;line-height:1.4;margin:0}
+.bs{font-weight:600;font-size:17px;line-height:1.35;margin:0}
+.c{font-size:15px;line-height:1.35;margin:0}
+.cs{font-weight:600;font-size:15px;line-height:1.35;margin:0}
+.f{font-size:13px;line-height:1.3;margin:0}
+.big{font-weight:700;font-size:34px;line-height:1.05;margin:0;font-variant-numeric:tabular-nums}
+.ink2{color:var(--ink2)}
+.acc{color:var(--accent);font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:8px}
+.col{display:flex;flex-direction:column;gap:12px}
+.col8{display:flex;flex-direction:column;gap:8px}
+.col4{display:flex;flex-direction:column;gap:4px}
+.wrap{display:flex;flex-wrap:wrap;gap:8px}
+.grow{flex:1;min-width:0}
+.center{align-items:center;text-align:center}
+
+/* header */
+.hd{display:flex;align-items:flex-start;gap:8px}
+.ib{width:44px;height:44px;border-radius:22px;display:inline-flex;align-items:center;justify-content:center;flex:none;color:var(--ink)}
+.ib:active{background:var(--pressed)}
+.ib.surf{background:var(--surface)}
+
+/* context line */
+.ctx{display:flex;flex-wrap:wrap;gap:0 18px;margin-top:-6px}
+.cx{min-height:44px;display:inline-flex;align-items:center;gap:6px;font-size:15px;line-height:1.3;color:var(--ink)}
+.cx svg{color:var(--ink2);flex:none}
+.cx .v{font-weight:600}
+.cx.off{color:var(--ink2);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--control)}
+
+/* cards and lists */
+.card{border-radius:28px;padding:20px;display:flex;flex-direction:column;gap:12px;flex:none}
+.surf{background:var(--surface)}.state{background:var(--t-state)}.memory{background:var(--t-memory)}.doctor{background:var(--t-doctor)}
+.lbl{font-weight:600;font-size:15px;line-height:1.35;color:var(--ink2);margin:0}
+.rows{display:flex;flex-direction:column;gap:4px}
+.fi{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 0;width:100%;text-align:left}
+.fi:active{opacity:.7}
+.fi .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.fi .tt .bs,.fi .tt .c{overflow-wrap:anywhere}
+.fi .tm{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.ico{width:44px;height:44px;border-radius:22px;background:var(--canvas);display:flex;align-items:center;justify-content:center;flex:none;color:var(--ink2)}
+.th{width:52px;height:52px;border-radius:14px;object-fit:cover;flex:none;background:var(--pressed);display:block}
+.li{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 0;width:100%;text-align:left}
+.li:last-child{border-bottom:0}
+.li .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.li svg{flex:none;color:var(--ink2)}
+.list{background:var(--surface);border-radius:22px;padding:0 16px;flex:none}
+
+/* buttons */
+.btn{min-height:60px;border-radius:999px;padding:0 24px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:18px;line-height:1.2;width:100%;text-align:center}
+.pri{background:var(--action);color:var(--on-action)}.pri:active{background:var(--action-pressed)}
+.sec{background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--ink)}.sec:active{background:var(--pressed)}
+.btn:disabled{opacity:.4;cursor:default}
+.link{min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:var(--ink2);width:100%;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--control)}
+.choice{min-height:56px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--control);padding:8px 16px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:600;font-size:17px;line-height:1.2;text-align:center}
+.choice:active{background:var(--pressed)}
+.choice.sel{box-shadow:inset 0 0 0 2px var(--ink)}
+.ch3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ch2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ch3 .choice,.ch2 .choice{padding:8px 10px;min-width:0}
+.chip{min-height:44px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--control);display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-weight:600;font-size:15px;line-height:1.25;max-width:100%}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip:active{background:var(--pressed)}
+.chip.on{background:var(--action);color:var(--on-action);box-shadow:none}
+.chip .star{color:var(--accent)}
+.hs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-left:calc(-1 * var(--gl));margin-right:calc(-1 * var(--gr));padding-left:var(--gl);padding-right:var(--gr);flex:none}
+.hs::-webkit-scrollbar{display:none}
+.hs .chip{flex:none;max-width:260px}
+
+/* input line */
+.line{height:64px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--control);display:flex;align-items:center;gap:6px;padding:0 6px;flex:none}
+.line:focus-within{box-shadow:inset 0 0 0 2px var(--ink)}
+.cam{height:48px;min-width:48px;border-radius:24px;background:var(--canvas);display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;cursor:pointer;color:var(--ink);font-weight:600;font-size:15px}
+.cam.wide{padding:0 14px 0 12px}
+.cam:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+.cam:active{background:var(--pressed)}
+.lin{flex:1;min-width:0;height:48px;border:0;background:transparent;font-size:17px;outline:none;padding:0 4px}
+.lin::placeholder{color:var(--ink2)}
+.mic{width:52px;height:52px;border-radius:26px;background:var(--action);color:var(--on-action);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.mic:active{background:var(--action-pressed)}
+
+/* tabs */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);flex:none;margin-left:calc(-1 * var(--gl));margin-right:calc(-1 * var(--gr));padding-left:var(--gl);padding-right:var(--gr)}
+.tab{min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink3);font-weight:500;font-size:12px;line-height:1.2;text-align:center}
+.tab.on{color:var(--ink);font-weight:600}
+
+/* toast */
+.toast{background:var(--toast);color:var(--toast-ink);box-shadow:0 8px 28px var(--shadow),inset 0 0 0 1px var(--line);border-radius:22px;padding:14px 14px 14px 16px;display:flex;flex-direction:column;gap:12px;flex:none;animation:up .22s ease}
+.toast .tr{display:flex;gap:10px;align-items:flex-start}
+.toast .tic{color:var(--toast-accent);flex:none;margin-top:1px}
+.toast .tt{flex:1;min-width:0}
+.toast .tt .bs,.toast .tt .c{overflow-wrap:anywhere}
+.toast .c{color:var(--ink2)}
+.toast .ta{display:flex;gap:12px}
+.toast .tb{flex:1;min-height:52px;border-radius:26px;background:var(--toast-btn);box-shadow:inset 0 0 0 1px var(--control);color:var(--toast-ink);font-weight:600;font-size:17px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px}
+.toast .tx{width:44px;height:44px;margin:-10px -8px -10px 0;display:inline-flex;align-items:center;justify-content:center;border-radius:22px;color:var(--toast-ink);flex:none}
+
+/* sheet */
+.scrim{position:absolute;inset:0;background:var(--scrim);z-index:20;animation:fade .2s ease}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:21;background:var(--canvas);border-radius:28px 28px 0 0;max-height:calc(100% - 40px);overflow-y:auto;padding-block:8px 24px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:16px;animation:up .26s cubic-bezier(.2,.8,.2,1);outline:none}
+.handle{width:40px;height:5px;border-radius:3px;background:var(--control);align-self:center;flex:none}
+.shd{display:flex;align-items:center;gap:4px;margin-top:-4px}
+.shd .t2{padding-left:4px}
+.photo{width:100%;max-height:300px;object-fit:cover;border-radius:22px;background:var(--pressed);display:block}
+.field{min-height:52px;border-radius:26px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--control);border:0;padding:12px 18px;font-size:17px;width:100%;outline:none;resize:none}
+.field:focus{box-shadow:inset 0 0 0 2px var(--ink)}
+textarea.field{border-radius:22px;min-height:96px;line-height:1.4}
+.ai{display:flex;gap:8px;align-items:flex-start;color:var(--ink2)}
+.ai svg{flex:none;margin-top:1px}
+.sw{width:51px;height:31px;border-radius:16px;background:var(--control);position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:14px;background:var(--surface);transition:left .2s}
+.sw.on{background:var(--action)}.sw.on::after{left:22px;background:var(--on-action)}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg .chip{flex:1 1 auto;justify-content:center}
+
+/* month */
+.ib.on{background:var(--action);color:var(--on-action)}
+.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.mgrid .wd{font-size:13px;line-height:1.3;color:var(--ink2);text-align:center}
+.mday{min-height:48px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-weight:600;font-size:17px;line-height:1;font-variant-numeric:tabular-nums}
+.mday:active{background:var(--pressed)}
+.mday:disabled{opacity:.35;cursor:default}
+.mday.td{background:var(--action);color:var(--on-action)}
+.mday.sel{box-shadow:inset 0 0 0 2px var(--ink)}
+.mday.td.sel{box-shadow:inset 0 0 0 2px var(--on-action),0 0 0 2px var(--ink)}
+.mday .mk{display:flex;gap:3px;align-items:center;height:5px}
+.mday .mk i{width:5px;height:5px;border-radius:3px;background:currentColor;display:block}
+.mday .mk b{width:12px;height:3px;border-radius:2px;background:currentColor;opacity:.6;display:block}
+/* generated answer */
+.strip{display:grid;grid-template-columns:repeat(30,1fr);gap:3px}
+.strip i{height:24px;border-radius:4px;background:var(--line);display:block}
+.strip i.on{background:var(--ink)}
+.strip i.td{box-shadow:inset 0 0 0 1.5px var(--ink2)}
+.sx{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2)}
+.kvr{display:grid;grid-template-columns:minmax(96px,38%) 1fr;gap:4px 12px}
+
+/* day chart */
+.dchart{display:flex;gap:2px;align-items:flex-end;height:72px}
+.dchart .dcol{flex:1;min-width:0;display:flex;flex-direction:column-reverse;gap:1px;height:100%}
+.dchart .dcol i{display:block;border-radius:2px;min-height:3px}
+.sw2{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+/* voice */
+.bars{display:flex;gap:6px;align-items:center;justify-content:center;height:56px}
+.bars i{width:6px;border-radius:3px;background:var(--ink);height:16px;animation:bar 1s ease-in-out infinite;display:block}
+.bars i:nth-child(2){animation-delay:.15s}.bars i:nth-child(3){animation-delay:.3s}.bars i:nth-child(4){animation-delay:.45s}.bars i:nth-child(5){animation-delay:.6s}
+
+/* mascot */
+.masc{display:block;flex:none;overflow:visible}
+.masc .mb{transform-origin:60px 104px;animation:breathe 4.5s ease-in-out infinite}
+
+/* onboarding */
+.ob{height:100%;display:flex;flex-direction:column}
+.obb{flex:1;min-height:0;overflow-y:auto;padding-block:12px 12px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:12px}
+.obb>:first-child{margin-top:auto}.obb>:last-child{margin-bottom:auto}
+.obf{flex:none;padding-block:8px 16px;padding-left:var(--gl);padding-right:var(--gr);display:flex;flex-direction:column;gap:4px}
+
+@keyframes up{from{transform:translateY(24px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes bar{0%,100%{height:12px}50%{height:44px}}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.025,.985)}}
+@media (prefers-reduced-motion:reduce){.sheet,.scrim,.toast{animation:none}.masc .mb,.bars i{animation:none}.sw,.sw::after{transition:none}}
+
+/* v5 web = figma v5/v5b */
+.spacer{flex:1 0 0;min-height:0}
+.grid{display:flex;flex-direction:column;gap:8px;flex:none}
+.grow2{display:flex;gap:8px;align-items:stretch}
+.grow2 .chip{flex:1 1 0;min-width:0;min-height:56px;justify-content:center;padding:0 12px}
+.grow2 .sp{flex:1 1 0}
+.grid .lbl{margin-top:2px}
+.acard{background:var(--surface);border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:8px;flex:none}
+.foot{padding-top:8px;display:flex;flex-direction:column;gap:8px}
+.rec{display:flex;align-items:center;gap:10px;min-height:28px}
+.rec .dot{width:10px;height:10px;border-radius:5px;background:var(--accent);flex:none;animation:blink 1.2s ease-in-out infinite}
+.rec .bars{height:28px;gap:3px;flex:none}
+.rec .bars i{width:3px;background:var(--ink2);height:12px}
+.rec .bars i:nth-child(6){animation-delay:.75s}.rec .bars i:nth-child(7){animation-delay:.9s}.rec .bars i:nth-child(8){animation-delay:.2s}.rec .bars i:nth-child(9){animation-delay:.5s}.rec .bars i:nth-child(10){animation-delay:.05s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.mt{margin-bottom:0}
+.li.hint{padding-top:8px;padding-bottom:0;min-height:48px}
+.li.hint .chev{color:var(--ink2)}
+.eyebrow{font-size:13px;color:var(--ink2);margin:0}
+@media (prefers-reduced-motion:reduce){.rec .dot{animation:none}}
+html.ax .scr,html.ax .bot{zoom:1.18}
+.bigs .b,.bigs .c,.bigs .kvr span{font-size:1.25em;line-height:1.35}
+
+/* explicit feedback: numb fingers must know the tap landed.
+   the finger covers the button, so the signal also goes outside it: ring + whole-phone buzz on saves */
+.press{transform:scale(.92)!important;filter:brightness(.88);transition:transform 50ms ease-out,filter 50ms ease-out!important}
+.sw.press,.cx.press,.link.press{transform:scale(.9)!important}
+@keyframes buzz{0%{transform:scale(.92)}8%{transform:translateX(-5px) scale(1.05)}16%{transform:translateX(5px) scale(1.04)}24%{transform:translateX(-5px) scale(1.03)}32%{transform:translateX(5px) scale(1.02)}40%{transform:translateX(-4px) scale(1.01)}48%{transform:translateX(4px) scale(1)}58%{transform:translateX(-3px)}68%{transform:translateX(3px)}78%{transform:translateX(-2px)}88%{transform:translateX(1px)}100%{transform:none}}
+@keyframes tapflash{0%{box-shadow:inset 0 0 0 1px var(--control)}20%{box-shadow:inset 0 0 0 3px var(--ink)}100%{box-shadow:inset 0 0 0 1px var(--control)}}
+@keyframes ringout{0%{outline-offset:0;opacity:1}100%{outline-offset:18px;opacity:0}}
+@keyframes ringfade{0%{opacity:1}100%{opacity:0}}
+@keyframes pbuzz{0%,100%{transform:none}10%{transform:translate(-3px,1px)}20%{transform:translate(3px,-1px)}30%{transform:translate(-3px,0)}40%{transform:translate(3px,1px)}50%{transform:translate(-2px,-1px)}60%{transform:translate(2px,0)}70%{transform:translate(-2px,1px)}80%{transform:translate(1px,0)}90%{transform:translate(-1px,0)}}
+@keyframes toastin{0%{transform:translateY(16px) scale(.96);opacity:0}45%{transform:translateY(-4px) scale(1.02);opacity:1}60%{transform:translateX(-5px)}72%{transform:translateX(5px)}84%{transform:translateX(-3px)}100%{transform:none;opacity:1}}
+.tap{animation:buzz .34s linear both!important}
+.chip.tap,.choice.tap{animation:buzz .34s linear both,tapflash .55s ease both!important}
+.ring{position:fixed;pointer-events:none;z-index:9999;outline:3px solid var(--ink);outline-offset:0;animation:ringout .45s cubic-bezier(.2,.7,.3,1) forwards}
+.phone.pbuzz{animation:pbuzz .3s linear both}
+@media (prefers-reduced-motion:reduce){.press{transform:none!important}.tap,.chip.tap,.choice.tap{animation:tapflash .45s ease both!important}.ring{animation:ringfade .45s ease forwards;outline-offset:4px}.phone.pbuzz{animation:none}.toast.mt{animation:none}}
+/* v6: today list inside the day card */
+.today6{display:flex;flex-direction:column;gap:8px}
+.tr6{display:flex;align-items:flex-start;gap:12px;min-height:56px;padding:10px 0;width:100%;text-align:left;border-radius:12px}
+.tr6.new+.acts6{margin-top:-8px;background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state);border-radius:0 0 12px 12px;padding-top:4px}
+.acts6{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 0 12px 60px}
+.acts6 .chip{min-height:48px}
+.acts6 .sub6{grid-column:1/-1}
+.d6 .ctx{margin-top:0;gap:0 16px}
+.d6 .ctx .stl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.tm6{flex:none;min-width:48px;font-size:15px;line-height:1.4;color:var(--ink2);font-variant-numeric:tabular-nums;padding-top:1px}
+.tx6{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
+.nw6{flex:none;font-size:13px;line-height:1.4;font-weight:600;color:var(--accent);padding-top:2px}
+.more6{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;width:100%;font-size:15px;color:var(--ink2);text-align:left}
+@keyframes newrow{0%{background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state);transform:translateY(10px);opacity:0}8%{transform:none;opacity:1}85%{background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state)}100%{background:transparent;box-shadow:-8px 0 0 transparent,8px 0 0 transparent}}
+.tr6.new{animation:newrow 6s ease-out both}
+@media (prefers-reduced-motion:reduce){.tr6.new{animation:none;background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state)}}
+.toast.mt{animation:toastin .55s cubic-bezier(.2,.9,.3,1.2) both}
+/* welcome: mascot first, then what the app does */
+@keyframes mpop{0%{transform:scale(.4) translateY(24px);opacity:0}60%{transform:scale(1.08) translateY(-4px);opacity:1}80%{transform:scale(.97)}100%{transform:none;opacity:1}}
+@keyframes rise{0%{transform:translateY(14px);opacity:0}100%{transform:none;opacity:1}}
+.ob .pop{animation:mpop .7s cubic-bezier(.2,.9,.3,1.2) both}
+.ob .flip{transition:transform .65s cubic-bezier(.3,.8,.3,1)}
+.ob .rv{animation:rise .5s ease-out both}
+.obs{display:flex;flex-direction:column;gap:8px;padding:12px 0}
+.obs .rw{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.obs .li{min-height:48px;padding-block:4px}
+.obs{padding-block:6px!important}
+.ob .lt{margin:0}
+.obs .seg{display:flex;gap:8px}
+.obs .seg .chip{min-height:44px;padding:0 14px}
+.obf{padding-bottom:max(16px,env(safe-area-inset-bottom,0px))!important}
+@media (prefers-reduced-motion:reduce){.ob .pop,.ob .rv{animation:none}.ob .flip{transition:none;transform:none!important}}
 </style>
 </head>
-<body><main>
-<h1>ms-app</h1>
-<p>A companion for people with multiple sclerosis: one input line, entries by voice, text or a food photo, coincidences and a summary for the doctor. Open on a phone</p>
-<h2>На экран «Домой» / Home Screen</h2>
-<a class="card" href="v5.html"><b>открыть приложение</b><span>Откройте эту ссылку в Safari, нажмите «Поделиться» и выберите «На экран „Домой“». Появится иконка с маскотом, приложение откроется без браузера. Версию и тему можно выбрать на приветственном экране</span></a>
-<a class="card" href="v5.html"><b>open the app</b><span>Open this link in Safari, tap Share and choose “Add to Home Screen”. You get the mascot icon and the app opens without the browser. Pick the version and theme on the welcome screen</span></a>
-<h2>English</h2>
-<a class="card" href="v5.html?v=6&lang=en"><b>v6: today in the card</b><span>Built on v5b: the last three entries in your words right in the day card, a saved entry confirms inside its own row, context inside the card, the “what to ask?” chip</span></a>
-<a class="card" href="v5.html?v=5b&lang=en"><b>v5b: minimum</b><span>No context line, one or two chips, zero steps after saving</span></a>
-<a class="card" href="v5.html?v=5&lang=en"><b>v5: with the context line</b><span>Weather, steps and cycle above the day card, the “what is linked?” hint, the “?” chip</span></a>
-<h2>Русский</h2>
-<a class="card" href="v5.html?v=6&lang=ru"><b>v6: сегодня в карточке</b><span>На основе v5b: последние три записи вашими словами прямо в карточке дня, новая запись подтверждается в своей строке, контекст внутри карточки, чип «что спросить?»</span></a>
-<a class="card" href="v5.html?v=5b&lang=ru"><b>v5b: минимум</b><span>Без контекстной строки, один-два чипа, ноль шагов после записи</span></a>
-<a class="card" href="v5.html?v=5&lang=ru"><b>v5: с контекстной строкой</b><span>Погода, шаги и цикл над карточкой дня, подсказка «что связано?», чип «?»</span></a>
-<small>Not a medical app. Prototype: entries are stored only in this browser. AI can make mistakes. Language can also be switched inside: say “english” or “по-русски”, or settings → language</small>
-</main></body></html>
+<body>
+<div id="app"></div>
+<script src="https://unpkg.com/htm@3.1.1/preact/standalone.umd.js"></script>
+<script>
+// ===== core: i18n, dates, storage, lexicon, simulated context, computations =====
+const {html, render, useState, useEffect, useRef} = htmPreact;
+const NBSP=' ';
+const SHORT=new Set('в во к ко с со о об у и а но да не ни на по за из до от без для при про под над что как или это'.split(' '));
+function nb(s){
+  if(typeof s!=='string'||s.indexOf(' ')<0) return s;
+  const w=s.split(' ');let o='';
+  for(let i=0;i<w.length;i++){
+    o+=w[i];
+    if(i<w.length-1){
+      const cur=w[i].toLowerCase().replace(/^[«„"(]+/,'');
+      const nx=w[i+1];const nxc=nx.toLowerCase().replace(/[.,!?:;»")]+$/,'');
+      const glue=SHORT.has(cur)||nx==='—'||nxc==='же'||nxc==='ли'||nxc==='бы'||(/^\d+([.,]\d+)?$/.test(cur)&&nx&&!/^[\d–—→]/.test(nx));
+      o+=glue?NBSP:' ';
+    }
+  }
+  return o;
+}
+function nbE(s){
+  if(typeof s!=='string') return s;
+  let r='';for(let i=0;i<s.length;i++){const ch=s[i];if(ch===' '&&i>0&&/[0-9]/.test(s[i-1])&&i+1<s.length&&!/[0-9\s–—→]/.test(s[i+1])) r+=NBSP; else r+=ch;}return r;
+}
+let LANG='ru';
+const L=(ru,en)=>LANG==='en'?nbE(en===undefined?ru:en):nb(ru);
+const EN=()=>LANG==='en';
+function withLang(lg,fn){const p=LANG;LANG=lg;try{return fn();}finally{LANG=p;}}
+function plRu(n,a,b,c){const x=Math.abs(n)%100,y=x%10;if(x>10&&x<20)return c;if(y>1&&y<5)return b;if(y===1)return a;return c;}
+const nEnt=n=>EN()?`${n} ${n===1?'entry':'entries'}`:`${n} ${plRu(n,'запись','записи','записей')}`;
+const nDay=n=>EN()?`${n} ${n===1?'day':'days'}`:`${n} ${plRu(n,'день','дня','дней')}`;
+const nQ=n=>EN()?`${n} ${n===1?'question':'questions'}`:`${n} ${plRu(n,'вопрос','вопроса','вопросов')}`;
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+const qt=s=>LANG==='en'?'“'+s+'”':'«'+s+'»';
+const lc=s=>s?s[0].toLowerCase()+s.slice(1):s;
+const esc=s=>String(s==null?'':s);
+
+// ---- dates (app clock can be shifted for testing) ----
+const DAY=864e5;
+const pad=n=>String(n).padStart(2,'0');
+let ST=null,UP=null,UI=null,SUI=null;
+const now=()=>new Date(Date.now()+((ST&&ST.offset)||0));
+const dk=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const fromDk=k=>{const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d,12,0,0);};
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
+const ddiff=(a,b)=>Math.round((fromDk(dk(a))-fromDk(dk(b)))/DAY);
+const todayK=()=>dk(now());
+const MRG=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const MRN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const MEN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WRU=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+const WRS=['вс','пн','вт','ср','чт','пт','сб'];
+const WEN=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+const WES=['sun','mon','tue','wed','thu','fri','sat'];
+const fDM=d=>EN()?`${MEN[d.getMonth()]} ${d.getDate()}`:`${d.getDate()} ${MRG[d.getMonth()]}`;
+const fHdr=d=>EN()?`${WEN[d.getDay()]}, ${MEN[d.getMonth()].toLowerCase()} ${d.getDate()}`:`${WRU[d.getDay()]}, ${d.getDate()} ${MRG[d.getMonth()]}`;
+const fMon=d=>EN()?MEN[d.getMonth()].toLowerCase():MRN[d.getMonth()];
+const fWdS=d=>EN()?WES[d.getDay()]:WRS[d.getDay()];
+function fT(d){const h=d.getHours(),m=pad(d.getMinutes());if(EN()){const h12=h%12||12;return `${h12}:${m} ${h<12?'AM':'PM'}`;}return `${pad(h)}:${m}`;}
+function fRange(a,b){
+  if(dk(a)===dk(b)) return fDM(a);
+  if(a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear()) return EN()?`${MEN[a.getMonth()]} ${a.getDate()}–${b.getDate()}`:`${a.getDate()}–${b.getDate()} ${MRG[a.getMonth()]}`;
+  return `${fDM(a)} – ${fDM(b)}`;
+}
+function rel(d){const n=ddiff(now(),d);if(n===0)return L('сегодня','today');if(n===1)return L('вчера','yesterday');if(n===2)return L('позавчера','2 days ago');return EN()?`${n} days ago`:`${n} ${plRu(n,'день','дня','дней')} назад`;}
+function relDT(d){const n=ddiff(now(),d);const t=fT(d);if(n===0)return L('сегодня','today')+', '+t;if(n===1)return L('вчера','yesterday')+', '+t;if(n===2)return L('позавчера','2 days ago')+', '+t;return fDM(d)+', '+t;}
+function dayTitle(d){const n=ddiff(now(),d);if(n===0)return L('сегодня','today');if(n===1)return L('вчера','yesterday');if(n===2)return L('позавчера','2 days ago');return EN()?WEN[d.getDay()]:WRU[d.getDay()];}
+
+// ---- storage ----
+const KEY='msapp.v5';let MEM=null;
+function defaults(){return {v:1,onboarded:false,lang:'ru',theme:'system',ai:'device',symptoms:['numb','fatigue','fog'],custom:{},main:'numb',
+  health:false,cycle:'off',cyclePaused:false,periodMarks:[],seed:null,city:null,geo:false,photosKeep:true,
+  comfort:{haptic:true,sound:false,badDay:true,morning:false},entries:[],worse:null,worseHist:[],worsePrompt:null,check:null,checks:[],
+  visit:{date:null,noDate:false,notes:[]},questions:[],meds:[],dismiss:{},offset:0,firstDay:null,voiceLang:'ui',sumLang:'ui',icloud:true,healthMed:false};}
+function loadS(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);return Object.assign(defaults(),o,{comfort:Object.assign(defaults().comfort,o.comfort||{})});}}catch(e){}return MEM||defaults();}
+function saveS(s){MEM=s;try{localStorage.setItem(KEY,JSON.stringify(s));return true;}catch(e){return false;}}
+let idc=0;const uid=()=>'e'+Date.now().toString(36)+(idc++).toString(36)+Math.random().toString(36).slice(2,5);
+
+// ---- catalog ----
+const SYM={numb:['Онемение пальцев','Numb fingers'],fatigue:['Усталость','Fatigue'],fog:['Туман в голове','Brain fog'],legs:['Слабость в ногах','Weak legs'],
+  vision:['Двоение в глазах','Double vision'],dizzy:['Головокружение','Dizziness'],tingle:['Покалывание','Tingling'],sleep:['Плохой сон','Poor sleep'],
+  headache:['Головная боль','Headache'],flush:['Покраснение лица','Facial redness'],stomach:['Тяжесть в животе','Heavy stomach'],spasm:['Спазмы','Spasms'],
+  balance:['Шаткость','Unsteadiness'],bladder:['Частые позывы','Bladder urgency'],blur:['Нечеткое зрение','Blurred vision'],weak:['Слабость','Weakness'],pain:['Боль','Pain'],fever:['Температура или болезнь','Fever or illness']};
+const OB_SYM=['numb','fatigue','fog','legs','vision','dizzy','tingle','sleep'];
+function symName(k){if(SYM[k])return L(SYM[k][0],SYM[k][1]);const c=ST&&ST.custom[k];return c?c:(k||'');}
+const SN={1:['слабо','mild'],2:['заметно','noticeable'],3:['сильно','strong']};
+const sName=s=>s?L(SN[s][0],SN[s][1]):'';
+const CMP={less:['слабее обычного','milder than usual'],same:['как обычно','as usual'],more:['сильнее обычного','stronger than usual'],first:['впервые','first time']};
+const cmpName=c=>CMP[c]?L(CMP[c][0],CMP[c][1]):'';
+const CTXP={shower:['после горячего душа','after a hot shower'],bath:['после ванны','after a bath'],sauna:['после бани','after a sauna'],hot:['в жару','in the heat'],workout:['после тренировки','after a workout'],walk:['после прогулки','after a walk'],stress:['после стресса','after stress'],effort:['после нагрузки','after effort']};
+const CTXC={shower:['тепло: душ','heat: shower'],bath:['тепло: ванна','heat: bath'],sauna:['тепло: баня','heat: sauna'],hot:['тепло: жара','heat: hot weather'],workout:['после: тренировка','after: workout'],walk:['после: прогулка','after: walk'],stress:['после: стресс','after: stress'],effort:['после: нагрузка','after: effort']};
+const HEAT=['shower','bath','sauna','hot'];
+function ctxText(c,chip){if(c.indexOf('food:')===0){const p=c.slice(5).split('|');const m=+p[0];return EN()?`${m} min after ${p[1]}`:`через ${m} мин после ${p[1]}`;}if(c.indexOf('med:')===0)return L('после: ','after: ')+c.slice(4);const t=(chip?CTXC:CTXP)[c];return t?L(t[0],t[1]):c;}
+const MEALS={breakfast:['завтрак','breakfast'],lunch:['обед','lunch'],dinner:['ужин','dinner'],snack:['перекус','snack'],food:['еда','food']};
+const mealName=m=>L(MEALS[m||'food'][0],MEALS[m||'food'][1]);
+function mealByTime(d){const h=d.getHours();if(h>=5&&h<11)return 'breakfast';if(h>=11&&h<16)return 'lunch';if(h>=16&&h<18)return 'snack';if(h>=18&&h<23)return 'dinner';return 'food';}
+const MOVES={walk:['прогулка','walk'],yoga:['йога','yoga'],swim:['бассейн','swimming'],pt:['ЛФК','physical therapy'],bike:['велосипед','cycling']};
+const moveName=k=>MOVES[k]?L(MOVES[k][0],MOVES[k][1]):k;
+const RES={1:['мало','low'],2:['ниже обычного','below usual'],3:['обычно','usual'],4:['много','high']};
+const DID={visit:['был у врача','saw a doctor','visit'],iv:['капельницы','IV drips','pill'],rehab:['реабилитация','rehab','move'],rest:['отдыхаю','resting','moon']};
+const didName=k=>DID[k]?L(DID[k][0],DID[k][1]):k;
+const GROUPS={
+  dairy:{n:['молочное','dairy'],gen:['молочного','dairy'],ins:['с молочным','with dairy'],sub:['молоко, сыр, йогурт, творог','milk, cheese, yogurt, cottage cheese'],st:['молок','молочн','сыр','творог','йогурт','кефир','сметан','сливк','морожен','капучино','латте','milk','cheese','yogurt','yoghurt','cream','latte','cappuccino']},
+  gluten:{n:['глютен','gluten'],gen:['глютена','gluten'],ins:['с глютеном','with gluten'],sub:['хлеб, макароны, выпечка','bread, pasta, pastry'],st:['хлеб','булк','батон','тост','макарон','паст','спагет','пицц','печень','торт','пирож','пирог','выпечк','блин','хачапури','хинкали','пельмен','вареник','лаваш','bread','toast','bagel','pasta','spaghetti','noodle','pizza','cookie','biscuit','cake','pastry','pancake','dumpling']},
+  coffee:{n:['кофе','coffee'],gen:['кофе','coffee'],ins:['с кофе','with coffee'],sub:['кофе, капучино, латте','coffee, cappuccino, latte'],st:['кофе','капучино','латте','эспрессо','coffee','latte','cappuccino','espresso']},
+  sugar:{n:['сладкое','sweets'],gen:['сладкого','sweets'],ins:['со сладким','with sweets'],sub:['сахар, шоколад, выпечка','sugar, chocolate, pastry'],st:['сахар','шоколад','конфет','торт','печень','морожен','пирож','sugar','chocolate','candy','cake','cookie','ice cream','honey']},
+  alcohol:{n:['алкоголь','alcohol'],gen:['алкоголя','alcohol'],ins:['с алкоголем','with alcohol'],sub:['вино, пиво','wine, beer'],st:['вино','вина','пиво','пива','алкогол','коктейл','wine','beer','alcohol','cocktail']}
+};
+const norm=s=>String(s||'').toLowerCase().replace(/ё/g,'е');
+const inGroup=(item,g)=>{const t=norm(item);return GROUPS[g].st.some(s=>t.indexOf(s)>=0);};
+function groupName(c,gen){if(GROUPS[c.g]){const x=GROUPS[c.g][gen?'gen':'n'];return L(x[0],x[1]);}return c.label||'';}
+function checkTitle(c){return c.mode==='in'?L('возвращаю ','adding back ')+groupName(c):L('без ','no ')+groupName(c,true);}
+
+// ---- lexicon ----
+const LEX=[
+  ['fever',/(температур|простыл|простуд|болею|заболел|грипп|инфекц|озноб|ангин|fever|\bflu\b|a cold|feel sick|\bsick\b|infection|chills)/],
+  ['headache',/(болит голов|голова болит|головн\S* бол|мигрен|headache|migraine)/],
+  ['numb',/(неме|немот|не чувству\S* пальц|numb)/],
+  ['fatigue',/(устал|усталост|утомл|нет сил|без сил|разбит|вымота|tired|fatigue|exhaust|worn out)/],
+  ['fog',/(туман|тормож|не соображ|рассеян|забываю|brain fog|foggy|\bfog\b)/],
+  ['legs',/(слабост\S* в ног|ноги слаб|ватн\S* ног|ноги ватн|ноги не держ|weak legs|legs (feel |are )?weak)/],
+  ['vision',/(двоит|двоени|двоится|double vision|seeing double)/],
+  ['blur',/(расплыв|нечетк|мутно в глаз|пелена|blurr)/],
+  ['dizzy',/(головокруж|кружится|кружилась|кружило|dizz|vertigo)/],
+  ['tingle',/(покалыв|мурашк|tingl|pins and needles)/],
+  ['sleep',/(плохо спал|не спал|не выспал|бессонн|просыпал|плохой сон|poor sleep|bad sleep|couldn.?t sleep|didn.?t sleep|insomnia)/],
+  ['flush',/(покраснел|прилив|flush|red face|face (got |went |is )?red)/],
+  ['stomach',/(тяжест\S* в живот|тяжесть после|вздут|живот|stomach|bloat)/],
+  ['spasm',/(спазм|судорог|сводит|spasm|cramp)/],
+  ['balance',/(шатает|шатало|равновеси|координац|unsteady|off balance|wobbl)/],
+  ['bladder',/(позыв|мочев|bladder|urgency)/],
+  ['weak',/(слабост|weakness)/],
+  ['pain',/(боль|болит|болел|болят|pain|hurt|ache)/]
+];
+const S3=new Set('сильно очень жутко ужасно невыносимо сильная сильный сильное сильные сильнее strong strongly severe very really badly terrible awful'.split(' '));
+const S2=new Set('заметно средне ощутимо прилично умеренно заметное заметная noticeable noticeably moderate moderately quite'.split(' '));
+const S1=new Set('слабо слегка чуть немного немножко слабое легкое легкая mild mildly slight slightly little'.split(' '));
+const toks=t=>norm(t).split(/[^a-zа-я0-9-]+/).filter(Boolean);
+function strengthOf(t){const ts=toks(t);if(ts.some(x=>S3.has(x)))return 3;if(ts.some(x=>S2.has(x)))return 2;if(ts.some(x=>S1.has(x)))return 1;return null;}
+function symsIn(t){
+  const n=norm(t);const out=[];
+  for(const [k,re] of LEX){const m=n.match(re);if(m&&!out.find(o=>o.k===k)){if(k==='weak'&&out.find(o=>o.k==='legs'))continue;if(k==='pain'&&out.find(o=>o.k==='headache'))continue;out.push({k,i:m.index});}}
+  if(ST)for(const [k,v] of Object.entries(ST.custom)){const i=n.indexOf(norm(v));if(i>=0&&!out.find(o=>o.k===k))out.push({k,i});}
+  return out.sort((a,b)=>a.i-b.i).map(o=>o.k);
+}
+function parseCtx(t){
+  const n=norm(t);const c=[];
+  if(/душ(?!н)|shower/.test(n))c.push('shower');else if(/ванн|\bbath/.test(n))c.push('bath');
+  if(/бан[яиюе]|саун|sauna/.test(n))c.push('sauna');
+  if(!c.length&&/(жара|жары|жару|жарко|в жару|духот|heat|hot weather|it.?s hot)/.test(n))c.push('hot');
+  if(/(после|after)\s+(\S+\s+)?(таблет|укол|инъекц|лекарств|капельниц|pill|tablet|injection|shot|meds|medication)/.test(n)){const m=(ST&&ST.meds[0]);c.push('med:'+(m?m.name:L('лекарство','medication')));}
+  if(/после (трениров|зарядк|спорт|занят)|after (a |the |my )?(workout|exercise|gym|training)/.test(n))c.push('workout');
+  if(/после прогулк|after (a |the |my )?walk/.test(n))c.push('walk');
+  if(/(стресс|нервнич|понервнич|stress)/.test(n))c.push('stress');
+  if(/(гиперфокус|перегруз|после работ|после созвон|после учеб|сосредоточ|много работ|много дел|после уборк|hyperfocus|overdid|after work|after a meeting|after studying|long day)/.test(n))c.push('effort');
+  return c;
+}
+function parseWhen(t){
+  const n=norm(t);const nw=now();let y=0;
+  if(/позавчера/.test(n))y=2;else if(/вчера|yesterday/.test(n))y=1;
+  let hr=null;
+  if(/(утром|с утра|morning)/.test(n))hr=9;else if(/(днем|afternoon)/.test(n))hr=14;else if(/(вечером|evening|tonight)/.test(n))hr=20;else if(/(ночью|at night|overnight)/.test(n))hr=3;
+  if(/(час назад|an hour ago)/.test(n))return new Date(nw.getTime()-36e5);
+  if(y){const d=addD(nw,-y);d.setHours(hr===null?20:hr,0,0,0);return d;}
+  if(hr!==null){const d=new Date(nw);d.setHours(hr,0,0,0);if(d<=nw)return d;}
+  return null;
+}
+const FOOD_EX=new Set('рис риса рисом чай чая чаю чаем сок сока соком мед меда медом каша кашу каши кашей паста пасту пасты вино вина пиво пива сыр сыра сыром сыры tea rice pie nuts nut egg eggs'.split(' '));
+const FOOD_ST='овсян гречк гречнев макарон спагет хлеб булк батон тост сырник творог йогурт кефир молок молочн сметан сливк кофе капучино латте эспрессо какао яйц яичниц омлет куриц курин мяс говяд свинин индейк рыб лосос тунец суп борщ салат банан яблок груш апельсин мандарин ягод фрукт овощ помидор огурц огурец картош картоф шоколад печень торт пирож пирог выпечк конфет сахар морожен пицц бургер орех хачапури хинкали лобио сэндвич бутерброд мюсли гранол блин пельмен вареник фрикадел котлет плов шаурм ролл суши лаваш хумус авокадо тыкв кабачк морков капуст фасол чечевиц завтрак обед ужин перекус oat porridge pasta spaghetti noodle bread toast bagel cheese yogurt yoghurt milk cream coffee latte cappuccino espresso cocoa omelet chicken meat beef pork turkey fish salmon tuna soup salad banana apple pear orange berr fruit vegetable tomato cucumber potato chocolate cookie biscuit cake pastry candy sugar honey pizza burger wine beer juice sandwich cereal granola pancake dumpling sushi avocado hummus breakfast lunch dinner snack'.split(' ');
+const isFoodTok=x=>FOOD_EX.has(x)||(x.length>=4&&FOOD_ST.some(s=>x.indexOf(s)===0));
+const FOOD_INTENT=/(^|\s)(ел|ела|съел|съела|поел|поела|кушал|кушала|позавтракал\S*|пообедал\S*|поужинал\S*|перекусил\S*|на завтрак|на обед|на ужин|на перекус|ate|eaten|for breakfast|for lunch|for dinner|for a snack|i had)(?=\s|$|[,.:!])/;
+function hasFood(t){return toks(t).some(isFoodTok)||FOOD_INTENT.test(norm(t));}
+function mealIn(t){const n=norm(t);if(/завтрак|breakfast/.test(n))return 'breakfast';if(/обед|lunch/.test(n))return 'lunch';if(/ужин|dinner|supper/.test(n))return 'dinner';if(/перекус|snack/.test(n))return 'snack';return null;}
+function foodItems(t){
+  let s=' '+norm(t).replace(/[«»"“”]/g,' ')+' ';
+  s=s.replace(/(^|\s)(сегодня|вчера|утром|днем|вечером|на завтрак|на обед|на ужин|на перекус|завтрак|обед|ужин|перекус|был[аио]?|ел|ела|съел|съела|поел|поела|кушал|кушала|выпил|выпила|позавтракал\S*|пообедал\S*|поужинал\S*|перекусил\S*|i had|i ate|ate|had|for breakfast|for lunch|for dinner|for a snack|today|yesterday|breakfast|lunch|dinner|snack|немного|чуть|еще)(?=\s|$|[,.:!])/g,' ');
+  const parts=s.split(/[,;.!:]|\s(?:и|а также|плюс|and|plus|then|потом)\s/).map(x=>x.trim().replace(/\s+/g,' ')).filter(Boolean);
+  const out=[];
+  for(const p of parts){if(p.length>40)continue;const ts=toks(p);if(!ts.length)continue;if(symsIn(p).length&&!ts.some(isFoodTok))continue;if(!ts.some(isFoodTok)&&!FOOD_INTENT.test(norm(t)))continue;if(/(после|after)\s/.test(p)&&!ts.slice(0,1).some(isFoodTok))continue;if(!out.includes(p))out.push(p);}
+  return out;
+}
+const SAFETY=/(внезапно|резко|вдруг|suddenly|all of a sudden).{0,40}(видеть|вижу|зрен|ослеп|глаз|говорить|речь|перекос|лицо|половин|паралич|парализ|отнял|не могу встать|не могу пошевел|can.?t see|vision|\beye|speak|speech|face|half|paraly|can.?t move)|(не вижу|ослеп|перестал\S* видеть|пропал\S* зрение|потерял\S* зрение|не могу говорить|пропала речь|перестал\S* говорить|отнялась|отнялись|парализ|перекосило|не могу пошевелить|сильнейш\S* головн|can.?t see|lost (my )?vision|can.?t speak|face (is )?drooping|can.?t move my|paralys|paralyz|worst headache)/;
+const MED_Q=/(можно ли|можно мне|стоит ли|нужно ли|надо ли|что делать|что принять|что пить|чем лечить|как лечить|опасно ли|нормально ли|это нормально|почему|это обострение|из-за чего|отчего|should i|can i|is it normal|is it dangerous|is this normal|what should i|what can i take|why do|why does|why am|why is|is this a relapse|what causes)/;
+const QUERY_Q=/(когда|сколько|как часто|покажи|найди|найти|что я ел|что я ела|что ела|что ел|было ли|бывало|when|how many|how often|show me|show|find|last time|did i)/;
+const Q_START=/^(когда|сколько|как часто|покажи|найди|что|почему|можно|стоит|нужно|надо|опасно|нормально|отчего|зачем|when|how|what|why|can|should|is|show|find|did|do)(\s|$)/;
+const DOC_PREFIX=/^(вопрос (к )?врачу|спросить (у )?врача|спрошу у врача|ask (the |my )?doctor|question for (the |my )?doctor)[:,\s-]*/;
+const MED_TAKE=/(^|\s)(принял|приняла|выпил[аи]?|сделал[аи]? укол|took)(\s|$)/;
+
+function analyze(text){
+  const t=text.trim();const n=norm(t);
+  if(SAFETY.test(n))return {kind:'safety'};
+  return analyzeRest(t);
+}
+function analyzeRest(t){
+  const n=norm(t);
+  if(DOC_PREFIX.test(n))return {kind:'doctorq',q:t.replace(new RegExp(DOC_PREFIX.source,'i'),'').trim()||t};
+  const keys=symsIn(t);
+  const isQ=/\?\s*$/.test(t)||Q_START.test(n);
+  if(isQ){if(MED_Q.test(n)&&!/^(когда|сколько|как часто|when|how many|how often)/.test(n))return {kind:'medical',keys};return {kind:'query',keys};}
+  const medWord=/(таблет|лекарств|укол|pill|meds|medication|tablet|shot|injection)/.test(n)||(ST&&ST.meds.some(m=>n.indexOf(norm(m.name).split(' ')[0])>=0));
+  if(MED_TAKE.test(n)&&medWord&&!keys.length)return {kind:'med'};
+  const when=parseWhen(t);
+  if(hasFood(t)){const items=foodItems(t);if(items.length)return {kind:'food',items,meal:mealIn(t),feel:keys,when};}
+  if(keys.length){
+    const ctx=parseCtx(t);
+    const clauses=t.split(/[,;.!]|\s(?:и|а|но|and|but)\s/);const items=[];let last=null;
+    for(const cl of clauses){const ks=symsIn(cl);const s=strengthOf(cl);
+      if(ks.length){for(const k of ks){if(items.find(i=>i.key===k))continue;const it={key:k,s:null,ctx:ctx.slice()};items.push(it);last=it;}if(s&&last)last.s=s;}
+      else if(s&&last&&!last.s)last.s=s;}
+    for(const k of keys)if(!items.find(i=>i.key===k))items.push({key:k,s:null,ctx:ctx.slice()});
+    return {kind:'sym',items,when};
+  }
+  return {kind:'unknown'};
+}
+
+// ---- simulated context (no Apple Health or weather in the prototype) ----
+function hsh(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0)/4294967295;}
+const weatherOn=()=>!!(ST.geo||ST.city);
+// real temperature from Open-Meteo; the simulated one only for sample data
+function tempFor(d){if(ST.demo)return tempSim(d);if(!ST.wx)return null;const k=dk(d);if(k===todayK()&&ST.wx.cur&&Date.now()-ST.wx.cur.at<3*36e5)return ST.wx.cur.t;const v=ST.wx.days&&ST.wx.days[k];return v==null?null:v;}
+function tempSim(d){const base=[6,8,12,17,22,27,30,30,25,18,12,7][d.getMonth()];return Math.round(base+(hsh('t'+dk(d)+(ST.city||'geo'))-0.5)*9);}
+const isHot=d=>weatherOn()&&tempFor(d)>=26;
+const hotFrom=d=>11+Math.floor(hsh('h'+dk(d))*4);
+function stepsFor(d){const full=2500+Math.round(hsh('s'+dk(d))*6500);if(dk(d)===todayK()){const h=now().getHours()+now().getMinutes()/60;return Math.round(full*Math.min(1,Math.max(0,(h-7)/14)));}return full;}
+const sleepFor=d=>5.1+hsh('z'+dk(d))*3.2;
+const fmtNum=n=>EN()?n.toLocaleString('en-US'):String(n).replace(/\B(?=(\d{3})+(?!\d))/g,NBSP);
+const fmtSleep=h=>{const hh=Math.floor(h),mm=Math.round((h-hh)*60/10)*10;return EN()?`${hh} h ${mm} min`:`${hh} ч ${mm} мин`;};
+function periodStarts(){
+  if(ST.cycle==='off'||ST.cyclePaused)return [];
+  if(ST.cycle==='manual')return ST.periodMarks.slice().sort().reverse();
+  if(!ST.health||!ST.seed)return [];
+  const seed=fromDk(ST.seed),t=fromDk(todayK()),out=[];let d=seed;while(d<=t){out.push(dk(d));d=addD(d,28);}
+  let b=addD(seed,-28);for(let i=0;i<5;i++){out.push(dk(b));b=addD(b,-28);}
+  return out.sort().reverse();
+}
+function cycleDay(d){const k=dk(d);const s=periodStarts().find(x=>x<=k);if(!s)return null;const n=ddiff(fromDk(k),fromDk(s))+1;return n>45?null:n;}
+const onPeriod=d=>{const c=cycleDay(d);return c!==null&&c<=5;};
+function prePeriod(k){const st=periodStarts();return st.some(s=>{const n=ddiff(fromDk(s),fromDk(k));return n>=1&&n<=3;});}
+function cycleTile(){if(ST.cycle==='off'||ST.cyclePaused)return null;const c=cycleDay(now());if(c===null)return {v:L('нет','none'),l:L('данных','data'),none:true};if(c<=5)return {v:String(c),l:L('месячные','on period')};return {v:String(c),l:L('день цикла','cycle day')};}
+
+// ---- entries ----
+const E=()=>ST.entries;
+const symEnts=k=>E().filter(e=>e.kind==='sym'&&(!k||e.key===k));
+const onDay=k=>E().filter(e=>e.d===k);
+const lastOf=k=>symEnts(k)[0]||null;
+const userEntsToday=()=>onDay(todayK()).filter(e=>!(e.kind==='med'&&e.src==='health')&&!(e.kind==='move'&&e.src==='health'));
+function inWorse(k){if(ST.worseHist.some(w=>k>=w.start&&k<=w.end))return true;return !!(ST.worse&&k>=ST.worse.start&&k<=todayK());}
+function worseN(k){const w=ST.worseHist.find(w=>k>=w.start&&k<=w.end)||(ST.worse&&k>=ST.worse.start&&k<=todayK()?ST.worse:null);return w?ddiff(fromDk(k),fromDk(w.start))+1:0;}
+const worseDayN=()=>ST.worse?ddiff(now(),fromDk(ST.worse.start))+1:0;
+function entrySub(e){
+  if(e.kind==='sym'){const p=[];if(e.cmp)p.push(cap(cmpName(e.cmp)));else if(e.s)p.push(cap(sName(e.s)));if(e.better)p.push(L('лучше, чем вчера','better than yesterday'));for(const c of (e.ctx||[]))p.push(ctxText(c));if(!p.length&&e.words&&norm(e.words)!==norm(symName(e.key)))return qt(e.words);if(!p.length)return L('Сила не указана','Strength not set');return cap(p.join(', '));}
+  if(e.kind==='food')return mealName(e.meal);
+  if(e.kind==='move')return e.src==='health'?L('из Apple Health','from Apple Health'):L('вручную','manual');
+  if(e.kind==='med')return e.src==='health'?L('принято, из Apple Health','taken, from Apple Health'):L('принято','taken');
+  if(e.kind==='res')return L(RES[e.v][0],RES[e.v][1]);
+  if(e.kind==='gone')return L('прошло','gone');
+  if(e.kind==='period')return L('отмечено вручную','marked manually');
+  if(e.kind==='pause')return L('без записей по вашему выбору','no entries, your call');
+  return e.words?qt(e.words):'';
+}
+function entryTitle(e){
+  if(e.kind==='sym'||e.kind==='gone')return symName(e.key);
+  if(e.kind==='food')return e.items&&e.items.length?e.items.join(', '):(e.words?qt(e.words):L('без подписи','no caption'));
+  if(e.kind==='move')return moveName(e.what)+(e.min?(EN()?`, ${e.min} min`:`, ${e.min} ${plRu(e.min,'минута','минуты','минут')}`):'');
+  if(e.kind==='med')return e.name;
+  if(e.kind==='res')return L('ресурс','energy');
+  if(e.kind==='period')return L('месячные начались','period started');
+  if(e.kind==='pause')return L('пауза','pause');
+  return L('заметка','note');
+}
+
+// ---- computations ----
+function topSyms(from,to,limit){const c={};for(const e of symEnts())if(e.d>=from&&e.d<=to)c[e.key]=(c[e.key]||0)+1;return Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,limit||3);}
+function heatCount(k,from,to){const l=symEnts(k).filter(e=>e.d>=from&&e.d<=to);return {n:l.length,h:l.filter(e=>(e.ctx||[]).some(c=>HEAT.includes(c))||isHot(new Date(e.at))).length};}
+function coincidences(){
+  const end=fromDk(todayK());const days=[];for(let i=29;i>=0;i--)days.push(dk(addD(end,-i)));const d0=days[0];
+  const foodDays=new Set(E().filter(e=>e.kind==='food'&&e.d>=d0).map(e=>e.d));
+  if(foodDays.size<7)return {few:true,n:foodDays.size};
+  const symDay=new Set(E().filter(e=>e.kind==='sym'&&e.d>=d0).map(e=>e.d));
+  const hit=d=>symDay.has(d)||symDay.has(dk(addD(fromDk(d),1)));
+  const res=[];
+  for(const g of Object.keys(GROUPS)){
+    const gD=days.filter(d=>E().some(e=>e.kind==='food'&&e.d===d&&(e.items||[]).some(it=>inGroup(it,g))));
+    if(gD.length<3)continue;
+    const after=gD.filter(hit);const oth=[...foodDays].filter(d=>!gD.includes(d));const othA=oth.filter(hit);
+    res.push({g,n:gD.length,a:after.length,o:oth.length,oa:othA.length,days:after,hot:after.filter(d=>isHot(fromDk(d))).length,sl:ST.health?after.filter(d=>sleepFor(fromDk(d))<6).length:null,pre:periodStarts().length?after.filter(prePeriod).length:null});
+  }
+  res.sort((x,y)=>(y.a/y.n-y.oa/Math.max(1,y.o))-(x.a/x.n-x.oa/Math.max(1,x.o)));
+  return {few:false,res,n:foodDays.size};
+}
+function checkEndK(c){return dk(addD(fromDk(c.start),c.days-1));}
+const checkOver=()=>ST.check&&todayK()>checkEndK(ST.check);
+const checkDayN=()=>ST.check?ddiff(now(),fromDk(ST.check.start))+1:0;
+function checkResult(c){
+  const s=fromDk(c.start),e=addD(s,c.days-1),b0=addD(s,-c.days),b1=addD(s,-1);
+  const rng=(a,b)=>{const out=[];for(let d=new Date(a);d<=b;d=addD(d,1))out.push(dk(d));return out;};
+  const D=rng(s,e),B=rng(b0,b1);
+  const cnt=ds=>symEnts().filter(x=>ds.includes(x.d)).length;
+  const worse=ds=>ds.filter(k=>inWorse(k)||symEnts().some(x=>x.d===k&&x.s===3)).length;
+  const hot=ds=>weatherOn()?ds.filter(k=>isHot(fromDk(k))).length:null;
+  const sl=ds=>ST.health?ds.reduce((a,k)=>a+sleepFor(fromDk(k)),0)/ds.length:null;
+  const per=ds=>periodStarts().length?ds.some(k=>onPeriod(fromDk(k))):null;
+  return {during:cnt(D),before:cnt(B),wD:worse(D),wB:worse(B),hD:hot(D),hB:hot(B),sD:sl(D),sB:sl(B),pD:per(D),pB:per(B)};
+}
+function walkSpeed(d){return 1.02+hsh('w'+dk(d))*0.14;}
+function buildSummary(lg,days){
+  return withLang(lg,()=>{
+    const end=fromDk(todayK());const start=addD(end,-((days||92)-1));const first=E().length?fromDk(E()[E().length-1].d):end;
+    const from=first>start?first:start;const fk=dk(from),tk=dk(end);
+    const S=[];
+    const ws=ST.worseHist.filter(w=>w.end>=fk).map(w=>({a:fromDk(w.start),b:fromDk(w.end)}));if(ST.worse)ws.push({a:fromDk(ST.worse.start),b:end,open:true});
+    ws.sort((x,y)=>y.a-x.a);
+    S.push({lab:L('дни хуже обычного','worse than usual'),text:ws.length?(EN()?`${ws.length} ${ws.length===1?'stretch':'stretches'}: `:`${ws.length} ${plRu(ws.length,'период','периода','периодов')}: `)+ws.map(w=>`${fRange(w.a,w.b)} (${nDay(ddiff(w.b,w.a)+1)}${w.open?L(', продолжается',', ongoing'):''})`).join(', '):L('не отмечали','none marked')});
+    const top=topSyms(fk,tk,3);
+    S.push({lab:L('чаще всего','most often'),kv:top.length?top.map(([k,c])=>[lc(symName(k)),nEnt(c)]):null,text:top.length?null:L('записей нет','no entries')});
+    if(ST.health){const a=walkSpeed(from),b=walkSpeed(end);S.push({lab:L('ходьба, Apple Health','walking, Apple Health'),text:L('скорость: ','speed: ')+(EN()?a.toFixed(2):a.toFixed(2).replace('.',','))+' → '+(EN()?b.toFixed(2):b.toFixed(2).replace('.',','))+L(' м/с',' m/s')});}
+    else S.push({lab:L('ходьба, Apple Health','walking, Apple Health'),text:L('нет данных','no data')});
+    const lines=[];
+    if(top.length){const k=top[0][0];const hc=heatCount(k,fk,tk);if(hc.n)lines.push(EN()?`${cap(symName(k))} on hot days or after heat: ${hc.h} of ${hc.n}`:`${cap(symName(k))} в жаркие дни или после тепла: ${hc.h} из ${hc.n}`);
+      const cool=symEnts().filter(e=>e.d>=fk&&e.cool);if(cool.length){const y=cool.filter(e=>e.cool==='yes').length;lines.push(EN()?`Better after cooling down: ${y} of ${cool.length}`:`Стало лучше, когда остыли: ${y} из ${cool.length}`);}
+      if(periodStarts().length){const all=symEnts().filter(e=>e.d>=fk&&e.d<=tk);const pre=all.filter(e=>prePeriod(e.d)).length;lines.push(EN()?`1–3 days before a period: ${pre} of ${all.length} entries`:`За 1–3 дня до месячных: ${pre} из ${all.length} записей`);}}
+    if(ST.cyclePaused)lines.push(L('Цикл на паузе','Cycle paused'));
+    if(top.length){const k=top[0][0];const all=symEnts(k).filter(e=>e.d>=fk&&e.d<=tk);const af=all.filter(e=>(e.ctx||[]).some(c=>c.indexOf('food:')===0)).length;const ef=all.filter(e=>(e.ctx||[]).includes('effort')).length;
+      if(af)lines.push(EN()?`${cap(symName(k))} within 3 hours after food: ${af} of ${all.length}`:`${cap(symName(k))} в течение 3 часов после еды: ${af} из ${all.length}`);
+      if(ef)lines.push(EN()?`After effort: ${ef} of ${all.length}`:`После нагрузки: ${ef} из ${all.length}`);}
+    if(lines.length)S.push({lab:L('тепло, еда, нагрузка, цикл','heat, food, effort, cycle'),text:lines.join('. ')});
+    const nw=newLong(fk);if(nw.length)S.push({lab:L('новое и дольше суток','new and longer than a day'),text:nw.map(x=>`${cap(symName(x.key))}: ${fRange(fromDk(x.first),fromDk(x.last))}${x.gone?L(', прошло',', gone'):''}`).join('. ')});
+    const meds=ST.meds;if(meds.length){S.push({lab:L('терапия','therapy'),text:meds.map(m=>{const taken=E().filter(e=>e.kind==='med'&&e.name===m.name&&e.d>=fk).length;const how=m.how==='course'?L('курс','course'):m.how==='asNeeded'?L('по необходимости','as needed'):L('постоянно','regularly');return cap(`${m.name}, ${how}`+(taken?L(`, отмечено приемов: ${taken}`,`, doses marked: ${taken}`):''));}).join('. ')});}
+    const ch=ST.checks.filter(c=>c.end>=fk);if(ch.length)S.push({lab:L('проверки продуктов','food checks'),text:ch.map(c=>cap(`${checkTitle(c)}, ${fRange(fromDk(c.start),fromDk(c.end))}`+(c.result?`, ${L('отметка человека','person’s mark')}: ${verdictName(c.result)}`:''))).join('. ')});
+    const words=symEnts().filter(e=>e.d>=fk&&e.words).slice(0,3).map(e=>qt(e.words));
+    if(words.length)S.push({lab:L('своими словами','in the person’s words'),text:words.join(', ')+(EN()?'. Original words; auto-translation is part of the app, not this prototype':'')});
+    const qs=ST.questions.filter(q=>q.status!=='done');if(qs.length)S.push({lab:L('вопросы к врачу','questions for the doctor'),list:qs.map(q=>q.text)});
+    return {range:fRange(from,end),from,end,sections:S,few:symEnts().filter(e=>e.d>=fk).length<5,ws,top};
+  });
+}
+function newLong(fk){const out=[];const keys=[...new Set(symEnts().map(e=>e.key))];
+  for(const k of keys){const l=symEnts(k).slice().reverse();if(!l.length||l[0].d<fk)continue;const first=l[0],last=l[l.length-1];if(ST.firstDay&&first.d<=ST.firstDay)continue;if(ddiff(now(),fromDk(first.d))>14)continue;if(last.at-first.at<DAY)continue;
+    const gone=E().some(e=>e.kind==='gone'&&e.key===k&&e.at>last.at);out.push({key:k,first:first.d,last:last.d,gone});}
+  return out;}
+const verdictName=v=>v==='link'?L('вижу связь','I see a link'):v==='none'?L('не связано','not related'):L('пока не знаю','not sure yet');
+function summaryText(lg,days){const s=buildSummary(lg,days);return withLang(lg,()=>{let t=L('Сводка для врача','Summary for the doctor')+'\n'+s.range+'. '+L('Только факты','Facts only')+'\n\n';for(const x of s.sections){t+=x.lab.toUpperCase()+'\n';if(x.kv)t+=x.kv.map(r=>r[0]+': '+r[1]).join('\n')+'\n';if(x.text)t+=x.text+'\n';if(x.list)t+=x.list.map(q=>'— '+q).join('\n')+'\n';t+='\n';}return t.replace(/ /g,' ');});}
+function csv(){const rows=[['date','time','kind','what','strength','context','words']];for(const e of E().slice().reverse()){const d=new Date(e.at);rows.push([e.d,pad(d.getHours())+':'+pad(d.getMinutes()),e.kind,withLang('en',()=>entryTitle(e)),e.s?withLang('en',()=>sName(e.s)):'',(e.ctx||[]).join(' '),e.words||'']);}return rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');}
+
+// ===== state, actions =====
+let RR=null;
+UI={tab:'today',sheet:null,toast:null,filter:'all',draft:''};
+const rr=()=>{if(RR)RR();};
+function save(){const ok=saveS(ST);rr();return ok;}
+function openSheetBase(name,p){UI.sheet=Object.assign({name,k:uid()},p||{});if(UI.toast&&UI.toast.where==='main')UI.toast=null;rr();}
+function closeSheetBase(){UI.sheet=null;if(UI.toast&&UI.toast.where==='sheet')UI.toast=null;rr();}
+let TID=0;
+function toast(o){const t=Object.assign({id:++TID,where:UI.sheet?'sheet':'main',icon:'check',acts:[]},o);if(t.where==='sheet'){UI.toast=t;}else{UI.toast=null;UI.resp={kind:'log',t};}rr();}
+function hideToast(){UI.toast=null;rr();}
+function SheetToast(){const t=UI.toast;useEffect(()=>{if(!t||(t.acts&&t.acts.length))return;const id=t.id;const h=setTimeout(()=>{if(UI.toast&&UI.toast.id===id){UI.toast=null;rr();}},5000);return ()=>clearTimeout(h);},[t&&t.id]);if(!t)return null;return html`<div class="toast" role="status"><div class="tr"><span class="tic"><${I} n=${t.icon}/></span><div class="tt"><p class="bs">${t.title}</p>${t.sub?html`<p class="c">${t.sub}</p>`:null}</div><button class="tx" aria-label=${L('Скрыть','Dismiss')} onClick=${hideToast}><${I} n="close" s=${20}/></button></div>${t.acts&&t.acts.length?html`<div class="ta">${t.acts.map(a=>html`<button class="tb" onClick=${()=>{UI.toast=null;a.fn();rr();}}>${a.l}</button>`)}</div>`:null}</div>`;}
+function sortE(){ST.entries.sort((a,b)=>b.at-a.at);}
+function addEntries(list){for(const x of list){x.id=x.id||uid();x.d=dk(new Date(x.at));x.made=Date.now();ST.entries.push(x);}sortE();return list.map(x=>x.id);}
+function removeIds(ids){ST.entries=ST.entries.filter(x=>!ids.includes(x.id));}
+const undoAct=ids=>({l:L('отменить','undo'),fn:()=>{removeIds(ids);save();toast({title:L('Отменила, записи нет','Undone, nothing saved'),icon:'undo'});}});
+const fixAct=id=>({l:L('исправить','edit'),fn:()=>openSheet('rec',{id})});
+const justNow=x=>x.made&&Date.now()-x.made<120000;
+
+function whenOpts(){
+  const n=now(),o=[{id:'now',l:L('сейчас','now'),d:n},{id:'hour',l:L('час назад','an hour ago'),d:new Date(n.getTime()-36e5)}];
+  const at=(h,dd)=>{const d=addD(n,-(dd||0));d.setHours(h,0,0,0);return d;};
+  if(n.getHours()>=10)o.push({id:'morning',l:L('утром','this morning'),d:at(9)});
+  if(n.getHours()>=15)o.push({id:'day',l:L('днем','this afternoon'),d:at(14)});
+  if(n.getHours()>=21)o.push({id:'eve',l:L('вечером','this evening'),d:at(20)});
+  o.push({id:'yday',l:L('вчера вечером','last night'),d:at(20,1)});
+  return o;
+}
+
+// ---- logging ----
+function symNameFrom(v){let t=' '+v.replace(/[.!?]+$/,'')+' ';
+  t=t.replace(/\s(после|after|из-за|because)\s.*$/i,' ');
+  t=t.replace(/(^|\s)(сегодня|вчера|позавчера|утром|с утра|днем|вечером|ночью|сейчас|опять|снова|немного|чуть|слегка|слабо|заметно|сильно|очень|жутко|ужасно|today|yesterday|this morning|morning|afternoon|evening|tonight|now|again|a bit|slightly|mildly|noticeably|really|very|badly)(?=\s)/gi,' ');
+  t=t.replace(/\s+/g,' ').trim();return (t||v.trim()).slice(0,40);}
+function foodBefore(at){const f=E().find(e=>e.kind==='food'&&e.at<=at&&at-e.at<=3*36e5);if(!f)return null;const m=Math.max(5,Math.round((at-f.at)/6e4/5)*5);const lab=(f.items&&f.items.length?f.items.slice(0,2).join(', '):mealName(f.meal));return 'food:'+m+'|'+lab;}
+function isNewLong(k,at){const prior=symEnts(k).filter(e=>e.at<at);if(!prior.length)return false;const first=prior[prior.length-1];if(at-first.at<DAY||at-first.at>14*DAY)return false;if(ST.firstDay&&first.d<=ST.firstDay)return false;const before=symEnts(k).some(e=>e.at<first.at);if(before)return false;if(E().some(e=>e.kind==='gone'&&e.key===k&&e.at>first.at&&e.at<at))return false;return true;}
+function logSym(items,when,words){
+  const at=(when||now()).getTime();
+  const fc=foodBefore(at);
+  const list=items.map(it=>({kind:'sym',key:it.key,s:it.s||null,ctx:(it.ctx||[]).concat(fc&&!(it.ctx||[]).some(c=>c.indexOf('food:')===0)?[fc]:[]),words:words||null,at}));
+  const nl=list.find(x=>isNewLong(x.key,at));
+  const ids=addEntries(list);save();
+  if(nl){const first=symEnts(nl.key).filter(e=>e.at<at).slice(-1)[0];
+    toast({title:L('Записала: ','Saved: ')+lc(symName(nl.key))+(nl.s?', '+sName(nl.s):''),sub:L('Это новое в ваших записях и держится больше суток, с ','This is new in your entries and has lasted over a day, since ')+relDT(new Date(first.at)),icon:'info',
+      acts:[{l:L('к врачу','ask doctor'),fn:()=>addQuestion(L('Новое: ','New: ')+lc(symName(nl.key))+L(', держится с ',', since ')+fDM(new Date(first.at)))},undoAct(ids)]});return ids;}
+  const what=list.map(x=>lc(symName(x.key))+(x.s?', '+sName(x.s):'')).join('; ');
+  const ctx=(list[0].ctx||[]).map(c=>ctxText(c)).join(', ');
+  const noS=list.some(x=>!x.s);
+  toast({title:L('Записала: ','Saved: ')+what,sub:cap(relDT(new Date(at)))+(ctx?', '+ctx:''),acts:[fixAct(ids[0]),undoAct(ids)]});
+  return ids;
+}
+function logFood(o){
+  const x={kind:'food',items:o.items||[],meal:o.meal||mealByTime(o.when||now()),words:o.words||null,photo:o.photo||null,at:(o.when||now()).getTime()};
+  const ids=addEntries([x]);
+  if(x.photo)ST.photoUsed=true;
+  let ok=saveS(ST);
+  if(!ok&&x.photo){x.photo=null;ok=saveS(ST);rr();toast({title:L('Записала без фото','Saved without the photo'),sub:L('Память браузера заполнена, фото не поместилось','Browser storage is full, the photo did not fit'),icon:'info',acts:[undoAct(ids)]});return ids;}
+  rr();
+  const what=x.items.length?x.items.join(', '):(x.photo?L('фото без подписи','photo, no caption'):'');
+  const firstPhoto=x.photo&&E().filter(e=>e.photo).length===1;
+  toast({title:L('Записала: ','Saved: ')+mealName(x.meal),sub:cap(what)+(what?', ':'')+relDT(new Date(x.at))+(firstPhoto?L('. Совпадения покажу через пару недель','. Coincidences in a couple of weeks'):''),acts:[fixAct(ids[0]),undoAct(ids)]});
+  return ids;
+}
+function logNote(words,hint){
+  const ids=addEntries([{kind:'note',words,at:now().getTime()}]);save();
+  toast({title:L('Записала','Saved'),sub:hint||qt(words),acts:[fixAct(ids[0]),undoAct(ids)]});
+}
+function addQuestion(text){
+  const q={id:uid(),text:cap(text),status:'open',at:Date.now()};ST.questions.unshift(q);save();
+  toast({title:L('Добавила вопрос к врачу','Added a question for the doctor'),sub:qt(q.text),acts:[{l:L('отменить','undo'),fn:()=>{ST.questions=ST.questions.filter(x=>x.id!==q.id);save();toast({title:L('Убрала вопрос','Question removed'),icon:'undo'});}}]});
+}
+function handleText(v){
+  if(typeof navigator!=='undefined'&&navigator.onLine===false){const ids=addEntries([{kind:'note',words:v,raw:true,at:now().getTime()}]);save();return toast({title:L('Записала как есть','Saved as is'),sub:L('Связи нет. Запись сохранена на телефоне, разберу, когда появится сеть','No connection. The entry is kept on your phone, I will sort it when the network is back'),icon:'info',acts:[undoAct(ids)]});}
+  const a=analyze(v);
+  if(a.kind==='safety')return openSheet('safety',{v});
+  if(a.kind==='medical')return answer(v,a.keys,true);
+  if(a.kind==='query')return answer(v,a.keys,false);
+  if(a.kind==='doctorq')return addQuestion(a.q);
+  if(a.kind==='sym'&&!a.when){const it=a.items[0];const rec=symEnts(it.key).find(e=>Date.now()-e.at<30*6e4);if(rec&&it.key!=='fever'){return card({body:L('Это похоже на запись ','This looks like the ')+fT(new Date(rec.at))+': '+lc(symName(rec.key))+(rec.s?', '+sName(rec.s):'')+L('. Обновить ее или записать отдельно?','. Update it or save separately?'),chips:[{l:L('обновить','update'),fn:()=>{if(it.s)rec.s=it.s;rec.at=now().getTime();rec.words=v;rec.edited=Date.now();sortE();save();UI.resp=null;toast({title:L('Обновила: ','Updated: ')+lc(symName(rec.key))+(rec.s?', '+sName(rec.s):''),acts:[fixAct(rec.id)]});}},{l:L('записать отдельно','save separately'),fn:()=>{UI.resp=null;logSym(a.items,a.when,v);}}]});}}
+  if(a.kind==='sym'){const ids=logSym(a.items,a.when,v);if(a.items.some(i=>i.key==='fever')){const x=E().find(e=>e.id===ids[0]);toast({title:L('Записала: температура или болезнь','Saved: fever or illness'),sub:L('При болезни ухудшение бывает из-за нее. Суток не ждите','Illness itself can make things worse. Do not wait a day'),icon:'info',acts:[{l:L('к врачу','ask doctor'),fn:()=>addQuestion(L('Температура или болезнь, ','Fever or illness, ')+fDM(now())+L(', стало хуже',', got worse'))},undoAct(ids)]});}return ids;}
+  if(a.kind==='food')return logFood({items:a.items,meal:a.meal,when:a.when,words:v});
+  if(a.kind==='med')return logNote(v,L('Терапия идет из Здоровья','Therapy comes from Health'));
+  const name=symNameFrom(v);let key=Object.keys(ST.custom).find(k=>norm(ST.custom[k])===norm(name));
+  const SYMPTOMISH=/(неме|боли|болит|двоит|кружит|шата|слабост|тошн|тянет|дрож|жж[её]т|покалыва|спазм|судорог|зрени|numb|pain|ache|double|dizz|weak|nause|tingl|burn|shak|spasm|cramp|vision)/i;
+  if(!key&&!SYMPTOMISH.test(v)&&(v.trim().split(/\s+/).length>=3||!strengthOf(v)))return notUnderstood(v);
+  if(!key){key='c_'+uid();ST.custom[key]=lc(name);save();if(!a.when&&!parseWhen(v))return newSymptomAsk(v,key,strengthOf(v));}
+  return logSym([{key,s:strengthOf(v),ctx:parseCtx(v)}],a.when||parseWhen(v),v);
+}
+function readPhoto(file){
+  return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=rej;fr.onload=()=>{const img=new Image();img.onload=()=>{try{const m=520,sc=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.72));}catch(e){rej(e);}};img.onerror=rej;img.src=fr.result;};fr.readAsDataURL(file);});
+}
+async function onPhoto(ev){
+  const f=ev.target.files&&ev.target.files[0];ev.target.value='';if(!f)return;
+  if(f.type&&!/^image\//.test(f.type))return toast({title:L('Это не фото','That is not a photo'),sub:L('Выберите снимок еды','Choose a photo of food'),icon:'info'});
+  try{const src=await readPhoto(f);const fresh=f.lastModified&&Math.abs(Date.now()-f.lastModified)<3*36e5;openSheet('photo',{src,at:fresh?f.lastModified:null});}
+  catch(e){toast({title:L('Не получилось открыть фото','Could not open the photo'),sub:L('Попробуйте другой снимок','Try another photo'),icon:'info'});}
+}
+
+// ---- demo data for testers ----
+function seedDemo(){
+  const ru=!EN(),T=now();
+  const W=ru?{numb:[['немеют кончики пальцев после душа',null,['shower']],['сильно немеют пальцы в жару',3,['hot']],['слегка немеют пальцы',1,[]]],fatigue:[['к вечеру нет сил',2,[]],['очень тяжело после прогулки',3,['walk']]],fog:[['туман в голове с утра',1,[]],['заметно торможу',2,[]]]}
+             :{numb:[['fingertips numb after a shower',null,['shower']],['fingers really numb in the heat',3,['hot']],['fingers slightly numb',1,[]]],fatigue:[['no strength by the evening',2,[]],['very tired after a walk',3,['walk']]],fog:[['brain fog since morning',1,[]],['noticeably foggy',2,[]]]};
+  const F=ru?[['овсянка','кофе с молоком'],['сырники','чай'],['гречка','курица'],['паста','салат'],['суп','хлеб'],['йогурт','банан'],['рис','рыба']]
+            :[['oatmeal','latte'],['pancakes','tea'],['buckwheat','chicken'],['pasta','salad'],['soup','bread'],['yogurt','banana'],['rice','fish']];
+  const out=[];const push=(d,h,m,o)=>{const t=new Date(d);t.setHours(h,m,0,0);if(t<=T)out.push(Object.assign({id:uid(),at:t.getTime(),d:dk(t)},o));};
+  for(let i=0;i<22;i++){
+    const d=addD(T,-i);
+    const lunch=hsh('dl'+i)<.8;const afterLunch=lunch&&hsh('da'+i)<.55;
+    if(i===1||hsh('dn'+i)<.45){const w=W.numb[i%3];const lab=F[(i+3)%7].slice(0,2).join(', ');push(d,afterLunch?14:10+Math.floor(hsh('dh'+i)*10),afterLunch?40:12,{kind:'sym',key:'numb',s:w[1]===null?2:w[1],ctx:afterLunch?w[2].concat(['food:55|'+lab]):w[2],words:w[0]});}
+    if(hsh('df'+i)<.3){const w=W.fatigue[i%2];push(d,19,40,{kind:'sym',key:'fatigue',s:w[1],ctx:w[2],words:w[0]});}
+    if(hsh('dg'+i)<.2){const w=W.fog[i%2];push(d,9,30,{kind:'sym',key:'fog',s:w[1],ctx:w[2],words:w[0]});}
+    push(d,8,30,{kind:'food',meal:'breakfast',items:F[i%7].slice(),words:null,photo:null});
+    if(lunch)push(d,13,45,{kind:'food',meal:'lunch',items:F[(i+3)%7].slice(),words:null,photo:null});
+  }
+  ST.entries=out;sortE();ST.demo=true;
+  ST.health=true;ST.geo=true;ST.cycle='health';ST.seed=dk(addD(T,-12));ST.firstDay=dk(addD(T,-21));
+  ST.questions=[{id:uid(),text:ru?'Связано ли онемение с жарой?':'Is the numbness related to heat?',status:'open',at:Date.now()}];
+}
+
+// ===== components =====
+const IC={
+  mic:'M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3zM6 11a6 6 0 0 0 12 0M12 17v3.5',
+  cam:'M4 8.5h3.2L9 5.8h6l1.8 2.7H20V19H4zM12 16.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z',
+  send:'M12 19V5M6 11l6-6 6 6',close:'M6.5 6.5l11 11M17.5 6.5l-11 11',
+  chevR:'M9.5 5.5L16 12l-6.5 6.5',chevL:'M14.5 5.5L8 12l6.5 6.5',
+  sliders:'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4',
+  check:'M5 12.5l4.5 4.5L19 7.5',undo:'M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3',
+  info:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5.5M12 7.6v.4',
+  trash:'M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13',
+  sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2.8v1.8M12 19.4v1.8M2.8 12h1.8M19.4 12h1.8M5.5 5.5l1.3 1.3M17.2 17.2l1.3 1.3M5.5 18.5l1.3-1.3M17.2 6.8l1.3-1.3',
+  steps:'M8.5 3.5c1.6 0 2.4 1.9 2.4 4.2 0 2.2-1 4.6-2.4 4.6S6 9.9 6 7.7c0-2.3.9-4.2 2.5-4.2zM6.6 14.6h3.8l-.4 2.6a1.5 1.5 0 0 1-3 0zM15.5 6.5c1.6 0 2.5 1.9 2.5 4.2 0 2.2-1 4.6-2.5 4.6s-2.4-2.4-2.4-4.6c0-2.3.8-4.2 2.4-4.2zM13.6 17.6h3.8l-.4 1.6a1.5 1.5 0 0 1-3 0z',
+  drop:'M12 3.5s6 6.4 6 10.8a6 6 0 0 1-12 0c0-4.4 6-10.8 6-10.8z',
+  home:'M4.5 10.5L12 4.5l7.5 6v9h-15z',list:'M4 6.5h16M4 12h16M4 17.5h10',
+  doc:'M8.5 3.8h7v3h-7zM6.5 5.3H5v15.2h14V5.3h-1.5M8.5 11.5h7M8.5 15.5h5',
+  spark:'M12 3.5l1.9 5 5.1 1.9-5.1 1.9-1.9 5-1.9-5-5.1-1.9 5.1-1.9z',
+  plate:'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM3.5 4v5a2 2 0 0 0 2 2v9M5.5 4v5M20.5 4c-1.6 1-2 3.4-2 6h2v10',
+  note:'M6 3.8h8.5L18 7.3v12.9H6zM9 11h6M9 15h6',pulse:'M3 12h4l2.2-5.5 4.6 11L16 12h5',
+  star:'M12 4l2.4 5 5.4.7-4 3.7 1 5.4L12 16.3l-4.8 2.5 1-5.4-4-3.7 5.4-.7z',copy:'M8.5 8.5h11v11h-11zM5 15.5V4.5h11',plus:'M12 5v14M5 12h14',
+  cal:'M4.5 6h15v14h-15zM4.5 10.5h15M8.5 3.5v4M15.5 3.5v4'
+};
+function I({n,s=24}){return html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d=${IC[n]||''}/></svg>`;}
+
+let MID=0;
+function Mascot({mood='calm',size=88}){
+  const r=useRef(null);if(!r.current)r.current='mc'+(++MID);const id=r.current;
+  const ink='var(--mink)';
+  const eyes=mood==='happy'?html`<path d="M43.5 63q4.5-6 9 0M67.5 63q4.5-6 9 0" stroke=${ink} stroke-width="3.2" stroke-linecap="round" fill="none"/>`
+    :mood==='rest'?html`<path d="M43.5 62q4.5 4 9 0M67.5 62q4.5 4 9 0" stroke=${ink} stroke-width="3" stroke-linecap="round" fill="none"/>`
+    :html`<ellipse cx="48" cy="62" rx="3.6" ry="4.6" fill=${ink}/><ellipse cx="72" cy="62" rx="3.6" ry="4.6" fill=${ink}/><circle cx="49.3" cy="60.3" r="1.3" fill="#fff"/><circle cx="73.3" cy="60.3" r="1.3" fill="#fff"/>`;
+  const mouth=mood==='happy'?html`<path d="M52.5 70.5q7.5 8.5 15 0z" fill=${ink}/>`
+    :mood==='rest'?html`<path d="M57 73q3 2 6 0" stroke=${ink} stroke-width="2.6" stroke-linecap="round" fill="none"/>`
+    :html`<path d="M54.5 71.5q5.5 4.5 11 0" stroke=${ink} stroke-width="2.8" stroke-linecap="round" fill="none"/>`;
+  return html`<svg class="masc" width=${size} height=${size} viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+    <defs>
+      <radialGradient id=${id+'b'} cx="40%" cy="32%" r="74%"><stop offset="0" style="stop-color:var(--m1)"/><stop offset=".58" style="stop-color:var(--m2)"/><stop offset="1" style="stop-color:var(--m3)"/></radialGradient>
+      <radialGradient id=${id+'h'} cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffffff" stop-opacity=".9"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+      <radialGradient id=${id+'s'} cx="50%" cy="50%" r="50%"><stop offset="0" style="stop-color:var(--mshadow)" stop-opacity=".26"/><stop offset="1" style="stop-color:var(--mshadow)" stop-opacity="0"/></radialGradient>
+      <linearGradient id=${id+'t'} x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--m2)"/><stop offset="1" style="stop-color:var(--m3)"/></linearGradient>
+    </defs>
+    <ellipse cx="60" cy="106" rx="36" ry="7" fill=${'url(#'+id+'s)'}/>
+    <g class="mb">
+      <path d="M59 21c-3.5-8 .5-14.5 9-16-.4 6.5-3.6 11.8-9 16z" fill=${'url(#'+id+'t)'}/>
+      <path d="M60 20c23 0 39 19 39 45 0 23-16 39-39 39S21 88 21 65c0-26 16-45 39-45z" fill=${'url(#'+id+'b)'}/>
+      <path d="M88 46c6 8 8.5 18 6.5 28" stroke="#ffffff" stroke-opacity=".38" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <ellipse cx="45" cy="38" rx="14" ry="8" fill=${'url(#'+id+'h)'} transform="rotate(-22 45 38)"/>
+      <ellipse cx="39" cy="72.5" rx="7" ry="4" style="fill:var(--mcheek)" opacity=".55"/>
+      <ellipse cx="81" cy="72.5" rx="7" ry="4" style="fill:var(--mcheek)" opacity=".55"/>
+      ${eyes}${mouth}
+    </g>
+  </svg>`;
+}
+
+// ---- today ----
+function Ctx(){
+  const items=[];
+  const tw=weatherOn()?tempFor(now()):null;
+  if(weatherOn()&&tw==null&&ST.wxErr)items.push(html`<button class="cx off" onClick=${()=>focusLine(L('город, например Тбилиси','city, for example Tbilisi'))}><${I} n="sun" s=${20}/>${L('погода: укажите город','weather: set a city')}</button>`);
+  else if(weatherOn()&&tw==null)items.push(html`<span class="cx"><${I} n="sun" s=${20}/><span class="ink2" aria-label=${L('погода загружается','weather is loading')}>…</span></span>`);
+  else if(weatherOn())items.push(html`<span class="cx"><${I} n="sun" s=${20}/><span class="v num">${(tw>0?'+':'')+tw+'°'}</span><span class="sr">${L('погода','weather')}</span></span>`);
+  else items.push(html`<button class="cx off" onClick=${()=>cmd('settings')}><${I} n="sun" s=${20}/>${L('погода: включить','weather: turn on')}</button>`);
+  if(ST.health)items.push(html`<span class="cx"><${I} n="steps" s=${20}/><span class="v num">${fmtNum(stepsFor(now()))}</span><span class="ink2 stl">${L('шагов','steps')}</span></span>`);
+  const c=cycleTile();
+  if(c&&!c.none)items.push(html`<span class="cx"><${I} n="drop" s=${20}/><span class="ink2">${c.l}</span><span class="v num">${c.v}</span></span>`);
+  else if(c&&c.none)items.push(html`<span class="cx"><${I} n="drop" s=${20}/><span class="ink2">${L('цикл: скажите «месячные начались»','cycle: say “my period started”')}</span></span>`);
+  else items.push(html`<button class="cx off" onClick=${()=>cmd('settings')}><${I} n="drop" s=${20}/>${L('цикл: включить','cycle: turn on')}</button>`);
+  return html`<div class="ctx" aria-label=${L('Контекст дня','Today’s context')}>${items}</div>`;
+}
+function FeedRow({x}){
+  const ic=x.kind==='sym'?'pulse':x.kind==='food'?'plate':'note';
+  const mark=justNow(x)?L('только что','just now'):x.edited?L('исправлено','edited'):null;
+  return html`<button class="fi" onClick=${()=>openSheet('rec',{id:x.id})}>
+    ${x.photo?html`<img class="th" src=${x.photo} alt=""/>`:html`<span class="ico"><${I} n=${ic}/></span>`}
+    <span class="tt"><span class="bs">${cap(entryTitle(x))}</span><span class="c ink2">${entrySub(x)}</span></span>
+    <span class="tm"><span>${fT(new Date(x.at))}</span>${mark?html`<span class="acc">${mark}</span>`:null}</span>
+  </button>`;
+}
+// ---- history ----
+function dayHead(k){const d=fromDk(k),n=ddiff(now(),d);const w=EN()?WEN[d.getDay()]:WRU[d.getDay()];return cap((n<=1?dayTitle(d):w)+', '+fDM(d));}
+// ---- doctor ----
+// ---- onboarding: one screen ----
+// ---- shared controls ----
+function SwRow({on,fn,t,s}){return html`<button class="li" role="switch" aria-checked=${String(!!on)} onClick=${fn}><span class="tt"><span class="bs">${t}</span>${s?html`<span class="c ink2">${s}</span>`:null}</span><span class=${'sw'+(on?' on':'')} aria-hidden="true"></span></button>`;}
+function SegRow({opts,val,pick,lab}){return html`<div class="seg" role="group" aria-label=${lab}>${opts.map(([id,l])=>html`<button class=${'chip'+(val===id?' on':'')} aria-pressed=${val===id} onClick=${()=>pick(id)}>${l}</button>`)}</div>`;}
+
+// ---- sheets ----
+function FrameSheet({title,onBack,children,noClose}){
+  return html`<div class="sheet" role="dialog" aria-modal="true" aria-label=${title} tabindex="-1">
+    <div class="handle" aria-hidden="true"></div>
+    ${UI.toast&&UI.toast.where==='sheet'?html`<${SheetToast}/>`:null}
+    <div class="shd">${onBack?html`<button class="ib" aria-label=${L('Назад','Back')} onClick=${onBack}><${I} n="chevL"/></button>`:null}
+      <h2 class="t2 grow">${title}</h2>${noClose?null:html`<button class="ib" aria-label=${L('Закрыть','Close')} onClick=${closeSheet}><${I} n="close"/></button>`}</div>
+    ${children}
+  </div>`;
+}
+function Choices({opts,val,pick,cols}){return html`<div class=${cols===2?'ch2':cols===3?'ch3':'col8'}>${opts.map(o=>html`<button class=${'choice'+(o.id===val?' sel':'')} aria-pressed=${o.id===val} onClick=${()=>pick(o.id)}>${o.id===val?html`<${I} n="check" s=${20}/>`:null}${o.l}</button>`)}</div>`;}
+const S_OPTS=()=>[1,2,3].map(n=>({id:n,l:cap(sName(n))}));
+const MEAL_OPTS=()=>['breakfast','lunch','dinner','snack'].map(m=>({id:m,l:cap(mealName(m))}));
+
+function RecSheet({id}){
+  const x=ST.entries.find(y=>y.id===id);
+  const [m,setM]=useState('view');const [txt,setTxt]=useState('');
+  if(!x)return html`<${Frame} title=${L('запись','entry')}><p class="b ink2">${L('Этой записи уже нет','This entry no longer exists')}</p><button class="btn pri" onClick=${closeSheet}>${L('закрыть','close')}</button></${Frame}>`;
+  const apply=(ch,label,title)=>{const old={};for(const k in ch)old[k]=x[k];const was=x.edited;const inSum=ST.copiedAt&&x.at<ST.copiedAt;Object.assign(x,ch,{edited:Date.now()});if(ch.at)x.d=dk(new Date(ch.at));sortE();save();setM('view');
+    toast({title:title||L('Исправила','Changed'),sub:label+(inSum?L('. Эта запись уже в скопированной сводке, отмечу в следующей','. This entry is already in the copied summary, I will mark it in the next one'):''),acts:[{l:L('отменить','undo'),fn:()=>{Object.assign(x,old);if(old.at)x.d=dk(new Date(old.at));x.edited=was;sortE();save();toast({title:L('Вернула как было','Restored'),icon:'undo'});}}]});};
+  const del=()=>{const snap=Object.assign({},x);removeIds([x.id]);save();closeSheet();toast({title:L('Запись удалена','Entry deleted'),icon:'trash',acts:[{l:L('вернуть','restore'),fn:()=>{ST.entries.push(snap);sortE();save();toast({title:L('Вернула запись','Entry restored'),icon:'undo'});}}]});};
+  const back=()=>setM('view');
+  const title=cap(entryTitle(x));
+  if(m==='del')return html`<${Frame} title=${L('удалить запись?','delete this entry?')}>
+    <p class="b">${L('Ее не будет в истории и в сводке для врача','It will be gone from history and from the doctor summary')}</p>
+    <div class="col"><button class="btn sec" onClick=${del}>${L('удалить','delete')}</button><button class="btn pri" onClick=${back}>${L('оставить','keep')}</button></div></${Frame}>`;
+  if(m.indexOf('mm:')===0){const ns=+m.slice(3),ws=strengthOf(x.words||'');const keep=x.s||ws;
+    return html`<${Frame} title=${L('поменять силу?','change the strength?')} onBack=${back}>
+      <p class="b">${L('Вы говорили: ','You said: ')}${qt(x.words)}. ${L('В этих словах сила: ','Those words mean: ')}${qt(sName(ws))}.</p>
+      <div class="col"><button class="btn pri" onClick=${()=>apply({s:ns},cap(sName(ns)),L('Силу поменяла','Strength changed'))}>${L('поменять на ','change to ')+qt(sName(ns))}</button>
+      <button class="btn sec" onClick=${()=>{setM('view');toast({title:L('Силу оставила','Strength kept'),sub:cap(sName(keep))});}}>${L('оставить ','keep ')+qt(sName(keep))}</button></div></${Frame}>`;}
+  if(m==='s')return html`<${Frame} title=${L('сила','strength')} onBack=${back}><${Choices} cols=${3} opts=${S_OPTS()} val=${x.s} pick=${n=>{if(n===x.s)return back();const ws=x.words?strengthOf(x.words):null;if(ws&&ws!==n)setM('mm:'+n);else apply({s:n},cap(sName(n)));}}/></${Frame}>`;
+  if(m==='what'){const keys=[...new Set([x.key,...OB_SYM,...Object.keys(SYM)])];
+    return html`<${Frame} title=${L('что','what')} onBack=${back}><${Choices} cols=${2} opts=${keys.map(k=>({id:k,l:symName(k)}))} val=${x.key} pick=${k=>k===x.key?back():apply({key:k},symName(k))}/></${Frame}>`;}
+  if(m==='meal')return html`<${Frame} title=${L('прием пищи','meal')} onBack=${back}><${Choices} cols=${2} opts=${MEAL_OPTS()} val=${x.meal} pick=${v=>v===x.meal?back():apply({meal:v},cap(mealName(v)))}/></${Frame}>`;
+  if(m==='when'){const o=whenOpts();return html`<${Frame} title=${L('когда','when')} onBack=${back}><p class="c ink2">${L('Сейчас: ','Now set: ')+relDT(new Date(x.at))}</p><${Choices} cols=${2} opts=${o} val=${null} pick=${v=>{const d=o.find(y=>y.id===v).d;apply({at:d.getTime()},cap(relDT(d)));}}/></${Frame}>`;}
+  if(m==='words'||m==='items'){const isI=m==='items';
+    return html`<${Frame} title=${isI?L('что ели','what you ate'):L('ваши слова','your words')} onBack=${back}>
+      <textarea class="field" id="edtxt" value=${txt} onInput=${e=>setTxt(e.target.value)} aria-label=${isI?L('Что ели','What you ate'):L('Ваши слова','Your words')}></textarea>
+      ${isI?html`<p class="f ink2">${L('Через запятую','Comma separated')}</p>`:null}
+      <button class="btn pri" onClick=${()=>{const v=txt.trim();if(isI){const it=v?v.split(/[,;]/).map(s=>s.trim()).filter(Boolean):[];apply({items:it},it.join(', ')||L('без подписи','no caption'));}else apply({words:v||null},v?qt(v):L('без слов','no words'));}}>${L('сохранить','save')}</button></${Frame}>`;}
+  const R=(f,lab,val)=>html`<button class="li" onClick=${()=>{if(f==='words')setTxt(x.words||'');if(f==='items')setTxt((x.items||[]).join(', '));setM(f);}}><span class="tt"><span class="f ink2">${lab}</span><span class="bs">${val}</span></span><${I} n="chevR"/></button>`;
+  const rows=x.kind==='sym'?[R('what',L('что','what'),symName(x.key)),R('s',L('сила','strength'),x.s?cap(sName(x.s)):L('не указана','not set')),R('when',L('когда','when'),cap(relDT(new Date(x.at)))),R('words',L('ваши слова','your words'),x.words?qt(x.words):L('нет','none'))]
+    :x.kind==='food'?[R('items',L('что ели','what you ate'),x.items&&x.items.length?x.items.join(', '):L('без подписи','no caption')),R('meal',L('прием пищи','meal'),cap(mealName(x.meal))),R('when',L('когда','when'),cap(relDT(new Date(x.at))))]
+    :[R('words',L('текст','text'),x.words?qt(x.words):L('нет','none')),R('when',L('когда','when'),cap(relDT(new Date(x.at))))];
+  return html`<${Frame} title=${title}>
+    ${x.photo?html`<img class="photo" src=${x.photo} alt=${L('Фото еды','Food photo')}/>`:null}
+    <div class="list">${rows}</div>
+    ${x.kind==='sym'&&x.ctx&&x.ctx.length?html`<p class="c ink2">${L('Контекст: ','Context: ')+x.ctx.map(c=>ctxText(c)).join(', ')}</p>`:null}
+    <button class="link" onClick=${()=>setM('del')}>${L('удалить запись','delete entry')}</button>
+  </${Frame}>`;
+}
+
+function PhotoSheet({src,at}){
+  const base=at?new Date(at):now();
+  const [cp,setCp]=useState('');const [meal,setMeal]=useState(mealByTime(base));const [w,setW]=useState(at?'photo':'now');const [pickT,setPickT]=useState(!at);
+  const o=whenOpts();
+  const go=()=>{const d=w==='photo'?new Date(at):(o.find(y=>y.id===w)||o[0]).d;const v=cp.trim();const it=v?(foodItems(v).length?foodItems(v):v.split(/[,;]/).map(s=>s.trim()).filter(Boolean)):[];closeSheet();logFood({items:it,meal,when:d,words:v||null,photo:src});};
+  return html`<${Frame} title=${L('фото еды','food photo')}>
+    <img class="photo" src=${src} alt=${L('Выбранное фото','Selected photo')}/>
+    <div class="col8"><label class="lbl" for="pcap">${L('что на фото','what is in the photo')}</label>
+      <input class="field" id="pcap" value=${cp} onInput=${e=>setCp(e.target.value)} placeholder=${L('можно не писать','optional')}/></div>
+    <div class="col8"><p class="lbl">${L('прием пищи','meal')}</p><${Choices} cols=${2} opts=${MEAL_OPTS()} val=${meal} pick=${setMeal}/></div>
+    ${pickT?html`<div class="col8"><p class="lbl">${at?L('когда ели','when did you eat'):L('у фото нет времени. когда ели?','the photo has no time. when did you eat?')}</p>
+        <${Choices} cols=${2} opts=${(at?[{id:'photo',l:L('время фото: ','photo time: ')+fT(new Date(at))}]:[]).concat(o)} val=${w} pick=${setW}/></div>`
+      :html`<button class="li" onClick=${()=>setPickT(true)}><span class="tt"><span class="f ink2">${L('когда','when')}</span><span class="bs">${L('время фото: ','photo time: ')+cap(relDT(new Date(at)))}</span></span><span class="cs ink2">${L('другое','change')}</span></button>`}
+    <button class="btn pri" onClick=${go}>${L('записать','save')}</button>
+  </${Frame}>`;
+}
+
+function QuickSheet({sym:k0}){
+  return html`<${Frame} title=${symName(k0)}><p class="b ink2">${L('Как сейчас?','How is it now?')}</p>
+    <${Choices} cols=${3} opts=${S_OPTS()} val=${null} pick=${n=>{closeSheet();logSym([{key:k0,s:n,ctx:[]}],null,null);}}/></${Frame}>`;
+}
+
+function VoiceSheet(){
+  const ph=EN()?['Fingertips really numb after a shower','No strength left by the evening','Pasta and salad for lunch','When were my fingers numb last?']
+    :['Сильно немеют кончики пальцев после душа','К вечеру совсем нет сил','На обед паста и салат','Когда немело в последний раз?'];
+  return html`<${Frame} title=${L('слушаю','listening')}>
+    <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="c ink2">${L('В прототипе голос имитируется. Выберите фразу или диктуйте с клавиатуры','Voice is simulated here. Pick a phrase or dictate with the keyboard')}</p>
+    <div class="col8">${ph.map(p=>html`<button class="choice" style="justify-content:flex-start;text-align:left" onClick=${()=>{closeSheet();handleText(p);}}>${p}</button>`)}</div>
+    <button class="btn sec" onClick=${()=>{closeSheet();setTimeout(()=>{const el=document.getElementById('line');if(el)el.focus();},60);}}>${L('продиктовать с клавиатуры','dictate with keyboard')}</button>
+  </${Frame}>`;
+}
+
+function symStats(k,days){
+  const T=fromDk(todayK()),from=dk(addD(T,-(days-1)));const l=symEnts(k).filter(x=>x.d>=from);const ds=new Set(l.map(x=>x.d));const strip=[];
+  for(let i=days-1;i>=0;i--){const kk=dk(addD(T,-i));strip.push({k:kk,on:ds.has(kk)});}
+  const heat=l.filter(x=>(x.ctx||[]).some(c=>HEAT.includes(c))||isHot(new Date(x.at))).length;
+  const pre=periodStarts().length?l.filter(x=>prePeriod(x.d)).length:null;
+  const afc=l.filter(x=>(x.ctx||[]).some(c=>c.indexOf('food:')===0));const dish={};for(const x of afc){const lab=x.ctx.find(c=>c.indexOf('food:')===0).split('|')[1];dish[lab]=(dish[lab]||0)+1;}
+  const dishes=Object.entries(dish).sort((a,b)=>b[1]-a[1]).slice(0,3);const effort=l.filter(x=>(x.ctx||[]).includes('effort')).length;
+  return {n:l.length,days:ds.size,last:l[0]||null,heat,pre,strip,af:afc.length,dishes,effort};
+}
+function SymBlock({k}){
+  const s=symStats(k,30);
+  if(!s.n)return html`<section class="card surf"><p class="lbl">${symName(k)}</p><p class="b">${L('За 30 дней записей об этом нет','No entries about this in 30 days')}</p></section>`;
+  return html`<section class="card surf" aria-label=${symName(k)}>
+    <p class="lbl">${symName(k)}</p>
+    <div class="row" style="align-items:baseline;gap:10px"><span class="big">${s.n}</span><span class="b">${EN()?(s.n===1?'entry':'entries')+' in 30 days':plRu(s.n,'запись','записи','записей')+' за 30 дней'}</span></div>
+    ${B?null:html`<div class="strip" role="img" aria-label=${L('Дни с записями за 30 дней','Days with entries over 30 days')}>${s.strip.map((d,i)=>html`<i class=${(d.on?'on':'')+(i===29?' td':'')}></i>`)}</div>
+    <div class="sx"><span>${L('30 дней назад','30 days ago')}</span><span>${L('сегодня','today')}</span></div>`}
+    <div class="col4">
+      ${B?null:html`<p class="c">${L('Дней с записями: ','Days with entries: ')}<span class="num">${s.days} ${L('из','of')} 30</span></p>`}
+      <p class="c">${L('Последний раз: ','Last time: ')+relDT(new Date(s.last.at))}</p>
+      <p class="c">${L('После тепла или в жару: ','After heat or on hot days: ')}<span class="num">${s.heat} ${L('из','of')} ${s.n}</span></p>
+      ${s.af?html`<p class="c">${L('В течение 3 часов после еды: ','Within 3 hours after food: ')}<span class="num">${s.af} ${L('из','of')} ${s.n}</span>${s.dishes.length?html`<span class="ink2">${' ('+s.dishes.map(d=>d[0]+(d[1]>1?' ×'+d[1]:'')).join(', ')+')'}</span>`:null}</p>`:null}
+      ${s.effort?html`<p class="c">${L('После нагрузки: ','After effort: ')}<span class="num">${s.effort} ${L('из','of')} ${s.n}</span></p>`:null}
+      ${s.pre!==null?html`<p class="c">${L('За 1–3 дня до месячных: ','1–3 days before a period: ')}<span class="num">${s.pre} ${L('из','of')} ${s.n}</span></p>`:null}
+    </div>
+  </section>`;
+}
+function FoodBlock({yday}){
+  const T=now();const days=yday?[dk(addD(T,-1))]:[todayK(),dk(addD(T,-1)),dk(addD(T,-2))];
+  const g=days.map(d=>({d,l:onDay(d).filter(x=>x.kind==='food')})).filter(x=>x.l.length);
+  if(!g.length)return html`<section class="card surf"><p class="b">${yday?L('Вчера записей о еде нет','No food entries yesterday'):L('За три дня записей о еде нет','No food entries in three days')}</p></section>`;
+  return html`${g.map(x=>html`<section class="card surf"><p class="lbl">${dayHead(x.d)}</p><div class="rows">${x.l.map(y=>html`<${FeedRow} key=${y.id} x=${y}/>`)}</div></section>`)}`;
+}
+function HeatBlock(){
+  if(!weatherOn())return html`<section class="card surf"><p class="b">${L('Погода выключена','Weather is off')}</p><button class="btn sec" onClick=${()=>cmd('settings')}>${L('включить погоду','turn on weather')}</button></section>`;
+  const T=fromDk(todayK());const days=[];for(let i=13;i>=0;i--)days.push(dk(addD(T,-i)));
+  const hot=days.filter(d=>isHot(fromDk(d)));const cnt=ds=>symEnts().filter(x=>ds.includes(x.d)).length;const cold=days.filter(d=>!hot.includes(d));
+  return html`<section class="card surf"><p class="lbl">${L('жара, 14 дней','heat, 14 days')}</p>
+    <div class="row" style="align-items:baseline;gap:10px"><span class="big">${hot.length}</span><span class="b">${EN()?(hot.length===1?'hot day':'hot days')+' (26° and above)':plRu(hot.length,'жаркий день','жарких дня','жарких дней')+' (от 26°)'}</span></div>
+    <div class="kvr"><span class="c ink2">${L('в жаркие дни','on hot days')}</span><span class="c num">${nEnt(cnt(hot))}</span><span class="c ink2">${L('в остальные','on other days')}</span><span class="c num">${nEnt(cnt(cold))}, ${nDay(cold.length)}</span></div></section>`;
+}
+function emergencyNo(){let r='';try{r=(Intl.DateTimeFormat().resolvedOptions().locale||navigator.language||'').split('-').pop().toUpperCase();}catch(e){}if(r==='RU')return L('112 или 103','112 or 103');if(r==='US'||r==='CA')return '911';return '112';}
+function SafetySheet({v}){
+  return html`<${Frame} title=${L('если это началось внезапно','if this started suddenly')}>
+    <p class="b">${L('Звоните в скорую, не ждите','Call emergency services, do not wait')}</p>
+    <div class="card surf"><p class="lbl">${L('скорая','emergency')}</p><p class="big num" style="user-select:all">${emergencyNo()}</p></div>
+    <div class="col"><button class="btn pri" onClick=${closeSheet}>${L('понятно','got it')}</button><button class="btn sec" onClick=${()=>{closeSheet();logNote(v);}}>${L('записать как есть','save as written')}</button></div>
+  </${Frame}>`;
+}
+
+function CopySheet({txt}){
+  return html`<${Frame} title=${L('скопировать сводку','copy summary')}><p class="c ink2">${L('Выделите и скопируйте','Select and copy')}</p>
+    <textarea class="field" id="cptxt" readonly style="min-height:240px" value=${txt} onFocus=${e=>e.target.select()}></textarea></${Frame}>`;
+}
+
+// ---- app ----
+// ===== v5: one screen (web = figma v5 / v5b) =====
+UI.resp=null;UI.hview=null;UI.inline=null;UI.mtoast=null;
+const MODE=(()=>{const m=(location.search.match(/[?&]v=(5b?|6)\b/)||[])[1];if(m){try{localStorage.setItem('msapp.mode',m);}catch(e){}}let s=null;try{s=localStorage.getItem('msapp.mode');}catch(e){}return m||s||'5b';})();
+const V6=MODE==='6';
+const B=MODE==='5b'||V6; // v6 builds on v5b
+const LIM=()=>EN()?20:17;
+let THEMED=false;
+function applyTheme(){const r=document.documentElement;if(ST.theme==='light'||ST.theme==='dark'){r.setAttribute('data-theme',ST.theme);THEMED=true;}else if(THEMED){r.removeAttribute('data-theme');THEMED=false;}}
+function say(o){if(o&&o.kind==='log')return toast(o.t);UI.resp=Object.assign({kind:'info'},o);rr();}
+// main toast: dark card above the day card, hides after 4 s, buttons live inside
+function toast(o){const t=Object.assign({id:++TID,where:UI.sheet?'sheet':'main',icon:'check',acts:[]},o);if(t.where==='sheet'){UI.toast=t;}else{UI.resp=null;UI.mtoast=t;if(V6&&t.acts&&t.acts.length){const top=onDay(todayK()).filter(x=>!(x.src==='health')).slice(0,3);const f=top.find(e=>e.made&&Date.now()-e.made<800);if(f)t.inline6=f.id;}}if(typeof speak==='function')speak(t.title+(t.sub?'. '+t.sub:''));if(typeof haptic==='function')haptic(t.icon==='info'?'warn':t.icon==='undo'?'undo':'save');rr();}
+function MainToast(){const t=UI.mtoast;useEffect(()=>{if(!t)return;const id=t.id;const h=setTimeout(()=>{if(UI.mtoast&&UI.mtoast.id===id){UI.mtoast=null;rr();}},t.acts&&t.acts.length?6000:4000);return ()=>clearTimeout(h);},[t&&t.id]);if(!t)return null;if(V6&&t.inline6&&!UI.resp)return null;
+  return html`<div class="toast mt" role="status"><div class="tr"><span class="tic"><${I} n=${t.icon}/></span><div class="tt"><p class="bs">${t.title}</p>${t.sub?html`<p class="c">${t.sub}</p>`:null}</div><button class="tx" aria-label=${L('Скрыть','Dismiss')} onClick=${()=>{UI.mtoast=null;rr();}}><${I} n="close" s=${20}/></button></div>${t.acts&&t.acts.length?html`<div class="ta">${t.acts.map(a=>html`<button class="tb" onClick=${()=>{UI.mtoast=null;a.fn();rr();}}>${a.l}</button>`)}</div>`:null}</div>`;}
+// chip grid: two columns, no horizontal scroll, long label takes the row
+function ChipGrid({items,label}){
+  const rows=[];let cur=null;
+  for(const it of items){const long=((it.l||'').length+(it.star||it.cam||it.ic?3:0))>LIM();if(long){cur=null;rows.push([it]);continue;}if(!cur||cur.length===2){cur=[];rows.push(cur);}cur.push(it);}
+  const Chip=({x})=>html`<button class=${'chip'+(x.on?' on':'')} aria-pressed=${x.on===undefined?undefined:!!x.on} aria-label=${x.aria||undefined} onClick=${x.fn}>${x.star?html`<span class="star"><${I} n="star" s=${18}/></span>`:x.cam?html`<${I} n="cam" s=${18}/>`:x.ic?html`<${I} n=${x.ic} s=${18}/>`:null}<span>${x.l}</span></button>`;
+  return html`<div class="grid" role="group" aria-label=${label||L('Подсказки','Suggestions')}>${rows.map((r,i)=>html`<div class="grow2" key=${i}>${r.map(x=>html`<${Chip} x=${x} key=${x.l}/>`)}${r.length===1&&((r[0].l||'').length+(r[0].star||r[0].cam||r[0].ic?3:0))<=LIM()?html`<span class="sp" aria-hidden="true"></span>`:null}</div>`)}</div>`;
+}
+
+// ---- commands by phrase: no settings screen ----
+function cmdBase(v){
+  const n=norm(v);
+  const wrap=(title,sub)=>say({kind:'log',t:{title,sub,icon:'check',acts:[]}});
+  if(n==='settings'||/^(настройки|settings)$/.test(n))return say({kind:'settings'});
+  if(/^(данные|данные и доступ|data|data and access)$/.test(n))return say({kind:'data'});
+  if(/^v(5b?|6)$/.test(n)){try{localStorage.setItem('msapp.mode',n);}catch(e){}location.search='?v='+n;return true;}
+  if(/(истори|покажи записи|все записи|history|show (my )?entries|all entries)/.test(n))return say({kind:'history',per:30,f:'all'});
+  if(/(хуже обычного|хуже чем обычно|плохой день|worse than usual|bad day)/.test(n)&&!/(^|\s)(вернул\S*|назад|уже|нормально|back|normal)/.test(n)){
+    if(ST.worse)return toast({title:L('Хуже обычного, день ','Worse than usual, day ')+worseDayN(),sub:L('Скажите «вернулось к обычному», когда пройдет','Say “back to usual” when it passes'),icon:'info',acts:[]});
+    ST.worse={start:todayK()};save();return toast({title:L('Записала: хуже обычного','Saved: worse than usual'),sub:L('Буду отмечать дни, пока не скажете, что вернулось к обычному. Это попадет в сводку','I will mark the days until you say it is back to usual. This goes into the summary'),acts:[undoAct([])&&{l:L('отменить','undo'),fn:()=>{ST.worse=null;save();toast({title:L('Отменила','Undone'),icon:'undo'});}}]});}
+  if(/(вернулось к обычному|уже нормально|стало как обычно|back to usual|back to normal)/.test(n)){
+    if(!ST.worse)return toast({title:L('Хуже обычного не отмечали','Nothing marked as worse than usual'),icon:'info',acts:[]});
+    const w={start:ST.worse.start,end:todayK()};ST.worseHist.push(w);ST.worse=null;save();
+    return toast({title:L('Записала: вернулось к обычному','Saved: back to usual'),sub:(EN()?`${nDay(ddiff(fromDk(w.end),fromDk(w.start))+1)} worse than usual, `:`${nDay(ddiff(fromDk(w.end),fromDk(w.start))+1)} хуже обычного, `)+fRange(fromDk(w.start),fromDk(w.end))+L('. В сводке к врачу','. In the doctor summary'),acts:[{l:L('сводка к врачу','doctor summary'),fn:()=>say({kind:'summary',days:30})}]});}
+  if(/(что делалось|what was going on)/.test(n)&&(ST.worse||ST.worseHist.length)){const w=ST.worse||ST.worseHist[ST.worseHist.length-1];return say({kind:'answer',q:v,keys:[],range:{a:w.start,b:w.end||todayK(),l:L('эти дни','these days')},list:true});}
+  if(/(месячные начались|начались месячные|period started|my period started|got my period)/.test(n)){
+    if(ST.cycle!=='health'){ST.cycle='manual';}if(!ST.periodMarks.includes(todayK()))ST.periodMarks.push(todayK());if(ST.cycle==='health'){ST.cycle='manual';}save();
+    return toast({title:L('Записала: месячные начались','Saved: period started'),sub:L('Сегодня день цикла 1. Дни до месячных теперь считаются от этой даты. Цикл виден только вам','Today is cycle day 1. Days before a period now count from this date. Only you can see the cycle'),acts:[{l:L('как это связано с циклом?','how is it linked to my cycle?'),fn:()=>say({kind:'cycle',keys:[]})}]});}
+  if(/^(пауза|pause|сегодня пауза|pause today)$/.test(n)){const ids=addEntries([{kind:'pause',at:now().getTime()}]);save();return toast({title:L('Пауза','Paused'),sub:L('Записи сохранены, подсказок не будет, пока не вернетесь','Entries are kept, no suggestions until you are back'),acts:[undoAct(ids)]});}
+  if(/(english|англий|на англ)/.test(n)){ST.lang='en';ST.langSet=true;LANG='en';save();return wrap('Switched to English');}
+  if(/(по-русски|по русски|русский|russian)/.test(n)){ST.lang='ru';ST.langSet=true;LANG='ru';save();return wrap('Переключила на русский');}
+  if(/(темн\S* тем|dark (theme|mode))/.test(n)){ST.theme='dark';save();applyTheme();return wrap(L('Темная тема','Dark theme'));}
+  if(/(светл\S* тем|light (theme|mode))/.test(n)){ST.theme='light';save();applyTheme();return wrap(L('Светлая тема','Light theme'));}
+  if(/(как в системе|system theme)/.test(n)){ST.theme='system';save();applyTheme();return wrap(L('Тема как в системе','Theme follows the system'));}
+  if(/(подключ\S*|включ\S*|connect|turn on|enable).{0,12}(здоровье|health)/.test(n)){if(!ST.demo)return toast({title:L('Apple Health подключится в приложении для iPhone','Apple Health connects in the iPhone app'),sub:L('Здесь цикл можно отмечать словами: «месячные начались»','Here you can mark the cycle in words: “my period started”'),icon:'info',acts:[]});ST.health=true;if(!ST.seed)ST.seed=dk(addD(now(),-11));if(ST.cycle==='off')ST.cycle='health';save();return wrap(L('Подключила Здоровье','Health connected'));}
+  if(/(отключ\S*|выключ\S*|disconnect|turn off|disable).{0,12}(здоровье|health)/.test(n)){ST.health=false;if(ST.cycle==='health')ST.cycle='off';save();return wrap(L('Отключила Здоровье','Health disconnected'));}
+  if(/(подключ\S*|включ\S*|connect|turn on|enable).{0,12}(погод|weather)/.test(n)){ST.geo=true;save();setTimeout(()=>fetchWx(true),0);return wrap(L('Включила погоду','Weather on'));}
+  if(/(отключ\S*|выключ\S*|disconnect|turn off|disable).{0,12}(погод|weather)/.test(n)){ST.geo=false;save();return wrap(L('Выключила погоду','Weather off'));}
+  if(/(главн\S* для меня|main (one|symptom))/.test(n)){const ks=symsIn(v);if(ks.length){ST.main=ks[0];save();return wrap(L('Главный для меня: ','My main one: ')+symName(ks[0]));}return wrap(L('Назовите симптом: «главный для меня: усталость»','Name it: “main one: fatigue”'));}
+  if(/(стереть|удалить все|сбросить|erase|reset everything|wipe)/.test(n)){return say({kind:'confirm',title:L('стереть все данные?','erase all data?'),sub:L('Вернуть будет нельзя','This cannot be undone'),ok:L('стереть','erase'),fn:()=>{const lg=ST.lang;ST=defaults();ST.lang=lg;ST.photoUsed=false;ST.demo=false;ST.onboarded=true;ST.firstDay=todayK();save();wrap(L('Стерла. Это снова первый день','Erased. First day again'));}});}
+  if(/(пример|sample|demo)/.test(n)){return say({kind:'confirm',title:L('заменить данные примером?','replace data with a sample?'),sub:L('Ваши записи заменятся примером','Your entries get replaced with a sample'),ok:L('заменить','replace'),fn:()=>{seedDemo();save();wrap(L('Загрузила пример','Sample loaded'));}});}
+  if(/(что ты (умеешь|можешь)|помощь|help|what can you do)/.test(n))return say({kind:'help'});
+  if(/^(мои |my )?(вопросы|questions)( к| для)?( врач\S*| (the |my )?doctor)?\??$/.test(n))return say({kind:'questions',q:v});
+  if(/(сводк|summary|^к врачу$|^(for the |to the )?doctor$)/.test(n)&&!/вопрос|question/.test(n)){const d=/(месяц|30|month)/.test(n)?30:/(полгод|180|six)/.test(n)?182:92;return say({kind:'summary',q:v,days:d});}
+  if(/(цикл|месячн|cycle|period)/.test(n)&&/\?$|как|how|влия|affect/.test(n))return say({kind:'cycle',q:v,keys:symsIn(v)});
+  if(/(связ|совпад|после чего|после какой|что влия|инсайт|триггер|link|related|pattern|insight|trigger|after what)/.test(n)&&!/^(почему|why)/.test(n))return say({kind:'insights',q:v,keys:symsIn(v)});
+  return false;
+}
+
+// ---- answers rendered in the main block ----
+function monthOf(n){const i=[...MRN,...MRG].findIndex(m=>n.indexOf(m.slice(0,4))>=0);if(i>=0)return i%12;const j=MEN.findIndex(m=>n.indexOf(m.slice(0,3).toLowerCase())>=0);return j>=0?j:null;}
+function answer(q,keys,medical){
+  const n=norm(q);
+  if(/(сводк|к врачу|for (the |my )?doctor|summary)/.test(n)&&!medical)return say({kind:'summary',q});
+  if(/(вопрос|question)/.test(n)&&/(врач|doctor)/.test(n)&&!medical)return say({kind:'questions',q});
+  const isFood=/((^|\s)(ел|ела|ели|съел\S*)(?=\s|$|\?)|еда|еду|еды|поесть|\bate\b|\beat|food|meal)/.test(n);
+  const isHeat=/(жар|жарк|heat|hot)/.test(n);
+  let range=null;const T=fromDk(todayK());
+  if(/(вчера|yesterday)/.test(n))range={a:dk(addD(T,-1)),b:dk(addD(T,-1)),l:L('вчера','yesterday')};
+  else if(/(сегодня|today)/.test(n))range={a:todayK(),b:todayK(),l:L('сегодня','today')};
+  else if(/(недел|week)/.test(n))range={a:dk(addD(T,-6)),b:todayK(),l:L('7 дней','7 days')};
+  else if(/(месяц|month)/.test(n)&&!monthOf(n))range={a:dk(addD(T,-29)),b:todayK(),l:L('30 дней','30 days')};
+  else{const m=monthOf(n);if(m!==null){const y=T.getFullYear()-(m>T.getMonth()?1:0);const a=new Date(y,m,1,12),b=new Date(y,m+1,0,12);range={a:dk(a),b:dk(b),l:(EN()?MEN[m]:MRN[m])};}}
+  const list=/(покажи|что было|какие записи|show|what happened|entries|history|история)/.test(n)||(range&&!keys.length&&!isHeat);
+  say({kind:'answer',q,keys:(keys||[]).slice(0,2),medical:!!medical,isFood,isHeat,range,list});
+}
+function daySentence(k){
+  const l=onDay(k);if(!l.length)return null;
+  const syms=[],foods=[];const seen=new Set();
+  for(const x of l.slice().reverse()){if(x.kind==='sym'&&!seen.has(x.key)){seen.add(x.key);syms.push(lc(symName(x.key))+(x.s?', '+sName(x.s):'')+((x.ctx||[]).some(c=>c.indexOf('food:')===0)?L(' после еды',' after food'):''));}
+    if(x.kind==='food')foods.push(x.items&&x.items.length?x.items.join(', '):mealName(x.meal));}
+  const p=[];if(l.some(x=>x.kind==='pause'))p.push(L('Пауза','Pause'));if(syms.length)p.push(cap(syms.join('; ')));if(foods.length)p.push(cap(L('ели: ','ate: ')+foods.join('; ')));
+  return p.join('. ');
+}
+function RangeList({range,f}){
+  const list=ST.entries.filter(x=>x.d>=range.a&&x.d<=range.b&&(f==='all'||(f==='sym'?x.kind!=='food':x.kind==='food')));
+  const groups=[];let cur=null;for(const x of list){if(!cur||cur.d!==x.d){cur={d:x.d,items:[]};groups.push(cur);}cur.items.push(x);}
+  if(!groups.length)return html`<p class="b ink2">${L('За этот период записей нет','No entries for this period')}</p>`;
+  const days=new Set(list.map(x=>x.d)).size;
+  return html`<p class="c ink2">${range.l}: ${nEnt(list.length)}, ${nDay(days)}</p>
+    ${groups.map(g=>html`<div class="col4" key=${g.d}><p class="lbl">${dayHead(g.d)}</p><div class="rows">${g.items.map(x=>html`<${FeedRow} key=${x.id} x=${x}/>`)}</div></div>`)}`;
+}
+function Summary({days}){
+  const s=buildSummary(LANG,days);
+  const P=[[30,L('30 дней','30 days')],[92,L('3 месяца','3 months')],[182,L('полгода','6 months')]];
+  const copy=()=>{const txt=summaryText(LANG,days);ST.copiedAt=Date.now();save();const done=()=>say({kind:'log',t:{title:L('Скопировала сводку','Summary copied'),sub:L('Вставьте в сообщение врачу или в заметки','Paste it into a message to your doctor or into notes'),icon:'check',acts:[]}});
+    try{navigator.clipboard.writeText(txt).then(done,()=>openSheet('copy',{txt}));}catch(e){openSheet('copy',{txt});}};
+  const seg=html`<div class="seg" role="group" aria-label=${L('Период','Period')}>${P.map(([d,l])=>html`<button class=${'chip'+(days===d?' on':'')} aria-pressed=${days===d} onClick=${()=>say({kind:'summary',days:d,big:UI.resp&&UI.resp.big})}>${l}</button>`)}</div>`;
+  return html`${s.few?html`<p class="b">${L('Записей пока мало. Для совпадений мало, покажу факты без выводов','Few entries so far. Too few for coincidences, so facts only, no conclusions')}</p>`:null}
+    ${s.sections.map(x=>html`<div class="col4"><p class="lbl">${x.lab}</p>
+      ${x.kv?html`<p class="b">${x.kv.map(r=>r[0]+' '+r[1]).join(', ')}</p>`:null}
+      ${x.text?html`<p class="b">${x.text}</p>`:null}${x.list?html`<ul class="b" style="margin:0;padding-left:20px">${x.list.map(q=>html`<li>${q}</li>`)}</ul>`:null}</div>`)}
+    ${ST.allergies.length?html`<div class="col4"><p class="lbl">${L('аллергии и непереносимость','allergies and intolerance')}</p><p class="b">${ST.allergies.join(', ')}</p></div>`:null}
+    ${ST.protocols.length||ST.protocol?html`<div class="col4"><p class="lbl">${L('питание','nutrition')}</p><p class="b">${(ST.protocol?[ST.protocol]:[]).concat(ST.protocols).map(p=>p.name+': '+(p.end?fRange(fromDk(p.start),fromDk(p.end)):L('с ','since ')+fDM(fromDk(p.start))+L(', идет',', ongoing'))).join('; ')}</p></div>`:null}
+    ${E().some(e=>e.doc)?html`<div class="col4"><p class="lbl">${L('заметки врача','doctor notes')}</p>${E().filter(e=>e.doc).slice(0,3).map(e=>html`<p class="b" key=${e.id}>${fDM(new Date(e.at))}: ${e.words}</p>`)}</div>`:null}
+    ${!ST.health?html`<p class="c ink2">${L('Шаги и сон из Apple Health появятся в приложении для iPhone','Steps and sleep from Apple Health come in the iPhone app')}</p>`:null}
+    <p class="f ink2">${B?L('Это не медицинское заключение','This is not a medical report'):L('Только факты. Не медицинское заключение','Facts only. Not a medical report')}</p>
+    ${seg}
+    <button class="btn pri" onClick=${copy}><${I} n="copy"/>${L('скопировать сводку','copy summary')}</button>`;
+}
+function DayChart({days}){
+  const T=fromDk(todayK());const from=dk(addD(T,-(days-1)));
+  const top=topSyms(from,todayK(),3).map(x=>x[0]);if(!top.length)return null;
+  const cols=[];let max=1;
+  for(let i=days-1;i>=0;i--){const k=dk(addD(T,-i));const c=top.map(t=>symEnts(t).filter(e=>e.d===k).length);const s=c.reduce((a,b)=>a+b,0);max=Math.max(max,s);cols.push({k,c,s});}
+  const sh=['var(--ink)','var(--ink3)','var(--control)'];
+  return html`<div class="col4"><p class="lbl">${L('записи по дням','entries by day')}</p>
+    <div class="dchart" role="img" aria-label=${L('Записи по дням за ','Entries by day for ')+nDay(days)}>${cols.map(c=>html`<div class="dcol" key=${c.k}>${c.c.map((n,i)=>n?html`<i style=${'height:'+(n/max*100)+'%;background:'+sh[i]}></i>`:null)}</div>`)}</div>
+    <div class="sx"><span>${cap(fDM(fromDk(from)))}</span><span>${L('сегодня','today')}</span></div>
+    <div class="wrap">${top.map((t,i)=>html`<span class="c" key=${t}><i class="sw2" style=${'background:'+sh[i]}></i>${lc(symName(t))} <span class="num">${symEnts(t).filter(e=>e.d>=from).length}</span></span>`)}</div></div>`;
+}
+function Questions(){
+  const qs=ST.questions.filter(x=>x.status!=='done');
+  return html`${qs.length?html`<div class="rows">${qs.map(x=>html`<div class="li"><span class="tt b">${x.text}</span><button class="ib" aria-label=${L('Убрать вопрос','Remove question')} onClick=${()=>{ST.questions=ST.questions.filter(y=>y.id!==x.id);save();}}><${I} n="close" s=${20}/></button></div>`)}</div>`:html`<p class="b ink2">${L('Пока пусто','Nothing yet')}</p>`}`;
+}
+function Insights({keys}){
+  const ks=(keys&&keys.length?keys:topSyms(dk(addD(now(),-29)),todayK(),2).map(x=>x[0]));
+  if(!ks.length)return html`<p class="b ink2">${L('Пока нет записей о самочувствии за 30 дней','No entries about how you feel in 30 days yet')}</p>`;
+  const co=coincidences();
+  return html`${ks.map(k=>{const st=symStats(k,30);if(!st.n)return null;return html`<div class="col4" key=${k}><p class="lbl">${symName(k)}: ${nEnt(st.n)}</p>
+      <p class="c">${L('В течение 3 часов после еды: ','Within 3 hours after food: ')}<span class="num">${st.af} ${L('из','of')} ${st.n}</span>${st.dishes.length?html`<span class="ink2">${' ('+st.dishes.map(d=>d[0]+(d[1]>1?' ×'+d[1]:'')).join(', ')+')'}</span>`:null}</p>
+      <p class="c">${L('После тепла или в жару: ','After heat or on hot days: ')}<span class="num">${st.heat} ${L('из','of')} ${st.n}</span></p>
+      ${st.effort?html`<p class="c">${L('После нагрузки: ','After effort: ')}<span class="num">${st.effort} ${L('из','of')} ${st.n}</span></p>`:null}
+      ${st.pre!==null?html`<p class="c">${L('За 1–3 дня до месячных: ','1–3 days before a period: ')}<span class="num">${st.pre} ${L('из','of')} ${st.n}</span></p>`:null}</div>`;})}
+    <p class="lbl">${L('по группам еды','by food group')}</p>
+    ${co.few?html`<p class="c ink2">${EN()?`Food on ${co.n} of 30 days, groups from 7`:`Еда записана ${co.n} из 30 дней, группы от 7`}</p>`
+      :co.res.length?html`<div class="kvr">${co.res.slice(0,4).map(x=>html`<span class="c">${L('дни с ','days with ')+groupName({g:x.g},true)}</span><span class="c num">${EN()?`${x.a} of ${x.n} with symptoms that day or the next; other days ${x.oa} of ${x.o}`:`${x.a} из ${x.n} с симптомами в тот же или на следующий день; в остальные дни ${x.oa} из ${x.o}`}</span>`)}</div>`
+      :html`<p class="c ink2">${L('Ни одна группа не встречалась 3 дня и больше','No group appeared on 3 or more days')}</p>`}
+    ${!ST.photoUsed?html``:null}`;
+}
+function CycleBlock({keys}){
+  if(ST.cycle==='off')return html`<p class="b">${L('Цикл выключен. Включить можно в настройках','The cycle is off. You can turn it on in settings')}</p>`;
+  if(!periodStarts().length)return html`<p class="b">${L('Цикл пока не отмечен. Когда начнутся месячные, скажите «месячные начались»','No cycle marked yet. When your period starts, say “my period started”')}</p>`;
+  const ks=(keys&&keys.length?keys:topSyms(dk(addD(now(),-89)),todayK(),2).map(x=>x[0]));
+  if(!ks.length)return html`<p class="b ink2">${L('Записей о самочувствии пока нет','No entries about how you feel yet')}</p>`;
+  const c=cycleTile();
+  return html`${c?html`<p class="c ink2">${L('Сейчас: ','Now: ')+c.l+' '+c.v}</p>`:null}
+    ${ks.map(k=>{const l=symEnts(k).filter(x=>x.d>=dk(addD(now(),-89)));const pre=l.filter(x=>prePeriod(x.d)).length;const on=l.filter(x=>onPeriod(fromDk(x.d))).length;const rest=l.length-pre-on;
+      return html`<div class="col4" key=${k}><p class="lbl">${symName(k)}: ${nEnt(l.length)}${L(' за 90 дней',' in 90 days')}</p><div class="kvr"><span class="c">${L('за 1–3 дня до месячных','1–3 days before a period')}</span><span class="c num">${pre}</span><span class="c">${L('во время месячных','during a period')}</span><span class="c num">${on}</span><span class="c">${L('в остальные дни','on other days')}</span><span class="c num">${rest}</span></div></div>`;})}
+    `;
+}
+function dayHint(){
+  const foodDays=new Set(E().filter(e=>e.kind==='food').map(e=>e.d)).size;const n=ST.entries.length;const photos=E().filter(e=>e.photo).length;
+  if(n<5)return null;
+  if(foodDays<7)return {ic:'cam',t:EN()?`Food on ${foodDays} of 7 days`:`Еда записана: ${foodDays} из 7 дней`,s:L('Совпадения от 7 дней','Coincidences from 7 days'),fn:()=>{const el=document.querySelector('.cam input[type=file]');if(el)el.click();}};
+  const d=now().getDate()%3;
+  if(d===0)return {ic:'spark',t:L('что связано с самочувствием?','what is linked to how I feel?'),s:L('Еда, тепло, нагрузка, цикл','Food, heat, effort, cycle'),fn:()=>handleAll(L('что связано с самочувствием?','what is linked to how I feel?'))};
+  if(d===1&&periodStarts().length)return {ic:'drop',t:L('как это связано с циклом?','how is it linked to my cycle?'),s:L('До, во время, в остальные дни','Before, during, other days'),fn:()=>handleAll(L('как это связано с циклом?','how is it linked to my cycle?'))};
+  return {ic:'doc',t:L('сводка к врачу','summary for the doctor'),s:L('За месяц, три или полгода','A month, three or six'),fn:()=>handleAll(L('сводка к врачу','summary for the doctor'))};
+}
+async function onPhoto(ev){
+  const files=Array.from(ev.target.files||[]);ev.target.value='';if(!files.length)return;const f=files[0];
+  if(f.type&&!/^image\//.test(f.type))return notFood();
+  try{const src=await readPhoto(f);const fresh=f.lastModified&&Math.abs(Date.now()-f.lastModified)<3*36e5;const yday=f.lastModified&&dk(new Date(f.lastModified))===dk(addD(now(),-1));
+    const go=()=>{if(yday)return photoYesterday(src,f.lastModified);say({kind:'photo',src,at:fresh?f.lastModified:null,items:[],meal:mealByTime(fresh?new Date(f.lastModified):now()),w:fresh?'photo':'now',other:false,txt:'',n:files.length});};
+    photoConsent(go);}
+  catch(e){toast({title:L('Не получилось открыть фото','Could not open the photo'),sub:L('Попробуйте другой снимок','Try another photo'),icon:'info',acts:[]});}
+}
+function guessDishes(meal){
+  const seen=[];const push=x=>{if(x&&!seen.includes(x))seen.push(x);};
+  for(const e of E())if(e.kind==='food'&&e.meal===meal)for(const it of (e.items||[]))push(it);
+  const typ=EN()?{breakfast:['oatmeal','eggs','coffee','yogurt'],lunch:['soup','salad','pasta','chicken'],dinner:['fish','vegetables','rice','pasta'],snack:['fruit','nuts','yogurt'],food:['salad','soup']}
+             :{breakfast:['овсянка','яичница','кофе','йогурт'],lunch:['суп','салат','паста','курица'],dinner:['рыба','овощи','рис','паста'],snack:['фрукты','орехи','йогурт'],food:['салат','суп']};
+  for(const t of (typ[meal]||typ.food))push(t);
+  return seen.slice(0,6);
+}
+function PhotoBlock({r}){
+  const set=o=>{Object.assign(r,o);rr();};
+  const dishes=guessDishes(r.meal);const o=whenOpts();
+  const go=()=>{const d=r.w==='photo'?new Date(r.at):(o.find(y=>y.id===r.w)||o[0]).d;const extra=r.txt.trim()?r.txt.split(/[,;]/).map(x=>x.trim()).filter(Boolean):[];const items=r.items.concat(extra);const al=ST.allergies.find(a=>items.some(i=>norm(i).indexOf(norm(a).slice(0,4))>=0));UI.resp=null;logFood({items,meal:r.meal,when:d,words:r.txt.trim()||null,photo:r.src});if(al)setTimeout(()=>{if(UI.mtoast){UI.mtoast.sub=L('Здесь ','Here: ')+al+L(', у вас на это аллергия',', you are allergic to it');UI.mtoast.icon='info';rr();}},30);};
+  const Row=({label,children})=>html`<div class="col4"><p class="lbl">${label}</p><div class="wrap">${children}</div></div>`;
+  return html`<section class="card surf" aria-live="polite">
+    <div class="row" style="align-items:flex-start">${r.src?html`<img class="th" src=${r.src} alt=${L('Выбранное фото','Selected photo')} style="width:64px;height:64px"/>`:html`<span class="th" style="width:64px;height:64px;background:var(--canvas);display:block"></span>`}<div class="grow col4"><h2 class="q">${L('фото еды','food photo')+(r.n>1?(EN()?`, ${r.n} photos`:`, ${r.n} фото`):'')}</h2><p class="c ink2">${r.nores?L('Блюдо не узнала. Скажите словами, что ели','I did not recognize the dish. Say in words what you ate'):ST.recognize===false?L('Без распознавания, только фото','No recognition, photo only'):L('Дальше по желанию','The rest is optional')}</p></div><button class="ib" aria-label=${L('Отмена','Cancel')} onClick=${()=>{UI.resp=null;rr();}}><${I} n="close"/></button></div>
+    <${Row} label=${r.nores?L('что ели','what you ate'):L('похоже на','looks like')}>${(r.nores?dishes.slice(0,2):dishes).map(d=>html`<button class=${'chip'+(r.items.includes(d)?' on':'')} key=${d} aria-pressed=${r.items.includes(d)} onClick=${()=>set({items:r.items.includes(d)?r.items.filter(x=>x!==d):r.items.concat([d])})}><span>${d}</span></button>`)}
+      <button class=${'chip'+(r.other?' on':'')} aria-expanded=${r.other} onClick=${()=>set({other:!r.other})}><span>${L('другое','other')}</span></button></${Row}>
+    ${r.other?html`<input class="field" id="pother" value=${r.txt} onInput=${e=>set({txt:e.target.value})} placeholder=${L('через запятую','comma separated')} aria-label=${L('Что еще на фото','What else is in the photo')}/>`:null}
+    <${Row} label=${L('прием пищи','meal')}>${['breakfast','lunch','dinner','snack'].map(m=>html`<button class=${'chip'+(r.meal===m?' on':'')} key=${m} aria-pressed=${r.meal===m} onClick=${()=>set({meal:m,items:[]})}><span>${mealName(m)}</span></button>`)}</${Row}>
+    ${r.at?html`<p class="c ink2">${L('Время фото: ','Photo time: ')+relDT(new Date(r.at))}${r.w==='photo'?html` <button class="link" style="display:inline;width:auto;min-height:0" onClick=${()=>set({w:'now'})}>${L('другое','change')}</button>`:null}</p>`:null}
+    ${!r.at||r.w!=='photo'?html`<${Row} label=${r.at?L('когда ели','when did you eat'):L('у фото нет времени. когда ели?','the photo has no time. when did you eat?')}>${o.slice(0,4).map(w=>html`<button class=${'chip'+(r.w===w.id?' on':'')} key=${w.id} aria-pressed=${r.w===w.id} onClick=${()=>set({w:w.id})}><span>${w.l}</span></button>`)}</${Row}>`:null}
+    <button class="btn pri" onClick=${go}>${L('записать','save')}</button>
+    <p class="f ink2">${L('Подсказки из прошлых записей, не распознавание','Suggestions from past entries, not recognition')}</p>
+  </section>`;
+}
+function Follow({items}){return html`<${ChipGrid} label=${L('Дальше','Next')} items=${items.map(x=>({l:x.l,ic:'spark',fn:()=>handleAll(x.q||x.l)}))}/>`;}
+// ---- voice: recording indicator in the card, line says "идет запись" ----
+function VoiceBlock({r}){
+  const [sec,setSec]=useState(0);const [txt,setTxt]=useState('');
+  useEffect(()=>{const h=setInterval(()=>setSec(s=>s+1),1000);let rec=null;
+    try{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(SR){rec=new SR();rec.lang=EN()?'en-US':'ru-RU';rec.interimResults=true;rec.continuous=true;rec.onresult=e=>{let t='';for(const res of e.results)t+=res[0].transcript;setTxt(t);r.txt=t;};rec.start();r.rec=rec;}}catch(e){rec=null;}
+    return ()=>{clearInterval(h);try{if(rec)rec.stop();}catch(e){}};},[]);
+  const ph=EN()?['Fingertips really numb after a shower','No strength left by the evening','Pasta and salad for lunch','When were my fingers numb last?']:['Сильно немеют кончики пальцев после душа','К вечеру совсем нет сил','На обед паста и салат','Когда немело в последний раз?'];
+  const mm=String(Math.floor(sec/60))+':'+String(sec%60).padStart(2,'0');
+  return html`<section class="card surf" aria-live="polite">
+    <h2 class="q">${L('слушаю','listening')}</h2>
+    <div class="rec" role="status" aria-label=${L('Идет запись, ','Recording, ')+mm}><span class="dot"></span><span class="cs ink2 num">${L('запись, ','recording, ')+mm}</span><div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+    ${txt?html`<p class="b">${txt}</p>`:r.rec?html`<p class="c ink2">${L('Говорите. Текст появится здесь','Speak. The text appears here')}</p>`:html`<p class="c ink2">${L('В этом браузере нет распознавания речи. Выберите фразу или напишите в строке','No speech recognition in this browser. Pick a phrase or type in the line')}</p><div class="col8">${ph.map(p=>html`<button class="choice" style="justify-content:flex-start;text-align:left" onClick=${()=>{UI.resp=null;handleText(p);}}>${p}</button>`)}</div>`}
+    <p class="c ink2">${L('Нажмите «готово», когда закончите','Tap “done” when you are finished')}</p>
+    ${B?html`<div class="foot"><${ChipGrid} items=${voiceChips(r)}/></div>`:null}
+  </section>`;
+}
+function voiceChips(r){return [{l:L('готово','done'),fn:()=>{const t=(r.txt||'').trim();UI.resp=null;if(t)handleAll(t);else rr();}},{l:L('отмена','cancel'),fn:()=>{UI.resp=null;rr();}}];}
+// ---- history by phrase: period and filters ----
+function HistoryBlock({r}){
+  const T=fromDk(todayK());const per=r.per||30;const f=r.f||'all';
+  const range={a:per>365?'0000':dk(addD(T,-(per-1))),b:todayK(),l:per===7?L('неделя','week'):per===30?L('месяц','month'):L('все','all')};
+  const set=o=>say(Object.assign({},r,o));
+  const P=[[7,L('неделя','week')],[30,L('месяц','month')],[999,L('все','all')]];
+  const F=[['all',L('все','all')],['sym',L('самочувствие','how I felt')],['food',L('еда','food')],['worse',L('хуже обычного','worse than usual')],['hot',L('в жару','in the heat')]];
+  let list=ST.entries.filter(x=>x.d>=range.a&&x.d<=range.b);
+  if(f==='sym')list=list.filter(x=>x.kind==='sym');else if(f==='food')list=list.filter(x=>x.kind==='food');else if(f==='worse')list=list.filter(x=>inWorse(x.d));else if(f==='hot')list=list.filter(x=>isHot(new Date(x.at)));
+  const groups=[];let cur=null;for(const x of list){if(!cur||cur.d!==x.d){cur={d:x.d,items:[]};groups.push(cur);}cur.items.push(x);}
+  return html`<section class="card surf" aria-live="polite"><div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${L('история','history')}</h2><p class="c ink2">${F.find(x=>x[0]===f)[1]+', '+range.l}</p></div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${()=>{UI.resp=null;rr();}}><${I} n="close"/></button></div>
+    <div class="seg" role="group" aria-label=${L('Период','Period')}>${P.map(([d,l])=>html`<button class=${'chip'+(per===d?' on':'')} aria-pressed=${per===d} onClick=${()=>set({per:d})}>${l}</button>`)}</div>
+    <div class="seg" role="group" aria-label=${L('Фильтр','Filter')}>${F.map(([id,l])=>html`<button class=${'chip'+(f===id?' on':'')} aria-pressed=${f===id} onClick=${()=>set({f:id})}>${l}</button>`)}</div>
+    ${!groups.length?html`<p class="b ink2">${L('Записей за этот период нет','No entries for this period')}</p>`:groups.slice(0,12).map(g=>html`<div class="col4" key=${g.d}><p class="lbl">${dayHead(g.d)}</p><div class="rows">${g.items.map(x=>html`<${FeedRow} key=${x.id} x=${x}/>`)}</div></div>`)}
+    <${Follow} items=${[{l:L('что с этим связано?','what is linked to it?'),q:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка к врачу','doctor summary')}]}/>
+  </section>`;
+}
+// ---- settings by phrase, no tabs ----
+function SettingsBlockOld(){
+  const close=()=>{UI.resp=null;rr();};
+  const T=(k,v)=>{ST[k]=v;save();};
+  return html`<section class="card surf"><div class="row" style="align-items:flex-start"><h2 class="q grow">${L('настройки','settings')}</h2><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${close}><${I} n="close"/></button></div>
+    <div class="list">
+      <${SwRow} on=${ST.health} fn=${()=>{if(ST.health)cmd(L('отключи Здоровье','disconnect Health'));else cmd(L('подключи Здоровье','connect Health'));}} t="Apple Health" s=${L('Шаги, сон, цикл. Только чтение','Steps, sleep, cycle. Read only')}/>
+      <${SwRow} on=${ST.geo} fn=${()=>T('geo',!ST.geo)} t=${L('Погода','Weather')} s=${L('Нужна только температура','Only the temperature is needed')}/>
+      <${SwRow} on=${ST.theme==='dark'} fn=${()=>{ST.theme=ST.theme==='dark'?'system':'dark';save();applyTheme();}} t=${L('Темная тема','Dark theme')} s=${L('Иначе как в системе','Otherwise same as system')}/>
+      <${SwRow} on=${ST.cycle!=='off'} fn=${()=>{ST.cycle=ST.cycle==='off'?(ST.health?'health':'manual'):'off';save();}} t=${L('Учитывать цикл','Track the cycle')} s=${L('Виден только вам','Only you can see it')}/>
+      <${SwRow} on=${LANG==='en'} fn=${()=>cmd(LANG==='en'?'по-русски':'english')} t="English" s=${L('Записи остаются на языке, на котором сказаны','Entries stay in the language they were said in')}/>
+    </div>
+    <button class="li hint" onClick=${()=>say({kind:'data'})}><span class="tt"><span class="bs">${L('данные и доступ','data and access')}</span><span class="c ink2">${L('Записи хранятся на телефоне','Entries are stored on your phone')}</span></span><${I} n="chevR"/></button>
+    <p class="f ink2">${L('Главный симптом: скажите «главный для меня: усталость»','Main symptom: say “main one: fatigue”')}</p>
+  </section>`;
+}
+function DataBlock(){
+  const close=()=>{UI.resp=null;rr();};
+  const exp=()=>{const txt=JSON.stringify({entries:ST.entries,questions:ST.questions},null,1);try{navigator.clipboard.writeText(txt).then(()=>toast({title:L('Скопировала записи','Entries copied'),sub:L('Вставьте в заметки или письмо','Paste into notes or an email'),acts:[]}),()=>openSheet('copy',{txt}));}catch(e){openSheet('copy',{txt});}};
+  return html`<section class="card surf"><div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${L('данные и доступ','data and access')}</h2><p class="c ink2">${L('Записи хранятся только в этом браузере','Entries are stored only in this browser')}</p></div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${close}><${I} n="close"/></button></div>
+    <p class="b">${EN()?`${ST.entries.length} ${ST.entries.length===1?'entry':'entries'}, ${E().filter(e=>e.photo).length} photos`:`${nEnt(ST.entries.length)}, ${E().filter(e=>e.photo).length} фото`}</p>
+    <button class="link" onClick=${exp}>${L('экспорт записей','export entries')}</button>
+    <button class="link" onClick=${()=>cmd(L('стереть все','erase everything'))}>${L('удалить все записи','delete all entries')}</button>
+    <p class="f ink2">${L('Удаление необратимо','Deleting cannot be undone')}</p>
+  </section>`;
+}
+// v6: today list inside the day card, last three, no scroll
+function TodayRow({x,dup}){
+  const d=new Date(x.at);const w=dup?null:x.words;const txt=w?qt(w):(dup?lc(symName(x.key))+(x.s?', '+sName(x.s):''):x.kind==='sym'?lc(entryTitle(x)):entryTitle(x));
+  const sub=dup?'':w?(x.kind==='sym'?lc(symName(x.key))+(x.s?', '+sName(x.s):''):x.kind==='food'?mealName(x.meal):''):entrySub(x);
+  const fresh=justNow(x);
+  return html`<button class=${'tr6'+(fresh?' new':'')} onClick=${()=>openSheet('rec',{id:x.id})} aria-label=${fT(d)+', '+txt+(sub?', '+sub:'')+(fresh?L(', только что',', just now'):'')+L('. Исправить','. Edit')}>
+    <span class="tm6 num">${fT(d)}</span><span class="tx6"><span class="b">${txt}</span>${sub&&norm(sub)!==norm(txt)?html`<span class="c ink2">${sub}</span>`:null}</span>${fresh?html`<span class="nw6">${L('только что','just now')}</span>`:null}</button>`;
+}
+function DayCard6({l,hint,foot,openDay,HintRow}){
+  const user=l.filter(x=>!(x.kind==='med'&&x.src==='health')&&!(x.kind==='move'&&x.src==='health'));
+  const last=user.slice(0,3).reverse();const more=user.length-last.length;const t=UI.mtoast&&UI.mtoast.inline6?UI.mtoast:null;
+  return html`<section class="card surf d6" aria-live="polite"><${Ctx}/>
+    <div class="today6" aria-label=${L('Сегодня записано','Saved today')}>
+      ${more>0?html`<button class="more6" onClick=${openDay}><span>${EN()?`${more} earlier ${more===1?'entry':'entries'}`:`еще ${more} ${plRu(more,'запись','записи','записей')} раньше`}</span><${I} n="chevR" s=${20}/></button>`:null}
+      ${last.map((x,i)=>html`<${TodayRow} key=${x.id} x=${x} dup=${!!(i&&x.words&&last[i-1].words===x.words&&Math.abs(last[i-1].at-x.at)<6e4)}/>${t&&t.inline6===x.id?html`<div class="acts6"><p class="sr" role="status">${t.title}</p>${t.sub&&!/^(сегодня|today)(,|\s|$)/i.test(t.sub)?html`<p class="c ink2 sub6">${t.sub}</p>`:null}${t.acts.filter(Boolean).map(a=>html`<button class="chip" onClick=${()=>{UI.mtoast=null;a.fn();rr();}}><span>${a.l}</span></button>`)}</div>`:null}`)}
+    </div>
+    ${hint&&last.length<=2?html`<${HintRow} t=${hint.t} s=${hint.s} fn=${hint.fn}/>`:null}
+    ${foot}</section>`;
+}
+function Block(){
+  const r=UI.resp;const tk=todayK();
+  const back=()=>{UI.resp=null;rr();};
+  const Head=({title,sub})=>html`<div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${title}</h2>${sub?html`<p class="c ink2">${sub}</p>`:null}</div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${back}><${I} n="close"/></button></div>`;
+  const foot=B&&UI.footChips?html`<div class="foot"><${ChipGrid} items=${UI.footChips}/></div>`:null;
+  const openDay=()=>say({kind:'answer',q:L('записи за сегодня','today’s entries'),keys:[],range:{a:tk,b:tk,l:L('сегодня','today')},list:true});
+  const HintRow=({t,s,ic,fn})=>html`<button class="li hint" onClick=${fn}>${ic?html`<span class="ico"><${I} n=${ic}/></span>`:null}<span class="tt"><span class="bs">${t}</span>${s?html`<span class="c ink2">${s}</span>`:null}</span><${I} n="chevR"/></button>`;
+  if(!r){
+    const l=onDay(tk);
+    if(!ST.entries.length)return html`<section class=${'card surf'+(V6?' d6':'')} aria-live="polite">${V6?html`<${Ctx}/>`:null}<div class="row"><${Mascot} mood="calm" size=${72}/><div class="grow col4"><h2 class="t2">${L('это ваш первый день','this is your first day')}</h2><p class="c ink2">${L('Скажите, как вы, или сфотографируйте еду','Say how you are, or take a photo of food')}</p></div></div>${foot}</section>`;
+    if(!l.length){const lastE=ST.entries[0];const gap=lastE?ddiff(now(),fromDk(lastE.d)):0;
+      if(gap>=14)return html`<section class="card surf" aria-live="polite"><p class="b">${L('Две недели тихо. Если было хуже обычного, можно записать задним числом','Two quiet weeks. If it was worse than usual, you can log it for past days')}</p>${B?html`<div class="foot"><${ChipGrid} items=${[{l:L('было хуже','it was worse'),fn:()=>focusLine(L('когда и что было?','when and what was it?'))},{l:L('все было обычно','all as usual'),fn:()=>{const ids=addEntries([{kind:'pause',at:now().getTime()}]);save();toast({title:L('Хорошо. Продолжаем с сегодня','Good. Continuing from today'),acts:[undoAct(ids)]});}}]}/></div>`:null}</section>`;
+      if(gap>=7)return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow"><p class="b">${L('Неделю записей не было. Ничего не потеряно, можно начать с сегодня','No entries for a week. Nothing is lost, you can start from today')}</p></div></div>${foot}</section>`;
+      if(ST.firstDay&&ddiff(now(),fromDk(ST.firstDay))===7){const wk=ST.entries.filter(e=>e.d>=ST.firstDay);const top=topSyms(ST.firstDay,tk,1)[0];return html`<section class="card surf" aria-live="polite"><p class="b">${(EN()?`First week: ${nEnt(wk.length)}, ${wk.filter(e=>e.photo).length} photos. `:`Первая неделя: ${nEnt(wk.length)}, ${wk.filter(e=>e.photo).length} фото. `)+(top?L('Чаще всего: ','Most often: ')+lc(symName(top[0]))+'. ':'')+L('Совпадения появятся через 2–3 недели','Coincidences appear after 2–3 weeks')}</p>${foot}</section>`;}
+      const yk=dk(addD(now(),-1));const ys=onDay(yk).filter(x=>x.kind==='sym');const yt=ys.length?cap(L('вчера: ','yesterday: ')+[...new Set(ys.map(x=>lc(symName(x.key))))].join(', ')+'. '):'';
+      return html`<section class=${'card surf'+(V6?' d6':'')} aria-live="polite">${V6?html`<${Ctx}/>`:null}<div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow col4"><p class="b">${yt+L('Сегодня пока тихо','Quiet so far today')}</p></div></div>${foot}</section>`;}
+    const hint=dayHint();const n=l.length;
+    if(V6)return html`<${DayCard6} l=${l} hint=${hint} foot=${foot} openDay=${openDay} HintRow=${HintRow}/>`;
+    return html`<section class="card surf" aria-live="polite">${B?null:html`<p class="lbl">${L('сегодня','today')}</p>`}<p class="b">${daySentence(tk)}</p>
+      ${B?null:html`<button class="link" onClick=${openDay}>${L('раскрыть записи','show entries')}</button>`}
+      ${hint?html`<${HintRow} t=${hint.t} s=${hint.s} fn=${hint.fn}/>`:null}
+      ${B?html`<${HintRow} t=${EN()?`${n} ${n===1?'entry':'entries'} today`:`${n} ${plRu(n,'запись','записи','записей')} сегодня`} s=${L('Открыть день','Open the day')} fn=${openDay}/>`:null}
+      ${foot}</section>`;
+  }
+  if(r.kind==='voice')return html`<${VoiceBlock} r=${r}/>`;
+  if(r.kind==='edit')return html`<${RecSheet} key=${r.id} id=${r.id}/>`;
+  if(r.kind==='safety')return html`<${SafetySheet} v=${r.v}/>`;
+  if(r.kind==='history')return html`<${HistoryBlock} r=${r}/>`;
+  if(r.kind==='settings')return html`<${SettingsBlock} r=${r}/>`;
+  if(r.kind==='card')return html`<${GenericCard} r=${r}/>`;
+  if(r.kind==='states')return html`<${StatesBlock}/>`;
+  if(r.kind==='widgets')return html`<${WidgetsBlock}/>`;
+  if(r.kind==='words')return html`<${WordsBlock} r=${r}/>`;
+  if(r.kind==='data')return html`<${DataBlock}/>`;
+  if(r.kind==='photo')return html`<${PhotoBlock} r=${r}/>`;
+  if(r.kind==='confirm')return html`<section class="card surf"><h2 class="q">${r.title}</h2><p class="b">${r.sub}</p><div class="ch2"><button class="choice" onClick=${()=>{UI.resp=null;r.fn();}}>${r.ok}</button><button class="choice sel" onClick=${back}>${L('отмена','cancel')}</button></div></section>`;
+  if(r.kind==='help'){const ex=EN()?['when were my fingers numb?','what did I eat yesterday?','what is linked to how I feel?','how is it linked to my cycle?','what happened this week?','summary for a month','ask the doctor: …','my period started','dark theme','по-русски']:['когда немело?','что я ела вчера?','что связано с самочувствием?','как это связано с циклом?','что было за неделю?','сводка за месяц','вопрос врачу: …','месячные начались','темная тема','english'];
+    return html`<section class="card surf"><${Head} title=${L('что можно сказать','what you can say')}/><div class="wrap">${ex.map(a=>html`<button class="chip" onClick=${()=>handleAll(a)}><span>${a}</span></button>`)}</div></section>`;}
+  if(r.kind==='summary')return html`<section class=${'card doctor'+(r.big?' bigs':'')}><${Head} title=${L('к врачу','for the doctor')}/><${Summary} days=${r.days||30}/><${ChipGrid} items=${[{l:r.big?L('обычный размер','normal size'):L('крупно для врача','large for the doctor'),fn:()=>say(Object.assign({},r,{big:!r.big}))}]}/></section>`;
+  if(r.kind==='insights')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('совпадения','coincidences')} sub=${L('Совпадения, не причины','Coincidences, not causes')}/><${Insights} keys=${r.keys}/><${Follow} items=${[{l:L('как это связано с циклом?','how is it linked to my cycle?')},{l:L('сводка за месяц','summary for a month')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей за 30 дней. ИИ может ошибаться. Не медицинская рекомендация','From your entries, 30 days. AI can make mistakes. Not medical advice')}</span></p></section>`;
+  if(r.kind==='cycle')return html`<section class="card surf" aria-live="polite"><${Head} title=${L('цикл и самочувствие','cycle and how you feel')}/><${CycleBlock} keys=${r.keys}/><${Follow} items=${[{l:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка за 3 месяца','summary for 3 months')}]}/><p class="ai f"><${I} n="spark" s=${16}/><span>${L('Совпадения, не причины. ИИ может ошибаться. Не медицинская рекомендация','Coincidences, not causes. AI can make mistakes. Not medical advice')}</span></p></section>`;
+  if(r.kind==='questions')return html`<section class="card doctor"><${Head} title=${L('вопросы к приему','questions for the visit')}/><${Questions}/></section>`;
+  if(r.kind==='answer'){
+    const has=r.keys.length||r.isFood||r.isHeat||r.range;
+    return html`<section class="card surf" aria-live="polite"><${Head} title=${qt(r.q)}/>${B&&!r.list&&r.keys.length?html`<${Ctx}/>`:null}
+      ${r.medical?html`<div class="card doctor" style="padding:16px"><h3 class="q">${L('на это лучше ответит врач','your doctor is the right person for this')}</h3><button class="btn pri" onClick=${()=>{addQuestion(r.q);}}>${L('добавить к вопросам','add to questions')}</button></div>`:null}
+      ${r.list&&r.range?html`<${RangeList} range=${r.range} f=${r.isFood?'food':'all'}/>`:null}
+      ${!r.list?r.keys.map(k=>html`<${SymBlock} k=${k}/>`):null}
+      ${r.isFood&&!r.medical&&!r.list?html`<${FoodBlock} yday=${!!(r.range&&r.range.l===L('вчера','yesterday'))}/>`:null}
+      ${r.isHeat&&!r.medical?html`<${HeatBlock}/>`:null}
+      ${!has&&!r.medical?html`<p class="b">${L('В записях не нашла','Not in your entries')}</p><div class="wrap">${(EN()?['when were my fingers numb?','what did I eat yesterday?','what happened this week?']:['когда немело?','что я ела вчера?','что было за неделю?']).map(a=>html`<button class="chip" onClick=${()=>handleText(a)}><${I} n="spark" s=${18}/><span>${a}</span></button>`)}</div>`:null}
+      ${has&&!r.medical?html`<${Follow} items=${r.keys.length?[{l:L('что с этим связано?','what is linked to it?'),q:L('что связано с ','what is linked to ')+lc(symName(r.keys[0]))+'?'},{l:L('как это связано с циклом?','how is it linked to my cycle?'),q:L('как ','how is ')+lc(symName(r.keys[0]))+L(' связано с циклом?',' linked to my cycle?')}]:[{l:L('что связано с самочувствием?','what is linked to how I feel?')},{l:L('сводка к врачу','summary for the doctor')}]}/>`:null}
+      <p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей. Совпадения, не причины. ИИ может ошибаться. Не медицинская рекомендация','From your entries. Coincidences, not causes. AI can make mistakes. Not medical advice')}</span></p>
+    </section>`;}
+  return html`<section class="card surf"><p class="bs">${r.title||''}</p>${r.sub?html`<p class="c ink2">${r.sub}</p>`:null}</section>`;
+}
+
+// ---- three living chips ----
+function chips(){
+  const out=[];const n0=now(),h=n0.getHours(),tk=todayK();const today=onDay(tk);
+  const yk=dk(addD(n0,-1));const ys=onDay(yk).filter(x=>x.kind==='sym');const uniq=[];for(const x of ys)if(!uniq.find(u=>u.key===x.key))uniq.push(x);
+  const lastFood=today.find(x=>x.kind==='food');
+  if(!ST.entries.length){const ph=EN()?['fingers slightly numb','oatmeal and coffee for breakfast']:['слегка немеют пальцы','на завтрак овсянка и кофе'];const first=[{l:L('сфотографировать еду','photograph food'),cam:true,fn:()=>{const el=document.querySelector('.cam input[type=file]');if(el)el.click();}}];return B?first:first.concat(ph.slice(0,1).map(p=>({l:p,fn:()=>handleText(p)})));}
+  if(!today.length&&uniq.length){out.push({l:L('как вчера','same as yesterday'),fn:()=>logSym(uniq.map(u=>({key:u.key,s:u.s,ctx:[]})),null,null)});out.push({l:L('прошло','gone'),fn:()=>{const at=n0.getTime();const ids=addEntries(uniq.map(u=>({kind:'gone',key:u.key,at})));save();toast({title:L('Хорошо, что прошло','Good that it passed'),sub:uniq.map(u=>lc(symName(u.key))).join(', '),acts:[undoAct(ids)]});}});}
+  const inl=()=>{UI.inline=ST.main;rr();};
+  if(ST.protocol&&protoDays()>=14&&!today.length)out.push({l:L('протокол: день ','protocol: day ')+protoDays(),fn:protoAsk});
+  if(ST.appt&&ST.appt===dk(addD(n0,1)))out.push({l:L('сводка к приему','summary for the visit'),fn:()=>say({kind:'summary',days:30})});
+  if(ST.appt&&ST.appt===dk(addD(n0,-1)))out.push({l:L('после приема','after the visit'),fn:afterAppt});
+  if(lastFood&&n0.getTime()-lastFood.at<3*36e5&&ST.main)out.push({l:L('как сейчас?','how is it now?'),star:true,fn:inl});
+  else if(ST.main)out.push({l:symName(ST.main),star:true,fn:inl});
+  if(B&&ST.entries.some(e=>e.words))out.push({l:L('мои слова','my words'),fn:()=>myWords()});
+  if(h>=12&&!today.length)out.push({l:L('сегодня пауза','pause today'),fn:()=>{const ids=addEntries([{kind:'pause',at:n0.getTime()}]);save();toast({title:L('Записала: пауза','Saved: pause'),acts:[undoAct(ids)]});}});
+  if(h>=18&&!today.some(x=>x.kind==='sym'))out.push({l:L('как прошел день?','how was the day?'),fn:()=>{UI.inline=ST.main||'fatigue';rr();}});
+  const disc=[];
+  if(ST.entries.length>=14&&E().filter(e=>e.kind==='food').length>=7)disc.push({l:L('что связано с самочувствием?','what is linked to how I feel?'),fn:()=>handleAll(L('что связано с самочувствием?','what is linked to how I feel?'))});
+  if(ST.entries.length>=14&&periodStarts().length)disc.push({l:L('как это связано с циклом?','how is it linked to my cycle?'),fn:()=>handleAll(L('как это связано с циклом?','how is it linked to my cycle?'))});
+  if(ST.entries.length>=14)disc.push({l:L('сводка к врачу','summary for the doctor'),fn:()=>handleAll(L('сводка к врачу','summary for the doctor'))});
+  if(n0.getDay()===0||n0.getDay()===6)disc.push({l:L('что было за неделю?','what happened this week?'),fn:()=>handleText(L('что было за неделю?','what happened this week?'))});
+  if(disc.length){const i=n0.getDate()%disc.length;out.push(disc[i]);if(disc.length>1)out.push(disc[(i+1)%disc.length]);}
+  out.push({l:L('что я ела вчера?','what did I eat yesterday?'),fn:()=>handleText(L('что я ела вчера?','what did I eat yesterday?'))});
+  if(ST.main)out.push({l:L('когда последний раз?','when was the last time?'),fn:()=>handleText(L('когда ','when ')+lc(symName(ST.main))+'?')});
+  const seen=new Set();return out.filter(c=>!seen.has(c.l)&&seen.add(c.l)).slice(0,B?2:3);
+}
+function ctxOptions(){
+  const n0=now(),o=[];const tk=todayK();
+  const f=E().find(e=>e.kind==='food'&&n0.getTime()-e.at<=3*36e5);
+  if(f)o.push({l:L('после ','after ')+(f.items&&f.items.length?f.items[0]:mealName(f.meal)),c:foodBefore(n0.getTime())});
+  if(weatherOn()&&isHot(n0))o.push({l:L('в жару','in the heat'),c:'hot'});
+  const h=n0.getHours();if(h>=6&&h<=11)o.push({l:L('после душа','after a shower'),c:'shower'});
+  if(ST.health&&stepsFor(n0)>=6000)o.push({l:L('после прогулки','after a walk'),c:'walk'});
+  if(h>=17)o.push({l:L('после работы','after work'),c:'effort'});
+  o.push({l:L('стресс','stress'),c:'stress'});
+  return o.slice(0,4);
+}
+function stepItems(){
+  const close=()=>{UI.inline=null;rr();};
+  if(UI.inline&&UI.inline.step==='ctx'){if(B){UI.inline=null;return null;}const st=UI.inline;const x=ST.entries.find(e=>e.id===st.id);if(!x){close();return null;}
+    return {label:L('после чего? по желанию','after what? optional'),items:ctxOptions().concat([{l:L('ничего такого','nothing special'),c:null}]).map(o=>({l:o.l,fn:()=>{if(o.c&&!x.ctx.includes(o.c)){x.ctx=x.ctx.concat([o.c]);x.edited=Date.now();save();}UI.inline={step:'when',id:x.id};rr();}})).concat([{l:'×',aria:L('Закрыть','Close'),fn:close}])};}
+  if(UI.inline&&UI.inline.step==='when'){if(B){UI.inline=null;return null;}const st=UI.inline;const x=ST.entries.find(e=>e.id===st.id);if(!x){close();return null;}
+    return {label:L('когда?','when?'),items:whenOpts().slice(0,3).map(w=>({l:w.l,fn:()=>{if(w.id!=='now'){x.at=w.d.getTime();x.d=dk(w.d);x.edited=Date.now();sortE();}save();UI.inline=null;toast({title:L('Записала: ','Saved: ')+lc(symName(x.key))+(x.s?', '+sName(x.s):''),sub:cap(relDT(new Date(x.at)))+((x.ctx||[]).length?', '+x.ctx.map(c=>ctxText(c)).join(', '):''),acts:[fixAct(x.id),undoAct([x.id])]});}})).concat([{l:'×',aria:L('Закрыть','Close'),fn:close}])};}
+  if(UI.inline){const k=typeof UI.inline==='string'?UI.inline:UI.inline.sym;const prior=symEnts(k).length>0;
+    const opts=prior?[{l:cmpName('less'),n:1,cmp:'less'},{l:cmpName('same'),n:2,cmp:'same'},{l:cmpName('more'),n:3,cmp:'more'}]:[1,2,3].map(n=>({l:sName(n),n}));
+    return {label:symName(k)+':',items:opts.map(o=>({l:o.l,fn:()=>{const ids=logSym([{key:k,s:o.n,ctx:[]}],null,null);const x=E().find(e=>e.id===ids[0]);if(x&&o.cmp){x.cmp=o.cmp;save();if(UI.mtoast)UI.mtoast.title=L('Записала: ','Saved: ')+lc(symName(k))+', '+cmpName(o.cmp);}UI.inline=B?null:{step:'ctx',id:ids[0]};rr();}})).concat([{l:'×',aria:L('Закрыть','Close'),fn:close}])};}
+  return null;
+}
+function allChips(){
+  const st=stepItems();if(st)return st;
+  if(UI.resp){if(UI.resp.kind==='voice'&&!B)return {items:voiceChips(UI.resp)};if(!B&&UI.resp.chips&&UI.resp.chips.length)return {items:UI.resp.chips};return null;}
+  const c=chips();if(!ST.chipHints)c.length=Math.min(c.length,1);if(!B||V6)c.push({l:V6?L('что спросить?','what to ask?'):'?',aria:L('Что можно сказать','What you can say'),fn:()=>say({kind:'help'})});
+  return {items:c};
+}
+function ChipsBottom({ch}){if(!ch)return null;return html`<div class="acard">${ch.label?html`<p class="lbl">${ch.label}</p>`:null}<${ChipGrid} items=${ch.items}/></div>`;}
+function handleAll(v){if(cmd(v)===false)handleText(v);}
+function InputLine(){
+  const [t,setT]=useState(UI.draft||'');
+  const send=()=>{const v=t.trim();if(!v)return;setT('');UI.draft='';const ph=UI.ph;UI.ph=null;if(ph&&/город|city/.test(ph)){ST.city=v;ST.geo=true;save();setTimeout(()=>fetchWx(true),0);return toast({title:L('Город: ','City: ')+v,acts:[]});}if(ph&&/врач|doctor/.test(ph))return cmd(L('врач сказал: ','doctor said: ')+v);handleAll(v);};
+  return html`<form class="line" onSubmit=${e=>{e.preventDefault();send();}}>
+    <label class=${'cam'+(ST.photoUsed||V6?'':' wide')}><input type="file" accept="image/*" multiple class="sr" aria-label=${L('Фото еды','Food photo')} onChange=${onPhoto}/><${I} n="cam"/>${ST.photoUsed||V6?null:html`<span aria-hidden="true">${L('фото','photo')}</span>`}</label>
+    <input id="line" class="lin" value=${t} onInput=${e=>{setT(e.target.value);UI.draft=e.target.value;}} placeholder=${UI.ph?UI.ph:UI.resp&&UI.resp.kind==='voice'?L('идет запись','recording'):UI.mtoast?L('что-нибудь еще?','anything else?'):V6?L('скажите или спросите','tell me or ask'):B?L('как вы?','how are you?'):L('Как вы?','How are you?')} aria-label=${L('Что записать или спросить','What to save or ask')} enterkeyhint="send" autocomplete="off"/>
+    ${t.trim()?html`<button type="submit" class="mic" aria-label=${L('Отправить','Send')}><${I} n="send"/></button>`:html`<button type="button" class="mic" aria-label=${L('Сказать голосом','Speak')} onClick=${()=>say({kind:'voice',txt:''})}><${I} n="mic"/></button>`}
+  </form>`;
+}
+function Onboarding(){
+  const [h,setH]=useState(true);const [w,setW]=useState(true);
+  let sysDark=false;try{sysDark=matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}
+  const [th,setTh]=useState(ST.theme==='light'||ST.theme==='dark'?ST.theme:(sysDark?'dark':'light'));
+  const [md,setMd]=useState(MODE);
+  const fr=useRef(null),br=useRef(null);
+  useEffect(()=>{const f=fr.current,b=br.current;if(!f||!b)return;let rm=false;try{rm=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}if(rm)return;const a=b.getBoundingClientRect(),m=f.getBoundingClientRect();const dy=(a.top+a.height/2)-(m.top+m.height/2);f.style.transform=`translateY(${dy}px) scale(1.6)`;const t=setTimeout(()=>{f.style.transform='';},1000);return ()=>clearTimeout(t);},[]);
+  const pickTheme=t=>{setTh(t);ST.theme=t;save();applyTheme();};
+  const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();ST.health=false;ST.cycle='manual';if(w)ST.geo=true;if(demo)seedDemo();save();if(w&&!demo)setTimeout(()=>fetchWx(true),50);
+    if(md!==MODE){try{localStorage.setItem('msapp.mode',md);}catch(e){}location.replace(location.pathname+'?v='+md+'&lang='+(ST.lang||'ru'));}};
+  const d=ms=>({style:`animation-delay:${ms}ms`});
+  const Seg=({items,val,fn,label})=>html`<div class="seg" role="group" aria-label=${label}>${items.map(([v,l])=>html`<button class=${'chip'+(val===v?' on':'')} aria-pressed=${val===v} onClick=${()=>fn(v)}><span>${l}</span></button>`)}</div>`;
+  return html`<div class="ob"><div class="obb" ref=${br}>
+      <div class="col center"><div class="flip" ref=${fr}><div class="pop"><${Mascot} mood="happy" size=${96}/></div></div><h1 class="lt rv" ...${d(1300)}>${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2 rv" ...${d(1450)}>${L('Голосом, текстом или фото еды','By voice, text or a food photo')}</p></div>
+      <div class="card surf rv obs" style="gap:0;padding:4px 20px;animation-delay:1650ms"><div class="col4" style="padding-block:10px"><span class="bs">Apple Health</span><span class="c ink2">${L('Подключится в приложении для iPhone. Цикл здесь отмечается словами','Connects in the iPhone app. Here the cycle is marked in words')}</span></div><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')}/>
+        <div class="rw"><span class="bs">${L('Тема','Theme')}</span><${Seg} label=${L('Тема','Theme')} val=${th} fn=${pickTheme} items=${[['light',L('светлая','light')],['dark',L('темная','dark')]]}/></div>
+        <div class="rw"><span class="bs">${L('Версия','Version')}</span><${Seg} label=${L('Версия прототипа','Prototype version')} val=${md} fn=${setMd} items=${[['5','v5'],['5b','v5b'],['6','v6']]}/></div>
+      </div>
+    </div><div class="obf rv" style="animation-delay:1850ms"><p class="f ink2" style="text-align:center;margin:0 0 8px">${L('Не медицинское приложение','Not a medical app')}</p><button class="btn pri" onClick=${()=>start(false)}>${L('начать','start')}</button><button class="link" onClick=${()=>start(true)}>${L('посмотреть с примером','try with sample data')}</button></div></div>`;
+}
+const SH={rec:RecSheet,quick:QuickSheet,voice:VoiceSheet,safety:SafetySheet,copy:CopySheet};
+function SheetHost(){const s=UI.sheet;useEffect(()=>{if(!s)return;const el=document.querySelector('.sheet');if(el)el.focus();},[s&&s.k]);if(!s)return null;const C=SH[s.name];if(!C)return null;return html`<div class="scrim" onClick=${closeSheet} aria-hidden="true"></div><${C} key=${s.k} ...${s}/>`;}
+function App(){
+  const [,f]=useState(0);RR=()=>f(x=>x+1);
+  useEffect(()=>{applyTheme();const k=e=>{if(e.key==='Escape'){if(UI.sheet)closeSheet();else if(UI.resp){UI.resp=null;rr();}}};document.addEventListener('keydown',k);return ()=>document.removeEventListener('keydown',k);},[]);
+  LANG=ST.lang||'ru';document.documentElement.lang=LANG;
+  if(!ST.onboarded)return html`<div class="phone"><${Onboarding}/></div>`;
+  const ch=allChips();
+  useEffect(()=>{if(!V6||UI.resp)return;const sc=document.querySelector('.scr');if(sc)sc.scrollTop=sc.scrollHeight;},[ST.entries.length,UI.mtoast&&UI.mtoast.id,!!UI.resp]);
+  UI.footChips=(B&&ch&&!UI.resp)?ch.items:null;const bottom=B?(UI.resp?null:(ch&&ch.label?ch:null)):ch;
+  return html`<div class="phone">
+    <main class="scr" aria-label=${L('Сегодня','Today')}>
+      <header class="hd"><div class="grow"><h1 class="lt">${L('сегодня','today')}</h1><p class="c ink2">${cap(fHdr(now()))}${ST.demo?html` <span class="acc">${L('пример данных','sample data')}</span>`:null}</p></div></header>
+      ${B?null:html`<${Ctx}/>`}
+      <div class="spacer" aria-hidden="true"></div>
+      <${MainToast}/>
+      <${Block}/>
+    </main>
+    <div class="bot"><${ChipsBottom} ch=${bottom}/><${InputLine}/><div style="height:8px"></div></div>
+    <${SheetHost}/>
+  </div>`;
+}
+ST=loadS();if(ST.photoUsed===undefined)ST.photoUsed=false;{const lg=(location.search.match(/[?&]lang=(en|ru)\b/)||[])[1];if(lg){if(lg!==ST.lang){ST.lang=lg;ST.langSet=true;saveS(ST);}}else if(!ST.langSet&&!ST.onboarded){ST.lang=/^ru/i.test(navigator.language||'')?'ru':'en';saveS(ST);}}LANG=ST.lang||'ru';
+
+// ===== v5 states: everything from the figma sections, reachable by phrase or from «все состояния» =====
+ST.protocol=ST.protocol||null;ST.protocols=ST.protocols||[];ST.allergies=ST.allergies||[];ST.appt=ST.appt||null;ST.copiedAt=ST.copiedAt||0;ST.photoConsent=ST.photoConsent===undefined?null:ST.photoConsent;ST.recognize=ST.recognize!==false;ST.chipHints=ST.chipHints!==false;ST.readAloud=!!ST.readAloud;ST.bigText=!!ST.bigText;ST.hk=ST.hk||{steps:true,sleep:true,walk:true};
+function applyBig(){document.documentElement.classList.toggle('ax',!!ST.bigText);}
+const card=(o)=>say(Object.assign({kind:'card'},o));
+const focusLine=(ph)=>{UI.ph=ph||null;rr();setTimeout(()=>{const el=document.getElementById('line');if(el)el.focus();},60);};
+const noPhoneSettings=()=>toast({title:L('В прототипе настроек телефона нет','No phone settings in the prototype'),sub:L('В приложении откроются Настройки iOS','The app opens iOS Settings'),icon:'info',acts:[]});
+const speak=(t)=>{if(!ST.readAloud)return;try{const u=new SpeechSynthesisUtterance(t);u.lang=EN()?'en-US':'ru-RU';speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}};
+const mainSym=()=>ST.main||'numb';
+function protoDays(){return ST.protocol?ddiff(now(),fromDk(ST.protocol.start))+1:0;}
+function protoStats(){const p=ST.protocol||ST.protocols[ST.protocols.length-1];if(!p)return null;const k=mainSym();const a=fromDk(p.start),end=p.end?fromDk(p.end):now();const days=ddiff(end,a)+1;const inP=symEnts(k).filter(e=>e.d>=p.start&&e.d<=dk(end)).length;const bA=dk(addD(a,-days)),bB=dk(addD(a,-1));const before=symEnts(k).filter(e=>e.d>=bA&&e.d<=bB).length;const foodDays=new Set(E().filter(e=>e.kind==='food'&&e.d>=p.start&&e.d<=dk(end)).map(e=>e.d)).size;return {p,days,inP,before,k,foodDays,skips:Math.max(0,days-foodDays)};}
+// ---- commands ----
+
+function cmd(v){
+  const n=norm(v);
+  if(/^(все состояния|all states)$/.test(n))return say({kind:'states'});
+  if(/^(виджеты|widgets)$/.test(n))return say({kind:'widgets'});
+  if(/^(мои слова|my words)$/.test(n))return myWords(null);
+  if(/(крупн\S* (шрифт|текст)|large text|big text)/.test(n)){ST.bigText=!/(обычн|выключ|normal|off)/.test(n);save();applyBig();return toast({title:ST.bigText?L('Крупный шрифт','Large text'):L('Обычный шрифт','Normal text'),sub:L('Можно менять и в настройках телефона','Can also be changed in phone settings'),acts:[]});}
+  if(/^(обычный шрифт|normal text|normal size|обычный размер)$/.test(n)){ST.bigText=false;save();applyBig();return toast({title:L('Обычный шрифт','Normal text'),acts:[]});}
+  if(/^(настройки|settings)[:\s]+(.+)$/.test(n)){const p=n.replace(/^(настройки|settings)[:\s]+/,'');const map={'удобство':'comfort','comfort':'comfort','ии и фото':'ai','ai and photos':'ai','мои симптомы':'syms','my symptoms':'syms','цикл':'cycle','cycle':'cycle','город и погода':'city','city and weather':'city','apple health':'health','язык':'lang','language':'lang','данные и доступ':'data','data and access':'data'};if(map[p])return map[p]==='data'?say({kind:'data'}):say({kind:'settings',page:map[p]});}
+  // protocol
+  if(/(с сегодня|со? завтра|начинаю|start(ing)?|from today).{0,20}(без |no |gluten|глютен|молоч|dairy|сахар|sugar)/.test(n)||/^(без глютена|без молочного|без сахара|gluten free|dairy free|sugar free)$/.test(n)){
+    const name=/(глютен|gluten)/.test(n)?L('без глютена','gluten free'):/(молоч|dairy)/.test(n)?L('без молочного','dairy free'):/(сахар|sugar)/.test(n)?L('без сахара','sugar free'):L('протокол','protocol');
+    if(ST.protocol)return toast({title:L('Протокол уже идет: ','A protocol is already on: ')+ST.protocol.name+', '+nDay(protoDays()),sub:L('Скажите «закончила протокол», чтобы начать новый','Say “finished the protocol” to start a new one'),icon:'info',acts:[]});
+    ST.protocol={name,start:todayK()};save();return toast({title:L('Записала: с сегодня ','Saved: from today ')+name,sub:L('День 1. Буду отмечать дни протокола. Через две недели покажу, как изменились записи','Day 1. I will mark the protocol days. In two weeks I will show how the entries changed'),acts:[{l:L('как это работает?','how does it work?'),fn:()=>card({title:L('протокол','protocol'),body:L('Дни протокола помечаются в записях. Через 14 дней я сравню записи главного симптома за время протокола и за две недели до него. Это совпадение, не причина','Protocol days are marked in entries. After 14 days I compare the main symptom entries during the protocol and two weeks before. A coincidence, not a cause'),foot:true})}]});}
+  if(/(как идет протокол|история протокола|protocol history|how is the protocol)/.test(n)){const s=protoStats();if(!s)return toast({title:L('Протокола сейчас нет','No protocol right now'),sub:L('Начать: «с сегодня без глютена»','Start: “gluten free from today”'),icon:'info',acts:[]});
+    return card({title:s.p.name+', '+L('день ','day ')+s.days,sub:L('С ','Since ')+fDM(fromDk(s.p.start))+(s.skips?', '+s.skips+L(' без фото еды',' without food photos'):''),rows:[[L('дни 1–7','days 1–7'),symName(s.k)+': '+nEnt(symEnts(s.k).filter(e=>e.d>=s.p.start&&e.d<=dk(addD(fromDk(s.p.start),6))).length)],[L('дни 8–14','days 8–14'),symName(s.k)+': '+nEnt(symEnts(s.k).filter(e=>e.d>=dk(addD(fromDk(s.p.start),7))&&e.d<=dk(addD(fromDk(s.p.start),13))).length)],[L('до протокола','before'),nEnt(s.before)+L(' за ',' in ')+nDay(s.days)]],foot:true,chips:[{l:L('закончила протокол','finish the protocol'),fn:()=>cmd(L('закончила протокол','finished the protocol'))},{l:L('продолжаю','continuing'),fn:()=>{UI.resp=null;rr();}}]});}
+  if(/(закончил\S* протокол|finish(ed)? the protocol|stop the protocol)/.test(n)){if(!ST.protocol)return toast({title:L('Протокола сейчас нет','No protocol right now'),icon:'info',acts:[]});const p=ST.protocol;p.end=todayK();ST.protocols.push(p);ST.protocol=null;save();
+    return toast({title:L('Записала: протокол ','Saved: protocol ')+p.name+L(' закончен',' finished'),sub:nDay(ddiff(fromDk(p.end),fromDk(p.start))+1)+', '+fRange(fromDk(p.start),fromDk(p.end))+L('. Итог сохранен в сводке к врачу','. The result is kept in the doctor summary'),acts:[{l:L('сводка к врачу','doctor summary'),fn:()=>say({kind:'summary',days:30})}]});}
+  if(/(аллерги|непереносим|allerg|intoleran)/.test(n)){const what=v.replace(/.*?(аллерги\S*|непереносимость|allergic to|allergy to|intolerance to|intolerant to)\s*(на\s+)?/i,'').replace(/[.!]+$/,'').trim();if(!what)return card({title:L('аллергия','allergy'),body:L('Скажите, на что: «аллергия на орехи»','Say what to: “allergic to nuts”'),chips:[]});
+    if(!ST.allergies.includes(what))ST.allergies.push(what);save();return toast({title:L('Записала: аллергия на ','Saved: allergy to ')+what,sub:L('Постоянно, в сводке к врачу. Если на фото еды будет это, предупрежу','Permanent, in the doctor summary. If a food photo has it, I will warn you'),acts:[{l:L('отменить','undo'),fn:()=>{ST.allergies=ST.allergies.filter(a=>a!==what);save();toast({title:L('Убрала','Removed'),icon:'undo'});}}]});}
+  if(/(прием|визит|appointment|visit).{0,8}(\d{1,2})\s*(\S+)/.test(n)&&!/(после|был|was|after)/.test(n)){const m=n.match(/(\d{1,2})\s*([а-яa-z]+)/);const mo=monthOf(m[2]);if(mo!==null){const T=now();let d=new Date(T.getFullYear(),mo,+m[1],12);if(d<addD(T,-1))d=new Date(T.getFullYear()+1,mo,+m[1],12);ST.appt=dk(d);save();const dd=ddiff(d,T);
+      return toast({title:L('Записала: прием ','Saved: appointment ')+fDM(d),sub:(dd>0?(EN()?`In ${nDay(dd)}. `:`Через ${nDay(dd)}. `):'')+L('За день до приема предложу сводку. Без пушей, только на экране','A day before, I will offer the summary. No push, only on screen'),acts:[{l:L('сводка к врачу','doctor summary'),fn:()=>say({kind:'summary',days:30})}]});}}
+  if(/(что сказал врач|врач сказал|doctor said)/.test(n)){const txt=v.replace(/.*?(врач сказал|сказал врач|doctor said)[:,]?\s*/i,'').trim();if(txt){const ids=addEntries([{kind:'note',words:txt,doc:true,at:now().getTime()}]);save();return toast({title:L('Записала как заметку врача','Saved as a doctor note'),sub:qt(txt)+L('. Попадет в сводку','. Goes into the summary'),acts:[undoAct(ids)]});}}
+  return cmdBase(v);
+}
+// ---- my words: past phrases as large choices ----
+function myWords(after){const words=[];for(const e of ST.entries){if(e.words&&!words.includes(e.words))words.push(e.words);if(words.length>=5)break;}
+  if(!words.length)return toast({title:L('Своих фраз пока нет','No phrases of yours yet'),sub:L('Они появятся после первых записей','They appear after the first entries'),icon:'info',acts:[]});
+  say({kind:'words',words,after});}
+function WordsBlock({r}){return html`<section class="card surf"><div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${L('мои слова','my words')}</h2><p class="c ink2">${L('Как вы говорили раньше','How you said it before')}</p></div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${()=>{UI.resp=null;rr();}}><${I} n="close"/></button></div>
+  <div class="col8">${r.words.map(w=>html`<button class="choice" key=${w} onClick=${()=>{UI.resp=null;handleText(w);}}>${w}</button>`)}</div>
+  <button class="link" onClick=${()=>{UI.resp=null;rr();}}>${L('ничего из этого','none of these')}</button></section>`;}
+// ---- generic card ----
+function GenericCard({r}){const close=()=>{UI.resp=null;rr();};
+  return html`<section class=${'card '+(r.tone||'surf')} aria-live="polite">${r.title?html`<div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${r.title}</h2>${r.sub?html`<p class="c ink2">${r.sub}</p>`:null}</div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${close}><${I} n="close"/></button></div>`:null}
+    ${r.mascot?html`<div class="row"><${Mascot} mood=${r.mascot} size=${64}/><div class="grow"><p class="b">${r.body}</p></div></div>`:r.body?html`<p class="b">${r.body}</p>`:null}
+    ${r.rows?html`<div class="kvr">${r.rows.map(x=>html`<span class="c ink2">${x[0]}</span><span class="c">${x[1]}</span>`)}</div>`:null}
+    ${r.note?html`<p class="c ink2">${r.note}</p>`:null}
+    ${r.warn?html`<div class="card state" style="padding:16px"><p class="c">${r.warn}</p></div>`:null}
+    ${r.foot?html`<p class="ai f"><${I} n="spark" s=${16}/><span>${L('Из ваших записей. Совпадения это не причины. ИИ может ошибаться. Не медицинская рекомендация','From your entries. Coincidences are not causes. AI can make mistakes. Not medical advice')}</span></p>`:null}
+    ${r.button?html`<button class="btn pri" onClick=${r.button.fn}>${r.button.l}</button>`:null}
+    ${B&&r.chips&&r.chips.length?html`<div class="foot"><${ChipGrid} items=${r.chips}/></div>`:null}
+  </section>`;}
+// ---- widgets demo ----
+function WidgetsBlock(){const k=mainSym();const y=onDay(dk(addD(now(),-1))).filter(x=>x.kind==='sym');
+  return html`<section class="card surf"><div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${L('виджеты','widgets')}</h2><p class="c ink2">${L('Так они выглядят на главном экране и на экране блокировки. Ответ сохраняется без открытия приложения','This is how they look on the home and lock screens. The answer is saved without opening the app')}</p></div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${()=>{UI.resp=null;rr();}}><${I} n="close"/></button></div>
+    <div class="ch2"><div class="card surf" style="padding:14px;box-shadow:inset 0 0 0 1px var(--line)"><p class="f ink2">${L('главный','main')}</p><p class="bs">${symName(k)}</p><div class="wrap" style="margin-top:8px">${[1,2,3].map(n=>html`<button class="chip" style="min-height:36px;padding:0 10px;font-size:13px" onClick=${()=>{UI.resp=null;logSym([{key:k,s:n,ctx:[]}],null,null);}}><span>${sName(n)}</span></button>`)}</div></div>
+      <div class="card surf" style="padding:14px;box-shadow:inset 0 0 0 1px var(--line)"><p class="f ink2">${L('как вчера?','same as yesterday?')}</p><p class="bs">${y.length?[...new Set(y.map(x=>lc(symName(x.key))))].join(', '):L('вчера тихо','quiet yesterday')}</p><div class="wrap" style="margin-top:8px"><button class="chip" style="min-height:36px;padding:0 10px;font-size:13px" onClick=${()=>{UI.resp=null;handleAll(L('как вчера','same as yesterday'));}}><span>${L('да','yes')}</span></button><button class="chip" style="min-height:36px;padding:0 10px;font-size:13px" onClick=${()=>{UI.resp=null;rr();}}><span>${L('нет','no')}</span></button></div></div></div>
+    <div class="card doctor" style="padding:14px"><p class="f ink2">${L('живая активность','live activity')}</p><p class="bs">${ST.worse?L('Хуже обычного, день ','Worse than usual, day ')+worseDayN()+L('. Как сегодня?','. How is today?'):L('Вопрос дня: как сейчас?','Question of the day: how is it now?')}</p></div>
+  </section>`;}
+// ---- all states (moderator) ----
+function statesList(){const T=now();const k=mainSym();const tk=todayK();
+  const seedIf=()=>{if(ST.entries.length<5)seedDemo();};
+  const g=(t,items)=>({t,items});
+  return [
+    g(L('знакомство','welcome'),[[L('онбординг','onboarding'),()=>{ST.onboarded=false;save();}],[L('первый день','first day'),()=>{ST.entries=[];ST.demo=false;save();UI.resp=null;rr();}],[L('погода по месту','weather by location'),()=>card({body:L('Погода помогает находить связь с жарой. Брать по геопозиции или указать город?','Weather helps find links with heat. Use your location or set a city?'),chips:[{l:L('по геопозиции','use location'),fn:()=>{ST.geo=true;ST.city=null;save();UI.resp=null;rr();}},{l:L('указать город','set a city'),fn:()=>{UI.resp=null;focusLine(L('город, например Тбилиси','city, for example Tbilisi'));}}]})]]),
+    g(L('сегодня и ответы','today and answers'),[[L('сегодня, пример данных','today, sample data'),()=>{seedDemo();save();UI.resp=null;rr();}],[L('тихий день','quiet day'),()=>{seedIf();ST.entries=ST.entries.filter(e=>e.d!==tk);save();UI.resp=null;rr();}],[L('ответ: когда немело?','answer: when numb?'),()=>{seedIf();handleAll(L('когда немели пальцы?','when were my fingers numb?'));}],[L('совпадения','coincidences'),()=>{seedIf();say({kind:'insights',keys:[]});}],[L('цикл','cycle'),()=>{seedIf();say({kind:'cycle',keys:[]});}],[L('сводка к врачу','doctor summary'),()=>{seedIf();say({kind:'summary',days:30});}],[L('что можно сказать','what you can say'),()=>say({kind:'help'})],[L('неделя','week'),()=>{seedIf();handleAll(L('что было за неделю?','what happened this week?'));}]]),
+    g(L('строка, голос, запись','line, voice, entry'),[[L('голос','voice'),()=>say({kind:'voice',txt:''})],[L('сила симптома','strength'),()=>{UI.resp=null;UI.inline=k;rr();}],[L('записала','saved'),()=>{UI.resp=null;logSym([{key:k,s:2,ctx:[]}],null,null);}],[L('после записи','after saving'),()=>{UI.resp=null;logSym([{key:k,s:2,ctx:[]}],null,null);UI.mtoast=null;rr();}],[L('исправить запись','edit entry'),()=>{seedIf();openSheet('rec',{id:ST.entries[0].id});}],[L('не поняла','did not catch that'),()=>notUnderstood(L('какой-то странный день сегодня','a strange day somehow'))],[L('мои слова','my words'),()=>{seedIf();myWords();}],[L('температура','fever'),()=>handleText(L('температура 37,8','fever 37.8'))],[L('новый симптом','new symptom'),()=>handleText(L('двоится в глазах','seeing double'))],[L('пауза','pause'),()=>cmd(L('пауза','pause'))],[L('без связи','offline'),()=>offlineSave()],[L('медицинский вопрос','medical question'),()=>handleText(L('можно ли удвоить дозу?','can I double the dose?'))],[L('после таблетки','after a pill'),()=>handleText(L('выпила таблетку','took my pill'))],[L('два симптома','two symptoms'),()=>handleText(L('немеют пальцы и устала','fingers numb and tired'))],[L('заметка','note'),()=>{UI.resp=null;logNote(L('какой-то странный день','a strange day somehow'));}],[L('похоже на повтор','looks like a repeat'),()=>{logSym([{key:k,s:2,ctx:[]}],null,null);UI.mtoast=null;setTimeout(()=>handleText(symName(k).toLowerCase()+', '+L('заметно','noticeably')),50);}],[L('запись уже в сводке','entry already in a summary'),()=>{seedIf();ST.copiedAt=Date.now();save();openSheet('rec',{id:ST.entries[2].id});}],[L('вопрос врачу из строки','question for the doctor'),()=>handleText(L('спросить врача: связано ли онемение с жарой','ask the doctor: is the numbness related to heat'))]]),
+    g(L('разрешения','permissions'),[[L('нет доступа к микрофону','no microphone access'),()=>micDenied()],[L('нет доступа к камере','no camera access'),()=>camDenied()]]),
+    g(L('хуже обычного и цикл','worse than usual and cycle'),[[L('хуже обычного, день 1','worse than usual, day 1'),()=>{ST.worse=null;cmd(L('сегодня хуже обычного','worse than usual today'));}],[L('что делалось','what was going on'),()=>{if(!ST.worse)ST.worse={start:dk(addD(T,-2))};save();cmd(L('что делалось?','what was going on?'));}],[L('вернулось к обычному','back to usual'),()=>{if(!ST.worse)ST.worse={start:dk(addD(T,-2))};cmd(L('вернулось к обычному','back to usual'));}],[L('месячные начались','period started'),()=>cmd(L('месячные начались','my period started'))]]),
+    g(L('еда','food'),[[L('фото еды','food photo'),()=>say({kind:'photo',src:null,at:null,items:[],meal:mealByTime(T),w:'now',other:false,txt:'',n:1})],[L('первое фото: распознавание','first photo: recognition'),()=>{ST.photoConsent=null;save();photoConsent(()=>say({kind:'photo',src:null,at:null,items:[],meal:'lunch',w:'now',other:false,txt:'',n:1}));}],[L('на фото не еда','not food'),()=>notFood()],[L('не узнала продукты','dish not recognized'),()=>say({kind:'photo',src:null,at:null,items:[],meal:'lunch',w:'now',other:false,txt:'',n:1,nores:true})],[L('фото из галереи, вчера','photo from gallery, yesterday'),()=>photoYesterday(null,addD(T,-1).setHours(13,20,0,0))],[L('несколько фото','several photos'),()=>say({kind:'photo',src:null,at:null,items:[],meal:'lunch',w:'now',other:false,txt:'',n:3})],[L('из Telegram','from Telegram'),()=>card({title:L('из Telegram','from Telegram'),body:L('Фото из чата, 12:05. Похоже на завтрак: омлет, кофе','Photo from a chat, 12:05 PM. Looks like breakfast: omelette, coffee'),note:L('В прототипе: так приложение принимает фото через «поделиться»','Prototype: this is how the app receives a photo via share'),chips:[{l:L('да, завтрак','yes, breakfast'),fn:()=>{UI.resp=null;logFood({items:L('омлет, кофе','omelette, coffee').split(', '),meal:'breakfast'});}},{l:L('не еда','not food'),fn:()=>{UI.resp=null;rr();}}]})]]),
+    g(L('питание','nutrition'),[[L('протокол: без глютена','protocol: gluten free'),()=>{ST.protocol=null;cmd(L('с сегодня без глютена','gluten free from today'));}],[L('протокол, день 14','protocol, day 14'),()=>{seedIf();ST.protocol={name:L('без глютена','gluten free'),start:dk(addD(T,-13))};save();cmd(L('как идет протокол?','how is the protocol going?'));}],[L('продолжаете протокол?','continue the protocol?'),()=>{ST.protocol={name:L('без глютена','gluten free'),start:dk(addD(T,-13))};save();protoAsk();}],[L('закончила протокол','protocol finished'),()=>{if(!ST.protocol)ST.protocol={name:L('без глютена','gluten free'),start:dk(addD(T,-13))};cmd(L('закончила протокол','finished the protocol'));}],[L('аллергия','allergy'),()=>cmd(L('у меня аллергия на орехи','I am allergic to nuts'))]]),
+    g(L('к врачу','doctor'),[[L('дата приема','appointment date'),()=>cmd(L('прием 20 ноября','appointment November 20'))],[L('после приема','after the appointment'),()=>{ST.appt=dk(addD(T,-1));save();afterAppt();}],[L('сводка, мало записей','summary, few entries'),()=>{ST.entries=ST.entries.slice(0,4);save();say({kind:'summary',days:30});}],[L('сводка без Здоровья','summary without Health'),()=>{seedIf();ST.health=false;save();say({kind:'summary',days:30});}],[L('сводка крупно для врача','summary, large for the doctor'),()=>{seedIf();say({kind:'summary',days:30,big:true});}],[L('сводка скопирована','summary copied'),()=>{ST.copiedAt=Date.now();save();toast({title:L('Скопировала сводку','Summary copied'),sub:L('Вставьте в сообщение врачу или в заметки','Paste it into a message to your doctor or into notes'),acts:[]});}]]),
+    g(L('пустые периоды','empty periods'),[[L('неделя без записей','a week without entries'),()=>{seedIf();ST.entries=ST.entries.filter(e=>e.d<dk(addD(T,-7)));save();UI.resp=null;rr();}],[L('14 дней без записей','14 days without entries'),()=>{seedIf();ST.entries=ST.entries.filter(e=>e.d<dk(addD(T,-14)));save();UI.resp=null;rr();}],[L('итог первой недели','first week recap'),()=>{seedIf();ST.firstDay=dk(addD(T,-7));ST.entries=ST.entries.filter(e=>e.d>=ST.firstDay&&e.d!==tk);save();UI.resp=null;rr();}]]),
+    g(L('настройки и данные','settings and data'),[[L('настройки','settings'),()=>say({kind:'settings'})],[L('удобство','comfort'),()=>say({kind:'settings',page:'comfort'})],[L('ИИ и фото','AI and photos'),()=>say({kind:'settings',page:'ai'})],[L('мои симптомы','my symptoms'),()=>say({kind:'settings',page:'syms'})],[L('цикл','cycle'),()=>say({kind:'settings',page:'cycle'})],[L('город и погода','city and weather'),()=>say({kind:'settings',page:'city'})],['Apple Health',()=>say({kind:'settings',page:'health'})],[L('язык','language'),()=>say({kind:'settings',page:'lang'})],[L('данные и доступ','data and access'),()=>say({kind:'data'})],[L('удалить все данные','delete all data'),()=>cmd(L('стереть все','erase everything'))]]),
+    g(L('доступность','accessibility'),[[L('крупный шрифт','large text'),()=>cmd(L('крупный шрифт','large text'))],[L('темная тема','dark theme'),()=>cmd(L('темная тема','dark theme'))],[L('светлая тема','light theme'),()=>cmd(L('светлая тема','light theme'))]]),
+    g(L('история','history'),[[L('история','history'),()=>{seedIf();say({kind:'history',per:30,f:'all'});}],[L('самочувствие','how I felt'),()=>{seedIf();say({kind:'history',per:30,f:'sym'});}],[L('еда','food'),()=>{seedIf();say({kind:'history',per:30,f:'food'});}],[L('хуже обычного','worse than usual'),()=>{seedIf();say({kind:'history',per:999,f:'worse'});}],[L('в жару','in the heat'),()=>{seedIf();say({kind:'history',per:30,f:'hot'});}],[L('пусто','empty'),()=>say({kind:'history',per:7,f:'worse'})],[L('день','day'),()=>{seedIf();say({kind:'answer',q:L('записи за сегодня','today’s entries'),keys:[],range:{a:tk,b:tk,l:L('сегодня','today')},list:true});}],[L('запись на вчера','entry for yesterday'),()=>handleText(L('вчера вечером была усталость','yesterday evening I was tired'))]]),
+    g(L('виджеты','widgets'),[[L('виджеты и экран блокировки','widgets and lock screen'),()=>say({kind:'widgets'})]])
+  ];}
+function StatesBlock(){const close=()=>{UI.resp=null;rr();};
+  return html`<section class="card surf"><div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${L('все состояния','all states')}</h2><p class="c ink2">${L('Для модератора теста: открыть любое состояние. В приложении этого экрана нет','For the test moderator: open any state. This screen does not exist in the app')}</p></div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${close}><${I} n="close"/></button></div>
+    ${statesList().map(g=>html`<div class="col4" key=${g.t}><p class="lbl">${g.t}</p><div class="rows">${g.items.map(([l,fn])=>html`<button class="li" key=${l} onClick=${()=>{UI.resp=null;fn();rr();}}><span class="tt"><span class="bs">${l}</span></span><${I} n="chevR"/></button>`)}</div></div>`)}</section>`;}
+// ---- single states ----
+function notUnderstood(v){card({body:L('Не поняла. Скажите иначе или выберите из своих слов','I did not catch that. Say it differently or pick from your words'),chips:[{l:L('мои слова','my words'),fn:()=>myWords()},{l:L('записать как есть','save as is'),fn:()=>{UI.resp=null;logNote(v);}}]});}
+function offlineSave(){const ids=addEntries([{kind:'note',words:L('немеют пальцы после обеда','fingers numb after lunch'),raw:true,at:now().getTime()}]);save();toast({title:L('Записала как есть','Saved as is'),sub:L('Связи нет. Запись сохранена на телефоне, разберу, когда появится сеть','No connection. The entry is kept on your phone, I will sort it when the network is back'),icon:'info',acts:[undoAct(ids)]});}
+function micDenied(){card({body:L('Микрофон для приложения выключен. Можно написать или включить его в настройках телефона','The microphone is off for this app. You can type, or turn it on in phone settings'),chips:[{l:L('написать','type'),fn:()=>{UI.resp=null;focusLine();}},{l:L('открыть настройки','open settings'),fn:noPhoneSettings}]});}
+function camDenied(){card({body:L('Камера выключена. Можно выбрать фото из галереи или включить камеру в настройках','The camera is off. You can pick a photo from the gallery or turn the camera on in settings'),chips:[{l:L('из галереи','from gallery'),fn:()=>{UI.resp=null;const el=document.querySelector('.cam input[type=file]');if(el)el.click();}},{l:L('открыть настройки','open settings'),fn:noPhoneSettings}]});}
+function notFood(){card({body:L('Не похоже на еду. Сохранить как фото к дню?','This does not look like food. Keep it as a photo of the day?'),chips:[{l:L('сохранить к дню','keep for the day'),fn:()=>{UI.resp=null;logNote(L('фото к дню','photo of the day'));}},{l:L('удалить','delete'),fn:()=>{UI.resp=null;rr();}}]});}
+function photoConsent(go){if(ST.photoConsent!==null)return go();card({title:L('первое фото еды','first food photo'),body:L('Чтобы узнать блюдо, фото уйдет на распознавание. Хранится только на телефоне, результат можно исправить','To name the dish, the photo goes out for recognition. It is stored only on your phone, the result can be edited'),chips:[{l:L('распознавать','recognize'),fn:()=>{ST.photoConsent=true;ST.recognize=true;save();go();}},{l:L('только сохранить фото','only keep the photo'),fn:()=>{ST.photoConsent=false;ST.recognize=false;save();go();}}]});}
+function photoYesterday(src,at){const d=new Date(at);card({body:L('Фото снято вчера, ','The photo was taken yesterday, ')+fT(d)+L('. Записать на вчера?','. Save it for yesterday?'),chips:[{l:L('на вчера','for yesterday'),fn:()=>say({kind:'photo',src,at,items:[],meal:mealByTime(d),w:'photo',other:false,txt:'',n:1})},{l:L('на сегодня','for today'),fn:()=>say({kind:'photo',src,at:null,items:[],meal:mealByTime(now()),w:'now',other:false,txt:'',n:1})}]});}
+function protoAsk(){const s=protoStats();card({body:(s?s.p.name+' '+nDay(s.days)+(s.skips>=3?L(', записей о еде три дня не было',', no food entries for three days'):''):'')+L('. Продолжаете?','. Continuing?'),chips:[{l:L('продолжаю','continuing'),fn:()=>{UI.resp=null;rr();}},{l:L('закончила протокол','finish the protocol'),fn:()=>cmd(L('закончила протокол','finished the protocol'))}]});}
+function afterAppt(){card({body:L('Прием был вчера. Что сказал врач, можно записать: попадет в сводку как заметка врача','The appointment was yesterday. You can save what the doctor said: it goes into the summary as a doctor note'),chips:[{l:L('записать','save'),fn:()=>{UI.resp=null;focusLine(L('что сказал врач?','what did the doctor say?'));}},{l:L('ничего','nothing'),fn:()=>{ST.appt=null;save();UI.resp=null;rr();}}]});}
+function newSymptomAsk(v,key,s){card({body:cap(symName(key))+L(': такого в записях не было. Держится больше суток?',': nothing like this in your entries. Has it lasted more than a day?'),chips:[{l:L('больше суток','more than a day'),fn:()=>{UI.resp=null;const ids=logSym([{key,s,ctx:[],long:true}],null,v);const x=E().find(e=>e.id===ids[0]);if(x){x.newLong=true;save();}UI.mtoast=null;card({title:L('новое и долгое','new and lasting'),body:L('Записала: ','Saved: ')+lc(symName(key))+L(', больше суток. В сводке к врачу будет первым',', more than a day. It goes first in the doctor summary'),warn:L('Если резко ухудшилось зрение, речь или сила в руке или ноге, обратитесь за помощью','If your vision, speech or strength in an arm or leg got worse suddenly, seek help'),chips:[{l:L('сводка к врачу','doctor summary'),fn:()=>say({kind:'summary',days:30})}]});}},{l:L('меньше суток','less than a day'),fn:()=>{UI.resp=null;logSym([{key,s,ctx:[]}],null,v);}}]});}
+// ---- settings pages ----
+
+function SettingsBlock({r}){const page=r&&r.page;const close=()=>{UI.resp=null;rr();};const back=()=>say({kind:'settings'});
+  const Head=({t,s})=>html`<div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${t}</h2>${s?html`<p class="c ink2">${s}</p>`:null}</div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${close}><${I} n="close"/></button></div>`;
+  const Tg=({k,on,fn,t,s})=>html`<${SwRow} on=${on} fn=${fn} t=${t} s=${s}/>`;
+  const Row=({t,s,fn})=>html`<button class="li" onClick=${fn}><span class="tt"><span class="bs">${t}</span>${s?html`<span class="c ink2">${s}</span>`:null}</span><${I} n="chevR"/></button>`;
+  if(!page)return html`<section class="card surf"><${Head} t=${L('настройки','settings')}/><div class="list">
+    <${Row} t=${L('удобство','comfort')} s=${L('Крупный шрифт, темная тема, озвучивание','Large text, dark theme, read aloud')} fn=${()=>say({kind:'settings',page:'comfort'})}/>
+    <${Row} t=${L('ИИ и фото','AI and photos')} s=${L('Распознавание еды, подсказки чипов','Food recognition, chip suggestions')} fn=${()=>say({kind:'settings',page:'ai'})}/>
+    <${Row} t=${L('мои симптомы','my symptoms')} s=${L('Главный: ','Main: ')+symName(mainSym())} fn=${()=>say({kind:'settings',page:'syms'})}/>
+    <${Row} t=${L('цикл','cycle')} s=${ST.cycle==='off'?L('выключен','off'):L('виден только вам','only you can see it')} fn=${()=>say({kind:'settings',page:'cycle'})}/>
+    <${Row} t=${L('город и погода','city and weather')} s=${ST.geo?(ST.city||L('по геопозиции','by location')):L('выключена','off')} fn=${()=>say({kind:'settings',page:'city'})}/>
+    <${Row} t="Apple Health" s=${ST.health?L('подключен, только чтение','connected, read only'):L('в приложении для iPhone','in the iPhone app')} fn=${()=>say({kind:'settings',page:'health'})}/>
+    <${Row} t=${L('язык','language')} s=${LANG==='en'?'English':'русский'} fn=${()=>say({kind:'settings',page:'lang'})}/>
+    <${Row} t=${L('данные и доступ','data and access')} s=${L('Записи хранятся на телефоне','Entries are stored on your phone')} fn=${()=>say({kind:'data'})}/>
+  </div><p class="f ink2">${L('Все это можно сказать строкой: «темная тема», «месячные начались», «english»','All of this can be said in the line: “dark theme”, “my period started”, “по-русски”')}</p></section>`;
+  const wrap=(t,s,body)=>html`<section class="card surf"><div class="row" style="align-items:flex-start"><button class="ib" aria-label=${L('Назад','Back')} onClick=${back}><${I} n="chevL"/></button><div class="grow col4"><h2 class="q">${t}</h2>${s?html`<p class="c ink2">${s}</p>`:null}</div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${close}><${I} n="close"/></button></div>${body}</section>`;
+  if(page==='comfort')return wrap(L('удобство','comfort'),L('Шрифт и тема берутся из системы, здесь можно переопределить','Text size and theme come from the system, you can override them here'),html`<div class="list"><${Tg} on=${ST.bigText} fn=${()=>{ST.bigText=!ST.bigText;save();applyBig();}} t=${L('крупный шрифт','large text')}/><${Tg} on=${ST.theme==='dark'} fn=${()=>{ST.theme=ST.theme==='dark'?'system':'dark';save();applyTheme();}} t=${L('темная тема','dark theme')}/><${Tg} on=${ST.readAloud} fn=${()=>{ST.readAloud=!ST.readAloud;save();if(ST.readAloud)speak(L('Озвучивание включено','Read aloud is on'));}} t=${L('озвучивать ответы','read answers aloud')}/><${Tg} on=${ST.comfort.haptic!==false} fn=${()=>{ST.comfort.haptic=ST.comfort.haptic===false;save();haptic('save');}} t=${L('сильный отклик на нажатие','strong tap feedback')} s=${L('Вибрация и встряска кнопки, чтобы нажатие было заметно даже онемевшими пальцами','Vibration and a button shake, so a tap is felt even with numb fingers')}/></div>`);
+  if(page==='ai')return wrap(L('ИИ и фото','AI and photos'),L('Фото хранятся только на телефоне. На распознавание уходит снимок без даты и места','Photos stay on your phone. Recognition gets the image without date or location'),html`<div class="list"><${Tg} on=${ST.recognize} fn=${()=>{ST.recognize=!ST.recognize;ST.photoConsent=ST.recognize;save();}} t=${L('распознавать еду на фото','recognize food in photos')}/><${Tg} on=${ST.chipHints} fn=${()=>{ST.chipHints=!ST.chipHints;save();}} t=${L('подсказки чипов','chip suggestions')}/></div>`);
+  if(page==='syms'){const keys=[...new Set([mainSym(),...ST.symptoms,...Object.keys(ST.custom)])];return wrap(L('мои симптомы','my symptoms'),L('Главный показывается чипом','The main one shows as a chip'),html`<div class="col8">${keys.map(k=>html`<button class=${'choice'+(k===mainSym()?' sel':'')} key=${k} onClick=${()=>{ST.main=k;save();}}>${symName(k)}${k===mainSym()?L(', главный',', main'):''}</button>`)}</div><button class="link" onClick=${()=>{UI.resp=null;focusLine(L('главный для меня: …','main one: …'));}}>${L('добавить симптом','add a symptom')}</button>`);}
+  if(page==='cycle'){const last=periodStarts()[0];return wrap(L('цикл','cycle'),L('Виден только вам. В сводку попадает как «дни до месячных»','Only you can see it. In the summary it appears as “days before a period”'),html`<div class="list"><${Tg} on=${ST.cycle!=='off'} fn=${()=>{ST.cycle=ST.cycle==='off'?(ST.health?'health':'manual'):'off';save();}} t=${L('учитывать цикл','track the cycle')}/></div><div class="col8"><button class="choice" onClick=${()=>cmd(L('месячные начались','my period started'))}>${L('последние месячные: ','last period: ')+(last?fDM(fromDk(last)):L('нет данных','no data'))}</button><button class="choice" onClick=${()=>toast({title:L('Длина цикла считается по отметкам','Cycle length is computed from marks'),icon:'info',acts:[]})}>${L('длина цикла: 28 дней','cycle length: 28 days')}</button></div>`);}
+  if(page==='city')return wrap(L('город и погода','city and weather'),L('Нужна только температура. Место хранится примерно, до города','Only the temperature is needed. The place is kept roughly, to the city'),html`<div class="list"><${Tg} on=${ST.geo} fn=${()=>{ST.geo=!ST.geo;save();if(ST.geo)fetchWx(true);}} t=${L('погода в записях','weather in entries')}/></div><div class="col8"><button class="choice" onClick=${()=>{UI.resp=null;focusLine(L('город, например Тбилиси','city, for example Tbilisi'));}}>${ST.city||(ST.wx&&ST.wx.lat!=null?L('по геопозиции','by location'):L('указать город','set a city'))}</button></div>`);
+  if(page==='health'&&!ST.demo)return wrap('Apple Health',L('Подключится в приложении для iPhone, только чтение','Connects in the iPhone app, read only'),html`<p class="b">${L('Здесь цикл можно отмечать словами: «месячные начались»','Here you can mark the cycle in words: “my period started”')}</p>`);
+  if(page==='health')return wrap('Apple Health',L('Только чтение. Приложение ничего не записывает в Здоровье','Read only. The app writes nothing to Health'),html`<div class="list"><${Tg} on=${ST.health} fn=${()=>cmd(ST.health?L('отключи Здоровье','disconnect Health'):L('подключи Здоровье','connect Health'))} t=${L('подключено','connected')}/><${Tg} on=${ST.hk.steps} fn=${()=>{ST.hk.steps=!ST.hk.steps;save();}} t=${L('шаги','steps')}/><${Tg} on=${ST.hk.sleep} fn=${()=>{ST.hk.sleep=!ST.hk.sleep;save();}} t=${L('сон','sleep')}/><${Tg} on=${ST.hk.walk} fn=${()=>{ST.hk.walk=!ST.hk.walk;save();}} t=${L('скорость ходьбы','walking speed')}/></div>`);
+  if(page==='lang')return wrap(L('язык','language'),L('Записи остаются на том языке, на котором сказаны','Entries stay in the language they were said in'),html`<div class="col8"><button class=${'choice'+(LANG==='ru'?' sel':'')} onClick=${()=>cmd('по-русски')}>русский</button><button class=${'choice'+(LANG==='en'?' sel':'')} onClick=${()=>cmd('english')}>English</button></div>`);
+  return null;}
+applyBig();
+
+// ---- explicit feedback: no vibration on iPhone web, so the screen does the buzzing ----
+// press: instant squeeze under the finger; release: rattle like a motor + ring outside the finger; saves and warnings buzz the whole phone
+const hOn=()=>!(ST.comfort&&ST.comfort.haptic===false);
+function phoneBuzz(){const p=document.querySelector('.phone');if(!p)return;p.classList.remove('pbuzz');void p.offsetWidth;p.classList.add('pbuzz');p.addEventListener('animationend',()=>p.classList.remove('pbuzz'),{once:true});}
+function haptic(kind){if(!hOn())return;const pat=kind==='save'?[40,40,90]:kind==='warn'?[90,60,90]:kind==='undo'?[25,40,25]:[35];try{if(navigator.vibrate)navigator.vibrate(pat);}catch(e){}if(kind==='save'||kind==='warn'||kind==='undo')phoneBuzz();}
+const TAPSEL='.chip,.choice,.btn,.li,.fi,.tb,.tx,.mic,.cam,.link,.ib,.sw,.cx,.tr6,.more6';
+function ring(el){const r=el.getBoundingClientRect();if(!r.width)return;const d=document.createElement('div');d.className='ring';d.setAttribute('aria-hidden','true');const rad=getComputedStyle(el).borderRadius||'16px';Object.assign(d.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',borderRadius:rad});document.body.appendChild(d);d.addEventListener('animationend',()=>d.remove(),{once:true});setTimeout(()=>d.remove(),900);}
+let PRESSED=null;
+document.addEventListener('pointerdown',e=>{const el=e.target.closest(TAPSEL);if(!el||!hOn())return;PRESSED=el;el.classList.remove('tap');el.classList.add('press');},{passive:true});
+function release(e,fire){const el=PRESSED;PRESSED=null;if(!el)return;el.classList.remove('press');if(!fire)return;void el.offsetWidth;el.classList.add('tap');el.addEventListener('animationend',()=>el.classList.remove('tap'),{once:true});ring(el);haptic(el.classList.contains('btn')?'save':'tap');}
+document.addEventListener('pointerup',e=>release(e,true),{passive:true});
+document.addEventListener('pointercancel',e=>release(e,false),{passive:true});
+
+// ---- figma v5: edit and safety are cards on the one screen, not sheets ----
+function openSheet(name,p){if(name==='rec')return say({kind:'edit',id:p.id});if(name==='safety')return say({kind:'safety',v:p.v});return openSheetBase(name,p);}
+function closeSheet(){if(UI.resp&&(UI.resp.kind==='edit'||UI.resp.kind==='safety')){UI.resp=null;rr();return;}return closeSheetBase();}
+function Frame({title,onBack,children,noClose}){
+  if(UI.sheet)return html`<div class="sheet" role="dialog" aria-modal="true" aria-label=${title} tabindex="-1"><div class="handle" aria-hidden="true"></div>${UI.toast&&UI.toast.where==='sheet'?html`<${SheetToast}/>`:null}<div class="shd">${onBack?html`<button class="ib" aria-label=${L('Назад','Back')} onClick=${onBack}><${I} n="chevL"/></button>`:null}<h2 class="t2 grow">${title}</h2>${noClose?null:html`<button class="ib" aria-label=${L('Закрыть','Close')} onClick=${closeSheet}><${I} n="close"/></button>`}</div>${children}</div>`;
+  return html`<section class="card surf" aria-label=${title}><div class="row" style="align-items:flex-start">${onBack?html`<button class="ib" aria-label=${L('Назад','Back')} onClick=${onBack}><${I} n="chevL"/></button>`:null}<h2 class="q grow">${title}</h2>${noClose?null:html`<button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${closeSheet}><${I} n="close"/></button>`}</div>${children}</section>`;}
+
+// ---- real weather: location or city -> Open-Meteo, only the temperature, place rounded to ~10 km ----
+let WXBUSY=false;
+async function wxCoords(){
+  if(ST.city&&!(ST.wx&&ST.wx.city===ST.city&&ST.wx.lat!=null)){const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language='+(EN()?'en':'ru')+'&name='+encodeURIComponent(ST.city));const j=await r.json();const g=j.results&&j.results[0];if(!g)throw new Error('city');return {lat:Math.round(g.latitude*10)/10,lon:Math.round(g.longitude*10)/10,city:ST.city};}
+  if(ST.wx&&ST.wx.lat!=null&&(!ST.city||ST.wx.city===ST.city))return {lat:ST.wx.lat,lon:ST.wx.lon,city:ST.wx.city||null};
+  return await new Promise((res,rej)=>{if(!navigator.geolocation)return rej(new Error('geo'));navigator.geolocation.getCurrentPosition(p=>res({lat:Math.round(p.coords.latitude*10)/10,lon:Math.round(p.coords.longitude*10)/10,city:null}),()=>rej(new Error('geo')),{maximumAge:36e5,timeout:15000,enableHighAccuracy:false});});
+}
+async function fetchWx(force){
+  if(ST.demo||!weatherOn()||WXBUSY)return;
+  if(!force&&ST.wx&&ST.wx.cur&&Date.now()-ST.wx.cur.at<30*6e4&&(!ST.city||ST.wx.city===ST.city))return;
+  WXBUSY=true;const prev=ST.wxErr;
+  try{const c=await wxCoords();const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m&daily=temperature_2m_max&past_days=92&forecast_days=1&timezone=auto`);if(!r.ok)throw new Error('net');const j=await r.json();
+    const days={};(j.daily&&j.daily.time||[]).forEach((t,i)=>{const v=j.daily.temperature_2m_max[i];if(v!=null)days[t]=Math.round(v);});
+    ST.wx={lat:c.lat,lon:c.lon,city:c.city,cur:{t:Math.round(j.current.temperature_2m),at:Date.now()},days};ST.wxErr=null;save();rr();}
+  catch(e){ST.wxErr=e.message==='geo'?'geo':e.message==='city'?'city':'net';save();
+    if(ST.wxErr!==prev){if(ST.wxErr==='geo')toast({title:L('Без геопозиции','No location'),sub:L('Погоду можно брать по городу','Weather can come from a city'),icon:'info',acts:[{l:L('указать город','set a city'),fn:()=>focusLine(L('город, например Тбилиси','city, for example Tbilisi'))}]});else if(ST.wxErr==='city')toast({title:L('Город не нашла','City not found'),sub:ST.city||'',icon:'info',acts:[{l:L('другой город','another city'),fn:()=>{ST.city=null;save();focusLine(L('город, например Тбилиси','city, for example Tbilisi'));}}]});}
+    rr();}
+  finally{WXBUSY=false;}
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ST.onboarded)fetchWx();});
+setTimeout(()=>{if(ST.onboarded)fetchWx();},400);
+// migration: earlier builds faked Apple Health outside the sample
+if(ST&&!ST.demo&&ST.health){ST.health=false;if(ST.cycle==='health')ST.cycle='manual';saveS(ST);}
+render(html`<${App}/>`,document.getElementById('app'));
+</script></body></html>
