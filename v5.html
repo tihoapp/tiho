@@ -1280,7 +1280,7 @@ function Block(){
   const r=UI.resp;const tk=todayK();
   const back=()=>{UI.resp=null;rr();};
   const Head=({title,sub})=>html`<div class="row" style="align-items:flex-start"><div class="grow col4"><h2 class="q">${title}</h2>${sub?html`<p class="c ink2">${sub}</p>`:null}</div><button class="ib" aria-label=${L('К сегодня','Back to today')} onClick=${back}><${I} n="close"/></button></div>`;
-  const foot=B&&UI.footChips?html`<div class="foot"><${ChipGrid} items=${UI.footChips}/></div>`:null;
+  const foot=B&&UI.footChips?html`<div class="foot">${UI.footLabel?html`<p class="lbl">${UI.footLabel}</p>`:null}<${ChipGrid} items=${UI.footChips} label=${UI.footLabel||undefined}/></div>`:null;
   const openDay=()=>say({kind:'answer',q:L('записи за сегодня','today’s entries'),keys:[],range:{a:tk,b:tk,l:L('сегодня','today')},list:true});
   const HintRow=({t,s,ic,fn})=>html`<button class="li hint" onClick=${fn}>${ic?html`<span class="ico"><${I} n=${ic}/></span>`:null}<span class="tt"><span class="bs">${t}</span>${s?html`<span class="c ink2">${s}</span>`:null}</span><${I} n="chevR"/></button>`;
   if(!r){
@@ -1430,7 +1430,7 @@ function App(){
   if(!ST.onboarded)return html`<div class="phone"><${Onboarding}/></div>`;
   const ch=allChips();
   useEffect(()=>{if(!V6||UI.resp)return;const sc=document.querySelector('.scr');if(sc)sc.scrollTop=sc.scrollHeight;},[ST.entries.length,UI.mtoast&&UI.mtoast.id,!!UI.resp]);
-  UI.footChips=(B&&ch&&!UI.resp)?ch.items:null;const bottom=B?(UI.resp?null:(ch&&ch.label?ch:null)):ch;
+  UI.footChips=(B&&ch&&!UI.resp)?ch.items:null;UI.footLabel=(B&&ch&&!UI.resp)?ch.label||null:null;const bottom=B?null:ch; // v5b/v6: steps live in the card footer only, never twice
   return html`<div class="phone">
     <main class="scr" aria-label=${L('Сегодня','Today')}>
       <header class="hd"><div class="grow"><h1 class="lt">${L('сегодня','today')}</h1><p class="c ink2">${cap(fHdr(now()))}${ST.demo?html` <span class="acc">${L('пример данных','sample data')}</span>`:null}</p></div><button class="ib surf hset" aria-label=${L('Настройки','Settings')} onClick=${()=>cmd(L('настройки','settings'))}><${I} n="sliders"/></button></header>
