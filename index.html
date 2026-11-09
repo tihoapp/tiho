@@ -430,25 +430,25 @@ const LEX=[
   ['fever',/(температур|простыл|простуд|болею|заболел|грипп|инфекц|озноб|ангин|fever|\bflu\b|a cold|feel sick|\bsick\b|infection|chills)/],
   ['headache',/(болит голов|голова болит|головн\S* бол|мигрен|headache|migraine)/],
   ['numb',/(неме|немот|не чувству\S* пальц|numb)/],
-  ['fatigue',/(устал|усталост|утомл|нет сил|без сил|разбит|вымота|tired|fatigue|exhaust|worn out)/],
+  ['fatigue',/(устал|усталост|утомл|нет сил|без сил|разбит|вымота|tired|fatigue|exhaust|worn out|no energy|out of energy|drained|wiped out)/],
   ['fog',/(туман|тормож|не соображ|рассеян|забываю|brain fog|foggy|\bfog\b)/],
-  ['legs',/(слабост\S* в ног|ноги слаб|ватн\S* ног|ноги ватн|ноги не держ|weak legs|legs (feel |are )?weak)/],
+  ['legs',/(слабост\S* в ног|ноги слаб|ватн\S* ног|ноги ватн|ноги не держ|weak legs|legs (feel |are )?weak|heavy legs|legs (feel |are )?(heavy|like jelly)|jelly legs)/],
   ['vision',/(двоит|двоени|двоится|double vision|seeing double)/],
   ['blur',/(расплыв|нечетк|мутно в глаз|пелена|blurr)/],
   ['dizzy',/(головокруж|кружится|кружилась|кружило|dizz|vertigo)/],
   ['tingle',/(покалыв|мурашк|tingl|pins and needles)/],
-  ['sleep',/(плохо спал|не спал|не выспал|бессонн|просыпал|плохой сон|poor sleep|bad sleep|couldn.?t sleep|didn.?t sleep|insomnia)/],
+  ['sleep',/(плохо спал|не спал|не выспал|бессонн|просыпал|плохой сон|poor sleep|bad sleep|couldn.?t sleep|didn.?t sleep|insomnia|slept (badly|poorly|bad)|bad night|barely slept)/],
   ['flush',/(покраснел|прилив|flush|red face|face (got |went |is )?red)/],
   ['stomach',/(тяжест\S* в живот|тяжесть после|вздут|живот|stomach|bloat)/],
   ['spasm',/(спазм|судорог|сводит|spasm|cramp)/],
   ['balance',/(шатает|шатало|равновеси|координац|unsteady|off balance|wobbl)/],
-  ['bladder',/(позыв|мочев|bladder|urgency)/],
-  ['weak',/(слабост|weakness)/],
+  ['bladder',/(позыв|мочев|в туалет|bladder|urgency|need to pee|to the (toilet|bathroom))/],
+  ['weak',/(слабост|weakness|weak all over|feel(ing)? weak)/],
   ['pain',/(боль|болит|болел|болят|pain|hurt|ache)/]
 ];
-const S3=new Set('сильно очень жутко ужасно невыносимо сильная сильный сильное сильные сильнее strong strongly severe very really badly terrible awful'.split(' '));
+const S3=new Set('сильно очень жутко ужасно невыносимо сильная сильный сильное сильные сильнее strong strongly severe very really terrible awful'.split(' '));
 const S2=new Set('заметно средне ощутимо прилично умеренно заметное заметная noticeable noticeably moderate moderately quite'.split(' '));
-const S1=new Set('слабо слегка чуть немного немножко слабое легкое легкая mild mildly slight slightly little'.split(' '));
+const S1=new Set('слабо слегка чуть немного немножко слабое легкое легкая mild mildly slight slightly little bit somewhat'.split(' '));
 const toks=t=>norm(t).split(/[^a-zа-я0-9-]+/).filter(Boolean);
 function strengthOf(t){const ts=toks(t);if(ts.some(x=>S3.has(x)))return 3;if(ts.some(x=>S2.has(x)))return 2;if(ts.some(x=>S1.has(x)))return 1;return null;}
 function symsIn(t){
@@ -1064,7 +1064,7 @@ function cmdBase(v){
   if(/^(мои |my )?(вопросы|questions)( к| для)?( врач\S*| (the |my )?doctor)?\??$/.test(n))return say({kind:'questions',q:v});
   if(/(сводк|summary|^к врачу$|^(for the |to the )?doctor$)/.test(n)&&!/вопрос|question/.test(n)){const d=/(месяц|30|month)/.test(n)?30:/(полгод|180|six)/.test(n)?182:92;return say({kind:'summary',q:v,days:d});}
   if(/(цикл|месячн|cycle|period)/.test(n)&&/\?$|как|how|влия|affect/.test(n))return say({kind:'cycle',q:v,keys:symsIn(v)});
-  if(/(связ|совпад|после чего|после какой|что влия|инсайт|триггер|link|related|pattern|insight|trigger|after what)/.test(n)&&!/^(почему|why)/.test(n))return say({kind:'insights',q:v,keys:symsIn(v)});
+  if(/(связ|совпад|после чего|после какой|что влия|инсайт|триггер|link|related|pattern|insight|trigger|after what|affect|connected|makes? (it|me|them|my \S+) worse)/.test(n)&&!/^(почему|why)/.test(n))return say({kind:'insights',q:v,keys:symsIn(v)});
   return false;
 }
 
@@ -1479,10 +1479,10 @@ function cmd(v){
   if(/^(обычный шрифт|normal text|normal size|обычный размер)$/.test(n)){ST.bigText=false;save();applyBig();return toast({title:L('Обычный шрифт','Normal text'),acts:[]});}
   if(/^(настройки|settings)[:\s]+(.+)$/.test(n)){const p=n.replace(/^(настройки|settings)[:\s]+/,'');const map={'удобство':'comfort','comfort':'comfort','ии и фото':'ai','ai and photos':'ai','мои симптомы':'syms','my symptoms':'syms','цикл':'cycle','cycle':'cycle','город и погода':'city','city and weather':'city','apple health':'health','язык':'lang','language':'lang','данные и доступ':'data','data and access':'data'};if(map[p])return map[p]==='data'?say({kind:'data'}):say({kind:'settings',page:map[p]});}
   // protocol
-  if(/(с сегодня|со? завтра|начинаю|start(ing)?|from today).{0,20}(без |no |gluten|глютен|молоч|dairy|сахар|sugar)/.test(n)||/^(без глютена|без молочного|без сахара|gluten free|dairy free|sugar free)$/.test(n)){
+  if(/(с сегодня|со? завтра|начинаю|start(ing)?|from today).{0,20}(без |no |gluten|глютен|молоч|dairy|сахар|sugar)/.test(n)||/(без (глютена|молочного|сахара)|(gluten|dairy|sugar)[- ]free|no (gluten|dairy|sugar)|cutting out (gluten|dairy|sugar)).{0,12}(с сегодня|со? завтра|from today|starting today|from tomorrow)/.test(n)||/^(без глютена|без молочного|без сахара|gluten[- ]free|dairy[- ]free|sugar[- ]free)$/.test(n)){
     const name=/(глютен|gluten)/.test(n)?L('без глютена','gluten free'):/(молоч|dairy)/.test(n)?L('без молочного','dairy free'):/(сахар|sugar)/.test(n)?L('без сахара','sugar free'):L('протокол','protocol');
     if(ST.protocol)return toast({title:L('Протокол уже идет: ','A protocol is already on: ')+ST.protocol.name+', '+nDay(protoDays()),sub:L('Скажите «закончила протокол», чтобы начать новый','Say “finished the protocol” to start a new one'),icon:'info',acts:[]});
-    ST.protocol={name,start:todayK()};save();return toast({title:L('Записала: с сегодня ','Saved: from today ')+name,sub:L('День 1. Буду отмечать дни протокола. Через две недели покажу, как изменились записи','Day 1. I will mark the protocol days. In two weeks I will show how the entries changed'),acts:[{l:L('как это работает?','how does it work?'),fn:()=>card({title:L('протокол','protocol'),body:L('Дни протокола помечаются в записях. Через 14 дней я сравню записи главного симптома за время протокола и за две недели до него. Это совпадение, не причина','Protocol days are marked in entries. After 14 days I compare the main symptom entries during the protocol and two weeks before. A coincidence, not a cause'),foot:true})}]});}
+    ST.protocol={name,start:todayK()};save();return toast({title:EN()?'Saved: '+name+' from today':'Записала: с сегодня '+name,sub:L('День 1. Буду отмечать дни протокола. Через две недели покажу, как изменились записи','Day 1. I will mark the protocol days. In two weeks I will show how the entries changed'),acts:[{l:L('как это работает?','how does it work?'),fn:()=>card({title:L('протокол','protocol'),body:L('Дни протокола помечаются в записях. Через 14 дней я сравню записи главного симптома за время протокола и за две недели до него. Это совпадение, не причина','Protocol days are marked in entries. After 14 days I compare the main symptom entries during the protocol and two weeks before. A coincidence, not a cause'),foot:true})}]});}
   if(/(как идет протокол|история протокола|protocol history|how is the protocol)/.test(n)){const s=protoStats();if(!s)return toast({title:L('Протокола сейчас нет','No protocol right now'),sub:L('Начать: «с сегодня без глютена»','Start: “gluten free from today”'),icon:'info',acts:[]});
     return card({title:s.p.name+', '+L('день ','day ')+s.days,sub:L('С ','Since ')+fDM(fromDk(s.p.start))+(s.skips?', '+s.skips+L(' без фото еды',' without food photos'):''),rows:[[L('дни 1–7','days 1–7'),symName(s.k)+': '+nEnt(symEnts(s.k).filter(e=>e.d>=s.p.start&&e.d<=dk(addD(fromDk(s.p.start),6))).length)],[L('дни 8–14','days 8–14'),symName(s.k)+': '+nEnt(symEnts(s.k).filter(e=>e.d>=dk(addD(fromDk(s.p.start),7))&&e.d<=dk(addD(fromDk(s.p.start),13))).length)],[L('до протокола','before'),nEnt(s.before)+L(' за ',' in ')+nDay(s.days)]],foot:true,chips:[{l:L('закончила протокол','finish the protocol'),fn:()=>cmd(L('закончила протокол','finished the protocol'))},{l:L('продолжаю','continuing'),fn:()=>{UI.resp=null;rr();}}]});}
   if(/(закончил\S* протокол|finish(ed)? the protocol|stop the protocol)/.test(n)){if(!ST.protocol)return toast({title:L('Протокола сейчас нет','No protocol right now'),icon:'info',acts:[]});const p=ST.protocol;p.end=todayK();ST.protocols.push(p);ST.protocol=null;save();
