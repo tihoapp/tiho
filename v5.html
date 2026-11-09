@@ -417,7 +417,7 @@ const GROUPS={
   sugar:{n:['сладкое','sweets'],gen:['сладкого','sweets'],ins:['со сладким','with sweets'],sub:['сахар, шоколад, выпечка','sugar, chocolate, pastry'],st:['сахар','шоколад','конфет','торт','печень','морожен','пирож','sugar','chocolate','candy','cake','cookie','ice cream','honey']},
   alcohol:{n:['алкоголь','alcohol'],gen:['алкоголя','alcohol'],ins:['с алкоголем','with alcohol'],sub:['вино, пиво','wine, beer'],st:['вино','вина','пиво','пива','алкогол','коктейл','wine','beer','alcohol','cocktail']}
 };
-const norm=s=>String(s||'').toLowerCase().replace(/ё/g,'е');
+const norm=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[\u00A0\u202F]/g,' '); // chips carry non-breaking spaces, commands expect plain ones
 const inGroup=(item,g)=>{const t=norm(item);return GROUPS[g].st.some(s=>t.indexOf(s)>=0);};
 function groupName(c,gen){if(GROUPS[c.g]){const x=GROUPS[c.g][gen?'gen':'n'];return L(x[0],x[1]);}return c.label||'';}
 function checkTitle(c){return c.mode==='in'?L('возвращаю ','adding back ')+groupName(c):L('без ','no ')+groupName(c,true);}
@@ -1184,7 +1184,7 @@ function guessDishes(meal){
 }
 function PhotoBlock({r}){
   const set=o=>{Object.assign(r,o);rr();};
-  const dishes=guessDishes(r.meal);const o=whenOpts();
+  const dishes=[...new Set(r.items.concat(guessDishes(r.meal)))];const o=whenOpts(); // picked items stay when the meal changes
   const go=()=>{const d=r.w==='photo'?new Date(r.at):(o.find(y=>y.id===r.w)||o[0]).d;const extra=r.txt.trim()?r.txt.split(/[,;]/).map(x=>x.trim()).filter(Boolean):[];const items=r.items.concat(extra);const al=ST.allergies.find(a=>items.some(i=>norm(i).indexOf(norm(a).slice(0,4))>=0));UI.resp=null;logFood({items,meal:r.meal,when:d,words:r.txt.trim()||null,photo:r.src});if(al)setTimeout(()=>{if(UI.mtoast){UI.mtoast.sub=L('Здесь ','Here: ')+al+L(', у вас на это аллергия',', you are allergic to it');UI.mtoast.icon='info';rr();}},30);};
   const Row=({label,children})=>html`<div class="col4"><p class="lbl">${label}</p><div class="wrap">${children}</div></div>`;
   return html`<section class="card surf" aria-live="polite">
@@ -1192,7 +1192,7 @@ function PhotoBlock({r}){
     <${Row} label=${r.nores?L('что ели','what you ate'):L('похоже на','looks like')}>${(r.nores?dishes.slice(0,2):dishes).map(d=>html`<button class=${'chip'+(r.items.includes(d)?' on':'')} key=${d} aria-pressed=${r.items.includes(d)} onClick=${()=>set({items:r.items.includes(d)?r.items.filter(x=>x!==d):r.items.concat([d])})}><span>${d}</span></button>`)}
       <button class=${'chip'+(r.other?' on':'')} aria-expanded=${r.other} onClick=${()=>set({other:!r.other})}><span>${L('другое','other')}</span></button></${Row}>
     ${r.other?html`<input class="field" id="pother" value=${r.txt} onInput=${e=>set({txt:e.target.value})} placeholder=${L('через запятую','comma separated')} aria-label=${L('Что еще на фото','What else is in the photo')}/>`:null}
-    <${Row} label=${L('прием пищи','meal')}>${['breakfast','lunch','dinner','snack'].map(m=>html`<button class=${'chip'+(r.meal===m?' on':'')} key=${m} aria-pressed=${r.meal===m} onClick=${()=>set({meal:m,items:[]})}><span>${mealName(m)}</span></button>`)}</${Row}>
+    <${Row} label=${L('прием пищи','meal')}>${['breakfast','lunch','dinner','snack'].map(m=>html`<button class=${'chip'+(r.meal===m?' on':'')} key=${m} aria-pressed=${r.meal===m} onClick=${()=>set({meal:m})}><span>${mealName(m)}</span></button>`)}</${Row}>
     ${r.at?html`<p class="c ink2">${L('Время фото: ','Photo time: ')+relDT(new Date(r.at))}${r.w==='photo'?html` <button class="link" style="display:inline;width:auto;min-height:0" onClick=${()=>set({w:'now'})}>${L('другое','change')}</button>`:null}</p>`:null}
     ${!r.at||r.w!=='photo'?html`<${Row} label=${r.at?L('когда ели','when did you eat'):L('у фото нет времени. когда ели?','the photo has no time. when did you eat?')}>${o.slice(0,4).map(w=>html`<button class=${'chip'+(r.w===w.id?' on':'')} key=${w.id} aria-pressed=${r.w===w.id} onClick=${()=>set({w:w.id})}><span>${w.l}</span></button>`)}</${Row}>`:null}
     <button class="btn pri" onClick=${go}>${L('записать','save')}</button>
