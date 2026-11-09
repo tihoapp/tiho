@@ -248,7 +248,6 @@ textarea.field{border-radius:22px;min-height:96px;line-height:1.4}
 html.ax .scr,html.ax .bot{zoom:1.25}
 .hd{display:flex;align-items:flex-start;gap:12px}
 html.ax .nw6{display:none}
-html.ax .acts6{padding-left:0}
 html.ax .tr6{gap:10px}
 html.ax .tm6{min-width:0}
 .hset{width:48px;height:48px;border-radius:24px;margin-top:4px;border:1px solid var(--control)}
@@ -272,20 +271,24 @@ html.ax .tm6{min-width:0}
 @media (prefers-reduced-motion:reduce){.press{transform:none!important}.tap,.chip.tap,.choice.tap{animation:tapflash .45s ease both!important}.ring{animation:ringfade .45s ease forwards;outline-offset:4px}.phone.pbuzz{animation:none}.toast.mt{animation:none}}
 /* v6: today list inside the day card */
 .today6{display:flex;flex-direction:column;gap:8px}
-.tr6{display:flex;align-items:flex-start;gap:12px;min-height:56px;padding:10px 0;width:100%;text-align:left;border-radius:12px}
-.tr6.new+.acts6{margin-top:-8px;background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state);border-radius:0 0 12px 12px;padding-top:4px}
-.acts6{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 0 12px 60px}
-.acts6 .chip{min-height:48px}
-.acts6 .sub6{grid-column:1/-1}
+.tr6{display:flex;align-items:flex-start;gap:12px;min-height:56px;padding:10px 12px;width:100%;text-align:left;border-radius:16px}
+.fresh6{display:flex;flex-direction:column;gap:4px;padding-bottom:12px;border-radius:16px;background:var(--t-memory);animation:freshin .45s ease-out both}
+.fresh6 .tr6{background:transparent}
+.wr6{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border-radius:16px;background:var(--t-state)}
+.acts6{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px;text-align:center}
+.acts6 .chip{min-height:48px;justify-content:center}
+.acts6 .sub6{grid-column:1/-1;text-align:left;padding-bottom:4px}
 .d6 .ctx{margin-top:0;gap:0 16px}
 .d6 .ctx .stl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .tm6{flex:none;min-width:48px;font-size:15px;line-height:1.4;color:var(--ink2);font-variant-numeric:tabular-nums;padding-top:1px}
 .tx6{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
 .nw6{flex:none;font-size:13px;line-height:1.4;font-weight:600;color:var(--accent);padding-top:2px}
 .more6{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;width:100%;font-size:15px;color:var(--ink2);text-align:left}
-@keyframes newrow{0%{background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state);transform:translateY(10px);opacity:0}8%{transform:none;opacity:1}85%{background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state)}100%{background:transparent;box-shadow:-8px 0 0 transparent,8px 0 0 transparent}}
+@keyframes freshin{0%{transform:translateY(10px);opacity:0}100%{transform:none;opacity:1}}
+@keyframes newrow{0%{background:var(--t-memory)}70%{background:var(--t-memory)}100%{background:transparent}}
 .tr6.new{animation:newrow 6s ease-out both}
-@media (prefers-reduced-motion:reduce){.tr6.new{animation:none;background:var(--t-state);box-shadow:-8px 0 0 var(--t-state),8px 0 0 var(--t-state)}}
+.fresh6 .tr6.new{animation:none}
+@media (prefers-reduced-motion:reduce){.tr6.new,.fresh6{animation:none}}
 .toast.mt{animation:toastin .55s cubic-bezier(.2,.9,.3,1.2) both}
 /* welcome: mascot first, then what the app does */
 @keyframes mpop{0%{transform:scale(.4) translateY(24px);opacity:0}60%{transform:scale(1.08) translateY(-4px);opacity:1}80%{transform:scale(.97)}100%{transform:none;opacity:1}}
@@ -1257,6 +1260,8 @@ function DataBlock(){
     <p class="f ink2">${L('Удаление необратимо','Deleting cannot be undone')}</p>
   </section>`;
 }
+// bad day stays visible on the main screen until 'back to usual', all versions
+function WorseRow(){if(!ST.worse)return null;const n=worseDayN();return html`<div class="wr6" role="status"><span class="bs">${EN()?`worse than usual, day ${n}`:`хуже обычного, день ${n}`}</span><span class="c ink2">${L('с ','since ')+fDM(fromDk(ST.worse.start))+L(', попадет в сводку к врачу',', goes into the doctor summary')}</span></div>`;}
 // v6: today list inside the day card, last three, no scroll
 function TodayRow({x,dup}){
   const d=new Date(x.at);const w=dup?null:x.words;const txt=w?qt(w):(dup?lc(symName(x.key))+(x.s?', '+sName(x.s):''):x.kind==='sym'?lc(entryTitle(x)):entryTitle(x));
@@ -1268,10 +1273,13 @@ function TodayRow({x,dup}){
 function DayCard6({l,hint,foot,openDay,HintRow}){
   const user=l.filter(x=>!(x.kind==='med'&&x.src==='health')&&!(x.kind==='move'&&x.src==='health'));
   const last=user.slice(0,3).reverse();const more=user.length-last.length;const t=UI.mtoast&&UI.mtoast.inline6?UI.mtoast:null;
-  return html`<section class="card surf d6" aria-live="polite"><${Ctx}/>
+  return html`<section class="card surf d6" aria-live="polite"><${Ctx}/><${WorseRow}/>
     <div class="today6" aria-label=${L('Сегодня записано','Saved today')}>
       ${more>0?html`<button class="more6" onClick=${openDay}><span>${EN()?`${more} earlier ${more===1?'entry':'entries'}`:`еще ${more} ${plRu(more,'запись','записи','записей')} раньше`}</span><${I} n="chevR" s=${20}/></button>`:null}
-      ${last.map((x,i)=>html`<${TodayRow} key=${x.id} x=${x} dup=${!!(i&&x.words&&last[i-1].words===x.words&&Math.abs(last[i-1].at-x.at)<6e4)}/>${t&&t.inline6===x.id?html`<div class="acts6"><p class="sr" role="status">${t.title}</p>${t.sub&&!/^(сегодня|today)(,|\s|$)/i.test(t.sub)?html`<p class="c ink2 sub6">${t.sub}</p>`:null}${t.acts.filter(Boolean).map(a=>html`<button class="chip" onClick=${()=>{UI.mtoast=null;a.fn();rr();}}><span>${a.l}</span></button>`)}</div>`:null}`)}
+      ${last.map((x,i)=>{const row=html`<${TodayRow} key=${x.id} x=${x} dup=${!!(i&&x.words&&last[i-1].words===x.words&&Math.abs(last[i-1].at-x.at)<6e4)}/>`;
+        if(!(t&&t.inline6===x.id))return row;
+        // the fresh entry and its fix/undo live in one tinted block, inset from the card edges
+        return html`<div class="fresh6" key=${'f'+x.id}>${row}<div class="acts6"><p class="sr" role="status">${t.title}</p>${t.sub&&!/^(сегодня|today)(,|\s|$)/i.test(t.sub)?html`<p class="c ink2 sub6">${t.sub}</p>`:null}${t.acts.filter(Boolean).map(a=>html`<button class="chip" onClick=${()=>{UI.mtoast=null;a.fn();rr();}}><span>${a.l}</span></button>`)}</div></div>`;})}
     </div>
     ${hint&&last.length<=2?html`<${HintRow} t=${hint.t} s=${hint.s} fn=${hint.fn}/>`:null}
     ${foot}</section>`;
@@ -1291,10 +1299,10 @@ function Block(){
       if(gap>=7)return html`<section class="card surf" aria-live="polite"><div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow"><p class="b">${L('Неделю записей не было. Ничего не потеряно, можно начать с сегодня','No entries for a week. Nothing is lost, you can start from today')}</p></div></div>${foot}</section>`;
       if(ST.firstDay&&ddiff(now(),fromDk(ST.firstDay))===7){const wk=ST.entries.filter(e=>e.d>=ST.firstDay);const top=topSyms(ST.firstDay,tk,1)[0];return html`<section class="card surf" aria-live="polite"><p class="b">${(EN()?`First week: ${nEnt(wk.length)}, ${wk.filter(e=>e.photo).length} photos. `:`Первая неделя: ${nEnt(wk.length)}, ${wk.filter(e=>e.photo).length} фото. `)+(top?L('Чаще всего: ','Most often: ')+lc(symName(top[0]))+'. ':'')+L('Совпадения появятся через 2–3 недели','Coincidences appear after 2–3 weeks')}</p>${foot}</section>`;}
       const yk=dk(addD(now(),-1));const ys=onDay(yk).filter(x=>x.kind==='sym');const yt=ys.length?cap(L('вчера: ','yesterday: ')+[...new Set(ys.map(x=>lc(symName(x.key))))].join(', ')+'. '):'';
-      return html`<section class=${'card surf'+(V6?' d6':'')} aria-live="polite">${V6?html`<${Ctx}/>`:null}<div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow col4"><p class="b">${yt+L('Сегодня пока тихо','Quiet so far today')}</p></div></div>${foot}</section>`;}
+      return html`<section class=${'card surf'+(V6?' d6':'')} aria-live="polite">${V6?html`<${Ctx}/>`:null}<${WorseRow}/><div class="row"><${Mascot} mood="rest" size=${64}/><div class="grow col4"><p class="b">${yt+L('Сегодня пока тихо','Quiet so far today')}</p></div></div>${foot}</section>`;}
     const hint=dayHint();const n=l.length;
     if(V6)return html`<${DayCard6} l=${l} hint=${hint} foot=${foot} openDay=${openDay} HintRow=${HintRow}/>`;
-    return html`<section class="card surf" aria-live="polite">${B?null:html`<p class="lbl">${L('сегодня','today')}</p>`}<p class="b">${daySentence(tk)}</p>
+    return html`<section class="card surf" aria-live="polite"><${WorseRow}/>${B?null:html`<p class="lbl">${L('сегодня','today')}</p>`}<p class="b">${daySentence(tk)}</p>
       ${B?null:html`<button class="link" onClick=${openDay}>${L('раскрыть записи','show entries')}</button>`}
       ${hint?html`<${HintRow} t=${hint.t} s=${hint.s} fn=${hint.fn}/>`:null}
       ${B?html`<${HintRow} t=${EN()?`${n} ${n===1?'entry':'entries'} today`:`${n} ${plRu(n,'запись','записи','записей')} сегодня`} s=${L('Открыть день','Open the day')} fn=${openDay}/>`:null}
@@ -1344,6 +1352,7 @@ function chips(){
   if(ST.protocol&&protoDays()>=14&&!today.length)out.push({l:L('протокол: день ','protocol: day ')+protoDays(),fn:protoAsk});
   if(ST.appt&&ST.appt===dk(addD(n0,1)))out.push({l:L('сводка к приему','summary for the visit'),fn:()=>say({kind:'summary',days:30})});
   if(ST.appt&&ST.appt===dk(addD(n0,-1)))out.push({l:L('после приема','after the visit'),fn:afterAppt});
+  if(ST.worse)out.push({l:L('вернулось к обычному','back to usual'),fn:()=>handleAll(L('вернулось к обычному','back to usual'))});
   {const pp=ST.cycle!=='off'?periodOf(n0):null;if(pp&&pp.open&&pp.n>=3)out.push({l:L('месячные закончились','period ended'),fn:()=>handleText(L('месячные закончились','my period ended'))});}
   if(lastFood&&n0.getTime()-lastFood.at<3*36e5&&ST.main)out.push({l:L('как сейчас?','how is it now?'),star:true,fn:inl});
   else if(ST.main)out.push({l:symName(ST.main),star:true,fn:inl});
