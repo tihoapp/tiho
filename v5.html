@@ -250,6 +250,7 @@ html.ax .scr,html.ax .bot{zoom:1.25}
 html.ax .nw6{display:none}
 html.ax .tr6{gap:10px}
 html.ax .tm6{min-width:0}
+.hfix{flex:none;padding-top:16px;padding-left:var(--gl);padding-right:var(--gr);background:var(--canvas);position:relative;z-index:2} /* the title stays put, only the content scrolls */
 .hset{width:48px;height:48px;border-radius:24px;margin-top:4px;border:1px solid var(--control)}
 .hset:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .bigs .b,.bigs .c,.bigs .kvr span{font-size:1.25em;line-height:1.35}
@@ -1441,8 +1442,8 @@ function App(){
   useEffect(()=>{if(!V6||UI.resp)return;const sc=document.querySelector('.scr');if(sc)sc.scrollTop=sc.scrollHeight;},[ST.entries.length,UI.mtoast&&UI.mtoast.id,!!UI.resp]);
   UI.footChips=(B&&ch&&!UI.resp)?ch.items:null;UI.footLabel=(B&&ch&&!UI.resp)?ch.label||null:null;const bottom=B?null:ch; // v5b/v6: steps live in the card footer only, never twice
   return html`<div class="phone">
+    <header class="hd hfix"><div class="grow"><h1 class="lt">${L('сегодня','today')}</h1><p class="c ink2">${cap(fHdr(now()))}${ST.demo?html` <span class="acc">${L('пример данных','sample data')}</span>`:null}</p></div><button class="ib surf hset" aria-label=${L('Настройки','Settings')} onClick=${()=>cmd(L('настройки','settings'))}><${I} n="sliders"/></button></header>
     <main class="scr" aria-label=${L('Сегодня','Today')}>
-      <header class="hd"><div class="grow"><h1 class="lt">${L('сегодня','today')}</h1><p class="c ink2">${cap(fHdr(now()))}${ST.demo?html` <span class="acc">${L('пример данных','sample data')}</span>`:null}</p></div><button class="ib surf hset" aria-label=${L('Настройки','Settings')} onClick=${()=>cmd(L('настройки','settings'))}><${I} n="sliders"/></button></header>
       ${B?null:html`<${Ctx}/>`}
       <div class="spacer" aria-hidden="true"></div>
       <${MainToast}/>
