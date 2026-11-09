@@ -250,6 +250,7 @@ html.ax .scr,html.ax .bot{zoom:1.25}
 html.ax .nw6{display:none}
 html.ax .tr6{gap:10px}
 html.ax .tm6{min-width:0}
+.oblang{display:flex;justify-content:flex-end;margin:-4px 0 -8px} /* language first: everything below is read in it */
 .hfix{flex:none;padding-top:16px;padding-left:var(--gl);padding-right:var(--gr);background:var(--canvas);position:relative;z-index:2} /* the title stays put, only the content scrolls */
 .hset{width:48px;height:48px;border-radius:24px;margin-top:4px;border:1px solid var(--control)}
 .hset:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
@@ -382,7 +383,7 @@ function dayTitle(d){const n=ddiff(now(),d);if(n===0)return L('сегодня','
 
 // ---- storage ----
 const KEY='msapp.v5';let MEM=null;
-function defaults(){return {v:1,onboarded:false,lang:'ru',theme:'system',ai:'device',symptoms:['numb','fatigue','fog'],custom:{},main:'numb',
+function defaults(){return {v:1,onboarded:false,lang:'en',theme:'system',ai:'device',symptoms:['numb','fatigue','fog'],custom:{},main:'numb',
   health:false,cycle:'off',cyclePaused:false,periodMarks:[],seed:null,city:null,geo:false,photosKeep:true,
   comfort:{haptic:true,sound:false,badDay:true,morning:false},entries:[],worse:null,worseHist:[],worsePrompt:null,check:null,checks:[],
   visit:{date:null,noDate:false,notes:[]},questions:[],meds:[],dismiss:{},offset:0,firstDay:null,voiceLang:'ui',sumLang:'ui',icloud:true,healthMed:false};}
@@ -1420,11 +1421,14 @@ function Onboarding(){
   const fr=useRef(null),br=useRef(null);
   useEffect(()=>{const f=fr.current,b=br.current;if(!f||!b)return;let rm=false;try{rm=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}if(rm)return;const a=b.getBoundingClientRect(),m=f.getBoundingClientRect();const dy=(a.top+a.height/2)-(m.top+m.height/2);f.style.transform=`translateY(${dy}px) scale(1.6)`;const t=setTimeout(()=>{f.style.transform='';},1000);return ()=>clearTimeout(t);},[]);
   const pickTheme=t=>{setTh(t);ST.theme=t;save();applyTheme();};
+  const [lg,setLg]=useState(LANG);
+  const pickLang=v=>{setLg(v);ST.lang=v;ST.langSet=true;LANG=v;document.documentElement.lang=v;save();rr();};
   const start=demo=>{ST.onboarded=true;ST.firstDay=todayK();ST.health=false;ST.cycle=cy?'manual':'off';if(w)ST.geo=true;if(demo)seedDemo();save();if(w&&!demo)setTimeout(()=>fetchWx(true),50);
-    if(md!==MODE){try{localStorage.setItem('msapp.mode',md);}catch(e){}location.replace(location.pathname+'?v='+md+'&lang='+(ST.lang||'ru'));}};
+    if(md!==MODE){try{localStorage.setItem('msapp.mode',md);}catch(e){}location.replace(location.pathname+'?v='+md+'&lang='+(ST.lang||'en'));}};
   const d=ms=>({style:`animation-delay:${ms}ms`});
   const Seg=({items,val,fn,label})=>html`<div class="seg" role="group" aria-label=${label}>${items.map(([v,l])=>html`<button class=${'chip'+(val===v?' on':'')} aria-pressed=${val===v} onClick=${()=>fn(v)}><span>${l}</span></button>`)}</div>`;
   return html`<div class="ob"><div class="obb" ref=${br}>
+      <div class="oblang"><${Seg} label="Язык / Language" val=${lg} fn=${pickLang} items=${[['en','English'],['ru','Русский']]}/></div>
       <div class="col center"><div class="flip" ref=${fr}><div class="pop"><${Mascot} mood="happy" size=${96}/></div></div><h1 class="lt rv" ...${d(1300)}>${L('расскажите, как вы, а я запишу','tell me how you are, I will write it down')}</h1><p class="b ink2 rv" ...${d(1450)}>${L('Голосом, текстом или фото еды','By voice, text or a food photo')}</p></div>
       <div class="card surf rv obs" style="gap:0;padding:4px 20px;animation-delay:1650ms"><${SwRow} on=${w} fn=${()=>setW(!w)} t=${L('Погода','Weather')}/><${SwRow} on=${cy} fn=${()=>setCy(!cy)} t=${L('Учитывать цикл','Track the cycle')} s=${L('Если не нужно, выключите','Turn it off if it does not apply')}/><${SwRow} on=${bt} fn=${()=>pickBig(!bt)} t=${L('Крупный текст','Large text')}/>
         <div class="rw"><span class="bs">${L('Тема','Theme')}</span><${Seg} label=${L('Тема','Theme')} val=${th} fn=${pickTheme} items=${[['light',L('светлая','light')],['dark',L('темная','dark')]]}/></div>
@@ -1438,7 +1442,7 @@ function SheetHost(){const s=UI.sheet;useEffect(()=>{if(!s)return;const el=docum
 function App(){
   const [,f]=useState(0);RR=()=>f(x=>x+1);
   useEffect(()=>{applyTheme();const k=e=>{if(e.key==='Escape'){if(UI.sheet)closeSheet();else if(UI.resp){UI.resp=null;rr();}}};document.addEventListener('keydown',k);return ()=>document.removeEventListener('keydown',k);},[]);
-  LANG=ST.lang||'ru';document.documentElement.lang=LANG;
+  LANG=ST.lang||'en';document.documentElement.lang=LANG;
   if(!ST.onboarded)return html`<div class="phone"><${Onboarding}/></div>`;
   const ch=allChips();
   useEffect(()=>{if(!V6||UI.resp)return;const sc=document.querySelector('.scr');if(sc)sc.scrollTop=sc.scrollHeight;},[ST.entries.length,UI.mtoast&&UI.mtoast.id,!!UI.resp]);
@@ -1454,7 +1458,7 @@ function App(){
     <${SheetHost}/>
   </div>`;
 }
-ST=loadS();if(ST.photoUsed===undefined)ST.photoUsed=false;{const lg=(location.search.match(/[?&]lang=(en|ru)\b/)||[])[1];if(lg){if(lg!==ST.lang){ST.lang=lg;ST.langSet=true;saveS(ST);}}else if(!ST.langSet&&!ST.onboarded){ST.lang=/^ru/i.test(navigator.language||'')?'ru':'en';saveS(ST);}}LANG=ST.lang||'ru';
+ST=loadS();if(ST.photoUsed===undefined)ST.photoUsed=false;{const lg=(location.search.match(/[?&]lang=(en|ru)\b/)||[])[1];if(lg){if(lg!==ST.lang){ST.lang=lg;ST.langSet=true;saveS(ST);}}else if(!ST.langSet&&!ST.onboarded){ST.lang='en';saveS(ST);}}LANG=ST.lang||'en';
 
 // ===== v5 states: everything from the figma sections, reachable by phrase or from «все состояния» =====
 ST.periodEnds=ST.periodEnds||{};ST.protocol=ST.protocol||null;ST.protocols=ST.protocols||[];ST.allergies=ST.allergies||[];ST.appt=ST.appt||null;ST.copiedAt=ST.copiedAt||0;ST.photoConsent=ST.photoConsent===undefined?null:ST.photoConsent;ST.recognize=ST.recognize!==false;ST.chipHints=ST.chipHints!==false;ST.readAloud=!!ST.readAloud;ST.bigText=!!ST.bigText;ST.hk=ST.hk||{steps:true,sleep:true,walk:true};
@@ -1576,7 +1580,7 @@ function SettingsBlock({r}){const page=r&&r.page;const close=()=>{UI.resp=null;r
   if(page==='syms'){const keys=[...new Set([mainSym(),...ST.symptoms,...Object.keys(ST.custom)])];return wrap(L('мои симптомы','my symptoms'),L('Главный показывается чипом','The main one shows as a chip'),html`<div class="col8">${keys.map(k=>html`<button class=${'choice'+(k===mainSym()?' sel':'')} key=${k} onClick=${()=>{ST.main=k;save();}}>${symName(k)}${k===mainSym()?L(', главный',', main'):''}</button>`)}</div><button class="link" onClick=${()=>{UI.resp=null;focusLine(L('главный для меня: …','main one: …'));}}>${L('добавить симптом','add a symptom')}</button>`);}
   if(page==='view'){const Seg3=({val,items,fn,label})=>html`<div class="seg" role="group" aria-label=${label}>${items.map(([v,l])=>html`<button class=${'chip'+(val===v?' on':'')} aria-pressed=${val===v} onClick=${()=>fn(v)}><span>${l}</span></button>`)}</div>`;const th=ST.theme==='light'||ST.theme==='dark'?ST.theme:'system';
     return wrap(L('вид','display'),L('По умолчанию как в системе iPhone','Follows your iPhone settings by default'),html`<div class="col8"><p class="bs">${L('Тема','Theme')}</p><${Seg3} label=${L('Тема','Theme')} val=${th} fn=${v=>{ST.theme=v;save();applyTheme();rr();}} items=${[['system',L('как в системе','system')],['light',L('светлая','light')],['dark',L('темная','dark')]]}/></div><div class="list"><${Tg} on=${ST.bigText} fn=${()=>{ST.bigText=!ST.bigText;save();applyBig();rr();}} t=${L('крупный текст','large text')} s=${L('Текст и кнопки крупнее, подсказки по одной в строку','Bigger text and buttons, one suggestion per row')}/></div>`);}
-  if(page==='ver')return wrap(L('версия прототипа','prototype version'),L('Записи общие для всех версий','Entries are shared across versions'),html`<div class="col8">${[['5','v5',L('Строка контекста над карточкой','Context row above the card')],['5b','v5b',L('Минимум: карточка и два чипа','Minimal: the card and two chips')],['6','v6',L('Последние три записи в карточке','The last three entries in the card')]].map(([v,t,d])=>html`<button class=${'choice'+(MODE===v?' sel':'')} aria-pressed=${MODE===v} onClick=${()=>{if(MODE===v)return;try{localStorage.setItem('msapp.mode',v);}catch(e){}location.replace(location.pathname+'?v='+v+'&lang='+(ST.lang||'ru'));}}><span class="tt"><span class="bs">${t}</span><span class="c ink2">${d}</span></span></button>`)}</div>`);
+  if(page==='ver')return wrap(L('версия прототипа','prototype version'),L('Записи общие для всех версий','Entries are shared across versions'),html`<div class="col8">${[['5','v5',L('Строка контекста над карточкой','Context row above the card')],['5b','v5b',L('Минимум: карточка и два чипа','Minimal: the card and two chips')],['6','v6',L('Последние три записи в карточке','The last three entries in the card')]].map(([v,t,d])=>html`<button class=${'choice'+(MODE===v?' sel':'')} aria-pressed=${MODE===v} onClick=${()=>{if(MODE===v)return;try{localStorage.setItem('msapp.mode',v);}catch(e){}location.replace(location.pathname+'?v='+v+'&lang='+(ST.lang||'en'));}}><span class="tt"><span class="bs">${t}</span><span class="c ink2">${d}</span></span></button>`)}</div>`);
   if(page==='cycle'){const st=periodStarts(),last=st[0],on=last&&onPeriod(now()),end=last&&ST.periodEnds[last];
     const gaps=[];for(let k=0;k+1<st.length&&k<6;k++)gaps.push(ddiff(fromDk(st[k]),fromDk(st[k+1])));const avg=gaps.length?Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length):null;
     const Info=({t,v})=>html`<div class="li" style="cursor:default"><span class="tt"><span class="c ink2">${t}</span><span class="bs">${v}</span></span></div>`;
