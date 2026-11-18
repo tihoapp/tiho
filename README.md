@@ -1,6 +1,6 @@
 # Tiho
 
-A companion for people with multiple sclerosis. One input line: voice, text, a food photo. Coincidences, not causes. A summary for the doctor.
+A companion for people with multiple sclerosis. One input line: voice, text, a food photo. A summary for the doctor.
 
 Open: https://tihoapp.github.io/tiho/ (choose the version and theme on the welcome screen)
 
