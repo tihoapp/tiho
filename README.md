@@ -1,17 +1,17 @@
 <p align="center"><img src="banner.svg" alt="tiho: a companion for people with MS" width="100%"></p>
 
-# Tiho
+# tiho
 
-A companion for people with multiple sclerosis. One input line: voice, text, a food photo. A summary for the doctor.
+a companion for people with multiple sclerosis. one input line: voice, text, a food photo. a summary for the doctor.
 
-Open: https://tihoapp.github.io/tiho/ (choose the version and theme on the welcome screen)
+open: https://tihoapp.github.io/tiho/ (choose the version and theme on the welcome screen)
 
 - `?v=6`, `?v=5b`, `?v=5` open a version directly, `&lang=en` or `&lang=ru` sets the language
 - all versions with descriptions: https://tihoapp.github.io/tiho/versions.html
-- Home Screen: open the link in Safari → Share → Add to Home Screen
+- home Screen: open the link in Safari → share → add to home screen
 
-Not a medical app. Entries are stored only on the device.
+not a medical app. entries are stored only on the device.
 
-Designed and built by [Yuliya S](https://github.com/julie566).
+designed and built by [Yuliya S](https://github.com/julie566).
 
 
