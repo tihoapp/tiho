@@ -10,11 +10,11 @@ not a medical app. it makes no diagnoses, and entries are stored only on the dev
 
 ## what it does
 
-- **one input line.** say or type how you feel, or photograph food. the app turns it into symptoms, meals and time, with no forms to fill.
-- **coincidences, not causes.** it shows what tends to happen together (heat, cycle, food, sleep) and never claims a cause.
-- **a summary for the doctor.** symptoms in the person's own words, ready to show at an appointment.
-- **built for numb fingers.** large touch targets, visual press feedback, a large-text mode and full RU / EN.
-- **no streaks.** a bad day is logged like any other day, and the app never punishes it.
+- **one input line** say or type how you feel, or make a photo of food. the app turns it into symptoms, meals and time, with no forms to fill.
+- **coincidences** it shows what tends to happen together (heat, cycle, food, sleep) and never claims a cause.
+- **a summary for the doctor** symptoms in the person's own words, ready to show at an appointment.
+- **built for numb fingers** large touch targets, visual press feedback, a large-text mode and full RU / EN.
+- **no streaks** a bad day is logged like any other day, and the app never punishes it.
 
 ## versions
 
