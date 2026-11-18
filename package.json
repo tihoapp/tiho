@@ -1,0 +1,20 @@
+{
+  "name": "tiho",
+  "version": "0.7.0",
+  "private": true,
+  "description": "A companion app for people with MS: one input line for symptoms, food and questions for the doctor.",
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes serve -l 5173 .",
+    "lint": "eslint src",
+    "format": "prettier --write \"src/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\"",
+    "check": "npm run lint && npm run format:check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.0.0"
+  }
+}
