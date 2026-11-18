@@ -12,6 +12,4 @@ Not a medical app. Entries are stored only on the device.
 
 Designed and built by [Yuliya S](https://github.com/julie566).
 
----
 
-Прототип приложения-помощника для людей с рассеянным склерозом. Одна строка: голос, текст, фото еды. Не медицинское приложение, записи хранятся только на устройстве.
