@@ -1,3 +1,5 @@
+<p align="center"><img src="banner.svg" alt="tiho: a companion for people with MS" width="100%"></p>
+
 # Tiho
 
 A companion for people with multiple sclerosis. One input line: voice, text, a food photo. A summary for the doctor.
