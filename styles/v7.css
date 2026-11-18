@@ -4,8 +4,12 @@
    body text 17px minimum, nothing thinner than Regular. */
 
 .v7 {
+  /* radius system: pill = commands, 18 = anything you choose and inner blocks,
+     28 = top-level containers. Nothing else. */
   --v7-r-card: 28px;
   --v7-r-ctl: 18px;
+  --v7-r-pill: 999px;
+  --v7-r-thumb: 14px;
   --v7-gap: 12px;
   --v7-opt: 60px;
   --v7-ok-bg: #e3f3ea;
@@ -186,7 +190,7 @@
 .v7-btn {
   min-height: 56px;
   padding: 14px 22px;
-  border-radius: 999px;
+  border-radius: var(--v7-r-pill);
   font-weight: 600;
   text-align: center;
   display: inline-flex;
@@ -231,7 +235,7 @@
   min-height: 48px;
   min-width: 48px;
   padding: 10px 16px;
-  border-radius: 999px;
+  border-radius: var(--v7-r-pill);
   background: var(--canvas);
   color: var(--ink);
   font-weight: 600;
@@ -279,7 +283,7 @@
   min-height: 48px;
   padding: 8px 14px 8px 8px;
   margin: 0 0 4px -8px;
-  border-radius: 999px;
+  border-radius: var(--v7-r-pill);
   font-weight: 600;
   color: var(--ink);
   display: inline-flex;
@@ -293,7 +297,7 @@
 .v7-menu {
   min-height: 48px;
   padding: 8px 16px 8px 12px;
-  border-radius: 999px;
+  border-radius: var(--v7-r-pill);
   background: var(--surface);
   box-shadow: 0 0 0 1.5px var(--v7-ctl-line) inset;
   display: inline-flex;
@@ -439,7 +443,7 @@
   align-items: center;
   gap: 12px;
   text-align: left;
-  border-radius: 12px;
+  border-radius: var(--v7-r-ctl);
 }
 .v7-row + .v7-row {
   border-top: 1px solid var(--line);
@@ -495,7 +499,7 @@
 .v7-thumb {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--v7-r-thumb);
   object-fit: cover;
   flex: 0 0 auto;
 }
@@ -546,7 +550,7 @@
   white-space: nowrap;
   min-height: 48px;
   padding: 10px 16px;
-  border-radius: 999px;
+  border-radius: var(--v7-r-ctl);
   background: var(--surface);
   box-shadow: 0 0 0 1.5px var(--v7-ctl-line) inset;
   font-weight: 600;
@@ -571,7 +575,7 @@
 .v7-chip {
   min-height: 52px;
   padding: 12px 18px;
-  border-radius: 999px;
+  border-radius: var(--v7-r-ctl);
   background: var(--surface);
   box-shadow: 0 0 0 1.5px var(--v7-ctl-line) inset;
   font-weight: 600;
@@ -711,7 +715,7 @@
   gap: 8px;
   min-height: 64px;
   padding: 6px;
-  border-radius: 32px;
+  border-radius: var(--v7-r-pill);
   background: var(--surface);
   box-shadow: 0 0 0 1.5px var(--ink) inset;
 }
@@ -736,7 +740,7 @@
   flex: 0 0 auto;
   min-width: 52px;
   height: 52px;
-  border-radius: 26px;
+  border-radius: var(--v7-r-pill);
   background: var(--action);
   color: var(--on-action);
   display: grid;
@@ -782,7 +786,7 @@
 }
 .v7-tab {
   min-height: 60px;
-  border-radius: 16px;
+  border-radius: var(--v7-r-ctl);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -809,7 +813,7 @@
   align-items: flex-start;
   gap: 8px;
   padding: 16px 12px 12px 18px;
-  border-radius: 24px;
+  border-radius: var(--v7-r-card);
   background: var(--action);
   color: var(--on-action);
   box-shadow: 0 12px 32px var(--shadow);

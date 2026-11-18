@@ -244,7 +244,8 @@ export function coincidences7(n) {
     for (const f of factors()) {
       const yes = known.filter(f.test),
         no = known.filter(k => !f.test(k));
-      if (yes.length < 5 || no.length < 5) continue;
+      const minN = f.food ? 7 : 5; // food is random day to day, so it needs more days before any card
+      if (yes.length < minN || no.length < minN) continue;
       const a = yes.filter(k => day(k).sym[s] > 0).length,
         b = no.filter(k => day(k).sym[s] > 0).length;
       const pa = a / yes.length,
