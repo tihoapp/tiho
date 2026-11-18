@@ -81,4 +81,4 @@ npm run check      # lint + format check
 
 ---
 
-designed and built by [Yuliya S](https://github.com/julie566).
+designed and built by [Yuliya S](https://github.com/julie566)
