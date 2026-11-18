@@ -11,7 +11,7 @@ import { speak } from './states.js';
 
 let TID = 0;
 export const MODE = (() => {
-  const m = (location.search.match(/[?&]v=(5b?|6)\b/) || [])[1];
+  const m = (location.search.match(/[?&]v=(5b?|6|7)\b/) || [])[1];
   if (m) {
     try {
       localStorage.setItem('msapp.mode', m);

@@ -20,6 +20,7 @@ not a medical app. it makes no diagnoses, and entries are stored only on the dev
 
 | url | version |
 |---|---|
+| `?v=7` | daily check-in of your own symptoms and medications, three labelled sections |
 | `?v=6` | today's last three entries inside the day card |
 | `?v=5b` | minimum: no context line, zero steps after saving |
 | `?v=5` | weather, steps and cycle above the day card |
@@ -32,7 +33,8 @@ add `&lang=en` or `&lang=ru` to set the language. to install, open the link in S
 index.html            app shell
 v5.html               same shell, kept so old links and installs keep working
 versions.html         version picker for testers
-styles/app.css        all styles, light and dark themes
+styles/app.css        styles for v5, v5b, v6, light and dark themes
+styles/v7.css         v7 styles on the same tokens
 src/
   main.js             entry point: startup order and first render
   state/store.js      shared state (stored data, UI state, language)
@@ -59,6 +61,9 @@ src/
     feedback.js       main toast
     haptics.js        visual press and release feedback
     frame.js          edit and safety cards
+  v7/                 v7: daily check-in
+    model.js          my symptoms, check-in, medications, coincidences, doctor summary, sample
+    app.js            screens: onboarding, today, coincidences, for the doctor, settings
   services/weather.js Open-Meteo, temperature only
   lib/preact.js       Preact + htm
 assets/               icons, QR codes, banner

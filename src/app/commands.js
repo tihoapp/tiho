@@ -18,7 +18,7 @@ export function cmdBase(v) {
   const wrap = (title, sub) => say({ kind: 'log', t: { title, sub, icon: 'check', acts: [] } });
   if (n === 'settings' || /^(настройки|settings)$/.test(n)) return say({ kind: 'settings' });
   if (/^(данные|данные и доступ|data|data and access)$/.test(n)) return say({ kind: 'data' });
-  if (/^v(5b?|6)$/.test(n)) {
+  if (/^v(5b?|6|7)$/.test(n)) {
     try {
       localStorage.setItem('msapp.mode', n);
     } catch (e) {}

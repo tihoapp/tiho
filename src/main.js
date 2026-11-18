@@ -5,9 +5,10 @@ import { html, render } from './lib/preact.js';
 import { initWeather } from './services/weather.js';
 import { ST } from './state/store.js';
 import { App, loadStoredState } from './ui/app.js';
-import { initResponseState } from './ui/feedback.js';
+import { MODE, initResponseState } from './ui/feedback.js';
 import { initHaptics } from './ui/haptics.js';
 import { applyStoredDefaults } from './ui/states.js';
+import { App7, initV7 } from './v7/app.js';
 
 initUiState();
 initResponseState();
@@ -22,4 +23,9 @@ if (ST && !ST.demo && ST.health) {
   if (ST.cycle === 'health') ST.cycle = 'manual';
   saveS(ST);
 }
-render(html`<${App} />`, document.getElementById('app'));
+if (MODE === '7') {
+  initV7();
+  render(html`<${App7} />`, document.getElementById('app'));
+} else {
+  render(html`<${App} />`, document.getElementById('app'));
+}

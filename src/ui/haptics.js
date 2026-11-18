@@ -27,7 +27,7 @@ export function haptic(kind) {
   } catch (e) {}
   if (kind === 'save' || kind === 'warn' || kind === 'undo') phoneBuzz();
 }
-const TAPSEL = '.chip,.choice,.btn,.li,.fi,.tb,.tx,.mic,.cam,.link,.ib,.sw,.cx,.tr6,.more6';
+const TAPSEL = '.v7b,.chip,.choice,.btn,.li,.fi,.tb,.tx,.mic,.cam,.link,.ib,.sw,.cx,.tr6,.more6';
 function ring(el) {
   const r = el.getBoundingClientRect();
   if (!r.width) return;
