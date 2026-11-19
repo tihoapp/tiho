@@ -8,6 +8,15 @@ import { ST } from '../state/store.js';
 export const E = () => ST.entries;
 export const symEnts = k => E().filter(e => e.kind === 'sym' && (!k || e.key === k));
 export const onDay = k => E().filter(e => e.d === k);
+/** The person's main symptom: chosen in settings, otherwise the one they logged most in 30 days; null before any symptom. */
+export function mainSym() {
+  if (ST.mainSet && ST.main) return ST.main;
+  const since = now().getTime() - 30 * 864e5;
+  const n = {};
+  for (const e of E()) if (e.kind === 'sym' && e.at >= since) n[e.key] = (n[e.key] || 0) + 1;
+  const top = Object.keys(n).sort((a, b) => n[b] - n[a])[0];
+  return top || null;
+}
 
 export function inWorse(k) {
   if (ST.worseHist.some(w => k >= w.start && k <= w.end)) return true;

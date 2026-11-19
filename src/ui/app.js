@@ -15,8 +15,8 @@ import { seedDemo } from '../app/demo.js';
 import { cmpName, ctxText, mealName, sName, symName } from '../core/catalog.js';
 import { isHot, periodOf, periodStarts, stepsFor, weatherOn } from '../core/context.js';
 import { addD, dk, fHdr, now, relDT, todayK } from '../core/dates.js';
-import { E, onDay, symEnts } from '../core/entries.js';
-import { loadS, saveS } from '../core/storage.js';
+import { E, mainSym, onDay, symEnts } from '../core/entries.js';
+import { loadS, phoneLang, saveS } from '../core/storage.js';
 import { EN, L, cap, lc } from '../core/text.js';
 import { html, useEffect, useRef, useState } from '../lib/preact.js';
 import { fetchWx } from '../services/weather.js';
@@ -92,7 +92,7 @@ function chips() {
     });
   }
   const inl = () => {
-    UI.inline = ST.main;
+    UI.inline = mainSym();
     rr();
   };
   if (ST.protocol && protoDays() >= 14 && !today.length)
@@ -117,11 +117,11 @@ function chips() {
         fn: () => handleText(L('месячные закончились', 'my period ended')),
       });
   }
-  if (lastFood && n0.getTime() - lastFood.at < 3 * 36e5 && ST.main)
+  if (lastFood && n0.getTime() - lastFood.at < 3 * 36e5 && mainSym())
     out.push({ l: L('как сейчас?', 'how is it now?'), star: true, fn: inl });
-  else if (ST.main) out.push({ l: symName(ST.main), star: true, fn: inl });
+  else if (mainSym()) out.push({ l: symName(mainSym()), star: true, fn: inl });
   if (B && ST.entries.some(e => e.words))
-    out.push({ l: L('мои слова', 'my words'), fn: () => myWords() });
+    out.push({ l: L('мои фразы', 'my phrases'), fn: () => myWords() });
   if (h >= 12 && !today.length)
     out.push({
       l: L('сегодня пауза', 'pause today'),
@@ -135,7 +135,7 @@ function chips() {
     out.push({
       l: L('как прошел день?', 'how was the day?'),
       fn: () => {
-        UI.inline = ST.main || 'fatigue';
+        UI.inline = mainSym() || 'fatigue';
         rr();
       },
     });
@@ -169,10 +169,10 @@ function chips() {
     l: L('что я ела вчера?', 'what did I eat yesterday?'),
     fn: () => handleText(L('что я ела вчера?', 'what did I eat yesterday?')),
   });
-  if (ST.main)
+  if (mainSym())
     out.push({
       l: L('когда последний раз?', 'when was the last time?'),
-      fn: () => handleText(L('когда ', 'when ') + lc(symName(ST.main)) + '?'),
+      fn: () => handleText(L('когда ', 'when ') + lc(symName(mainSym())) + '?'),
     });
   const seen = new Set();
   return out.filter(c => !seen.has(c.l) && seen.add(c.l)).slice(0, B ? 2 : 3);
@@ -622,10 +622,11 @@ export function loadStoredState() {
         ST.langSet = true;
         saveS(ST);
       }
-    } else if (!ST.langSet && !ST.onboarded) {
-      ST.lang = 'en';
+    } else if (!ST.langSet && ST.lang !== phoneLang()) {
+      // not chosen by the person: follow the phone (also fixes installs that defaulted to English)
+      ST.lang = phoneLang();
       saveS(ST);
     }
   }
-  setLANG(ST.lang || 'en');
+  setLANG(ST.lang || phoneLang());
 }

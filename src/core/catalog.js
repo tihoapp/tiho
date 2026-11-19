@@ -13,6 +13,8 @@ export const SYM = {
   tingle: ['Покалывание', 'Tingling'],
   sleep: ['Плохой сон', 'Poor sleep'],
   headache: ['Головная боль', 'Headache'],
+  tinnitus: ['Шум в ушах', 'Ringing in the ears'],
+  nausea: ['Тошнота', 'Nausea'],
   flush: ['Покраснение лица', 'Facial redness'],
   stomach: ['Тяжесть в животе', 'Heavy stomach'],
   spasm: ['Спазмы', 'Spasms'],

@@ -248,6 +248,7 @@ export function cmdBase(v) {
     const ks = symsIn(v);
     if (ks.length) {
       ST.main = ks[0];
+      ST.mainSet = true;
       save();
       return wrap(L('Главный для меня: ', 'My main one: ') + symName(ks[0]));
     }

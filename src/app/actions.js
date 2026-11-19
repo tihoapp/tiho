@@ -11,7 +11,7 @@ import { answer } from '../ui/answers.js';
 import { I } from '../ui/components.js';
 import { toast } from '../ui/feedback.js';
 import { openSheet } from '../ui/frame.js';
-import { card, newSymptomAsk, notUnderstood } from '../ui/states.js';
+import { card, newSymptomAsk } from '../ui/states.js';
 
 export const rr = () => {
   if (RR) RR();
@@ -378,7 +378,13 @@ export function handleText(v) {
   const SYMPTOMISH =
     /(неме|боли|болит|двоит|кружит|шата|слабост|тошн|тянет|дрож|жж[её]т|покалыва|спазм|судорог|зрени|numb|pain|ache|double|dizz|weak|nause|tingl|burn|shak|spasm|cramp|vision)/i;
   if (!key && !SYMPTOMISH.test(v) && (v.trim().split(/\s+/).length >= 3 || !strengthOf(v)))
-    return notUnderstood(v);
+    return logNote(
+      v,
+      L(
+        'Не узнала симптом, сохранила вашими словами. Можно исправить',
+        'Did not recognise a symptom, saved in your words. You can edit it',
+      ),
+    );
   if (!key) {
     key = 'c_' + uid();
     ST.custom[key] = lc(name);

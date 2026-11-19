@@ -14,7 +14,7 @@ import { seedDemo } from '../app/demo.js';
 import { mealByTime, norm, sName, symName } from '../core/catalog.js';
 import { onPeriod, periodStarts } from '../core/context.js';
 import { addD, ddiff, dk, fDM, fRange, fT, fromDk, now, todayK } from '../core/dates.js';
-import { E, onDay, symEnts, worseDayN } from '../core/entries.js';
+import { E, mainSym as mainSymOf, onDay, symEnts, worseDayN } from '../core/entries.js';
 import { EN, L, cap, lc, nDay, nEnt, plRu, qt } from '../core/text.js';
 import { html } from '../lib/preact.js';
 import { fetchWx } from '../services/weather.js';
@@ -54,7 +54,7 @@ export const speak = t => {
     speechSynthesis.speak(u);
   } catch (e) {}
 };
-const mainSym = () => ST.main || 'numb';
+const mainSym = () => mainSymOf() || 'fatigue';
 export function protoDays() {
   return ST.protocol ? ddiff(now(), fromDk(ST.protocol.start)) + 1 : 0;
 }
@@ -81,7 +81,7 @@ export function cmd(v) {
   const n = norm(v);
   if (/^(все состояния|all states)$/.test(n)) return say({ kind: 'states' });
   if (/^(виджеты|widgets)$/.test(n)) return say({ kind: 'widgets' });
-  if (/^(мои слова|my words)$/.test(n)) return myWords(null);
+  if (/^(мои слова|мои фразы|my words|my phrases)$/.test(n)) return myWords(null);
   if (
     /((выключ|отключ|убер|не нуж)\S*.{0,12}(цикл|месячн)|(цикл|месячн)\S*.{0,12}(не нуж|выключ|отключ)|(turn off|disable|stop tracking|don'?t need).{0,12}(cycle|period)|(cycle|period).{0,12}(off|not needed))/.test(
       n,
@@ -393,7 +393,7 @@ export function WordsBlock({ r }) {
   return html`<section class="card surf">
     <div class="row" style="align-items:flex-start">
       <div class="grow col4">
-        <h2 class="q">${L('мои слова', 'my words')}</h2>
+        <h2 class="q">${L('мои фразы', 'my phrases')}</h2>
         <p class="c ink2">${L('Как вы говорили раньше', 'How you said it before')}</p>
       </div>
       <button
@@ -703,7 +703,7 @@ function statesList() {
         () => notUnderstood(L('какой-то странный день сегодня', 'a strange day somehow')),
       ],
       [
-        L('мои слова', 'my words'),
+        L('мои фразы', 'my phrases'),
         () => {
           seedIf();
           myWords();
@@ -1147,7 +1147,7 @@ export function notUnderstood(v) {
       'I did not catch that. Say it differently or pick from your words',
     ),
     chips: [
-      { l: L('мои слова', 'my words'), fn: () => myWords() },
+      { l: L('мои фразы', 'my phrases'), fn: () => myWords() },
       {
         l: L('записать как есть', 'save as is'),
         fn: () => {
@@ -1579,6 +1579,7 @@ export function SettingsBlock({ r }) {
                 key=${k}
                 onClick=${() => {
                   ST.main = k;
+                  ST.mainSet = true;
                   save();
                 }}
               >

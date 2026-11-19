@@ -10,7 +10,15 @@ const LEX = [
     'fever',
     /(температур|простыл|простуд|болею|заболел|грипп|инфекц|озноб|ангин|fever|\bflu\b|a cold|feel sick|\bsick\b|infection|chills)/,
   ],
-  ['headache', /(болит голов|голова болит|головн\S* бол|мигрен|headache|migraine)/],
+  [
+    'headache',
+    /(болит голов|голова болит|головн\S* бол|голова раскалыва|мигрен|headache|migraine)/,
+  ],
+  [
+    'tinnitus',
+    /(шум\S* в уш|шумит в уш|звон\S* в уш|звенит в уш|пищит в уш|заложило уш|tinnitus|ringing in (my )?ears|ears? (are |is )?ringing)/,
+  ],
+  ['nausea', /(тошн|мутит|подташнив|nause|feel(ing)? sick to my stomach|queasy)/],
   ['numb', /(неме|немот|не чувству\S* пальц|numb)/],
   [
     'fatigue',

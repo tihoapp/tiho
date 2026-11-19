@@ -3,11 +3,19 @@
 // ---- storage ----
 const KEY = 'msapp.v5';
 let MEM = null;
+/** Interface language from the phone: Russian-family phones get Russian, everyone else English. */
+export function phoneLang() {
+  let l = '';
+  try {
+    l = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+  } catch (e) {}
+  return /^(ru|uk|be|kk)/i.test(l) ? 'ru' : 'en';
+}
 export function defaults() {
   return {
     v: 1,
     onboarded: false,
-    lang: 'en',
+    lang: phoneLang(),
     theme: 'system',
     ai: 'device',
     symptoms: ['numb', 'fatigue', 'fog'],
