@@ -15,13 +15,15 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+
+<link rel="stylesheet" href="styles/fonts.css">
 <link rel="stylesheet" href="styles/app.css">
 <link rel="stylesheet" href="styles/v7.css">
 </head>
 <body>
 <div id="app"></div>
-<script src="https://unpkg.com/htm@3.1.1/preact/standalone.umd.js"></script>
+<div id="bootfail" hidden style="position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:32px;background:#F6F6F4;color:#1D1D22;font:17px/1.4 -apple-system,system-ui,sans-serif"><p id="bootmsg" style="margin:0">Не получилось загрузить приложение. Проверьте интернет и попробуйте еще раз. Ваши записи сохранены на телефоне</p><button onclick="location.reload()" style="min-height:56px;border:0;border-radius:999px;background:#232327;color:#fff;font:600 18px -apple-system,system-ui,sans-serif">обновить</button></div>
+<script>setTimeout(function(){var a=document.getElementById('app');if(a&&!a.children.length){var f=document.getElementById('bootfail');if(!/^(ru|uk|be|kk)/i.test(navigator.language||'')){document.getElementById('bootmsg').textContent='The app did not load. Check your connection and try again. Your entries are safe on this phone';f.querySelector('button').textContent='reload'}f.hidden=false}},6000)</script>
+<script src="assets/vendor/htm-preact-3.1.1.umd.js"></script>
 <script type="module" src="src/main.js"></script></body></html>
